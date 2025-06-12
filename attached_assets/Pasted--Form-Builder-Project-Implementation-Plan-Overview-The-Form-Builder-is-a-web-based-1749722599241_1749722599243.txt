@@ -1,0 +1,110 @@
+
+# Form Builder Project - Implementation Plan
+
+## Overview
+
+The **Form Builder** is a web-based platform that enables users to visually create, manage, and deploy dynamic forms through a drag-and-drop interface. Built using modern technologies, the platform will allow seamless integration into external applications via SDKs for both React and Angular.
+
+> **Design Note**: The overall portal will follow a clean, developer-friendly aesthetic similar to [Supabase](https://supabase.com/), emphasizing usability, minimalism, and modern UI principles.
+
+---
+
+## Core Features & Requirements
+
+### 1. Drag-and-Drop Form Generation
+- Intuitive drag-and-drop interface for building forms.
+- Users can place and configure fields directly on a visual canvas.
+- Built using a robust drag-and-drop library compatible with React (e.g., `@dnd-kit` or `react-beautiful-dnd`).
+
+### 2. Comprehensive Input Types
+Supports a wide variety of form input types:
+- Text input
+- Number input
+- Email input
+- Checkbox
+- Radio buttons
+- Select (dropdown)
+
+### 3. Validations & Conditional Logic
+- Field-level validations (e.g., required, min/max values, pattern matching).
+- Conditional display logic (e.g., show/hide fields based on values of other fields).
+- Visual configuration tools for non-technical users.
+
+### 4. Tailwind CSS Styling
+- All components styled using Tailwind CSS for a modern, responsive design.
+- Utility-first CSS enables rapid UI development and consistency across the portal.
+
+### 5. Form Management Portal
+- Users can create, view, update, and delete forms.
+- All forms are saved in a backend database with their corresponding JSON schemas.
+- Project-based structure with environments (Testing and Production).
+
+### 6. Project & API Key Management
+- Each project has a unique Project ID.
+- Separate API keys for **Testing** and **Production** environments.
+- These keys allow external systems to fetch and render the correct form schema securely.
+
+### 7. React and Angular SDK Libraries
+- SDKs available for React and Angular applications.
+- Developers can install the SDK, register the API key and project ID, and embed the form via:
+
+#### React:
+```jsx
+<FormBuilder formName="form1" projectId="your-project-id" apiKey="your-api-key" />
+```
+
+#### Angular:
+```html
+<form-builder [formName]="'form1'" [projectId]="'your-project-id'" [apiKey]="'your-api-key'"></form-builder>
+```
+
+### 8. Authentication (OAuth)
+- Authentication via Google or GitHub only.
+- No traditional email/password sign-in.
+- OAuth2 integration using Passport strategies on the backend.
+
+---
+
+## Stack Summary
+
+- **Frontend:** React, Tailwind CSS
+- **Backend:** NestJS
+- **Databases:** PostgreSQL (for structured data), MongoDB (for dynamic form schemas)
+- **Auth:** Google & GitHub OAuth2 via Passport.js
+- **API:** RESTful endpoints for form and project management
+- **SDKs:** Published NPM packages for React and Angular
+
+---
+
+## UI/UX Reference
+
+The platform’s UI will be modeled after [Supabase](https://supabase.com/):
+- Clean and modern layout
+- Sidebar navigation
+- Dark/light mode support
+- Developer-focused interface
+
+--- 
+
+## 🎨 Sidebar UI Specification
+Behavior:
+
+Sidebar is collapsed by default (small width showing only icons).
+
+On hover, the sidebar expands to show menu names next to icons.
+
+Smooth transition between collapsed and expanded states.
+
+Supports dark/light mode.
+
+Example Menu Items:
+
+🏠 Project overview
+
+📋 My Forms
+
+🔑 API Keys
+
+⚙️ Settings
+
+🚪 Logout
