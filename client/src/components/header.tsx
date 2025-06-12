@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronDown, Settings, LogOut, User, FolderOpen, TestTube, Globe } from "lucide-react";
+import { Search, ChevronDown, Settings, LogOut, User, FolderOpen, TestTube, Globe, Box } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -106,23 +106,10 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
           <div className="flex items-center">
             <button
               onClick={() => setMode(mode === "testing" ? "production" : "testing")}
-              className={`h-7 px-3 text-xs font-medium border-0 rounded-md transition-colors ${
-                mode === "testing" 
-                  ? "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50" 
-                  : "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
-              }`}
+              className="h-7 px-3 text-xs font-medium rounded-md transition-colors bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
             >
-              {mode === "testing" ? (
-                <>
-                  <TestTube className="w-3 h-3 mr-1.5" />
-                  Testing
-                </>
-              ) : (
-                <>
-                  <Globe className="w-3 h-3 mr-1.5" />
-                  Production
-                </>
-              )}
+              <Box className="w-3 h-3 mr-1.5" />
+              {mode === "testing" ? "Testing" : "Production"}
             </button>
           </div>
         </div>
