@@ -86,8 +86,8 @@ export default function FormEditor() {
     enabled: !!currentProjectId,
   });
 
-  // Fetch forms
-  const { data: forms = [] } = useQuery<Form[]>({
+  // Fetch forms for the selected project
+  const { data: forms = [], isLoading } = useQuery<Form[]>({
     queryKey: [`/api/projects/${currentProjectId}/forms`],
     enabled: !!currentProjectId,
   });
@@ -185,7 +185,6 @@ export default function FormEditor() {
     };
     setFormFields([...formFields, newField]);
     setSelectedFieldId(newField.id);
-    setShowPropertiesPanel(true);
   };
 
   const getFieldLabel = (type: string) => {
@@ -217,15 +216,16 @@ export default function FormEditor() {
       <div className="flex h-full">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-              <FileText className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-            </div>
+            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              No project selected
+              No Project Selected
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Please select a project from the header to manage forms
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Please select a project to view its forms
             </p>
+            <Link href="/projects">
+              <Button>Go to Projects</Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -239,111 +239,133 @@ export default function FormEditor() {
         <div className="w-80 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Forms</h2>
-              <Button size="sm" className="h-7" onClick={handleNewFormClick}>
-                <Plus className="w-3 h-3 mr-1" />
-                New
-              </Button>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="search"
-                placeholder="Search forms..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
-              />
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Forms</h2>
+            <Button size="sm" className="h-7" onClick={handleNewFormClick}>
+              <Plus className="w-3 h-3 mr-1" />
+              New
+            </Button>
           </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="search"
+              placeholder="Search forms..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-8 text-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+            />
+          </div>
+        </div>
 
-          {/* Forms List */}
-          <div className="flex-1 overflow-y-auto">
-            {filteredForms.length === 0 ? (
-              <div className="p-6 text-center">
-                <Card className="border-dashed">
-                  <CardContent className="pt-6">
-                    <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                    </div>
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      No forms found
-                    </CardTitle>
-                    <CardDescription className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-                      Create your first form to get started with collecting data
-                    </CardDescription>
-                    <Button size="sm" className="h-8 text-xs" onClick={handleNewFormClick}>
-                      <Plus className="w-3 h-3 mr-1" />
-                      Create form
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <div className="p-2 space-y-1">
-                {filteredForms.map((form) => (
-                  <div
-                    key={form.id}
-                    className={`p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer group border ${
-                      selectedFormId === form.id 
-                        ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950" 
-                        : "border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-                    }`}
-                    onClick={() => handleFormSelect(form.id)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {form.name}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 mb-2">
-                          {getFormStatusBadge(form)}
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatDistanceToNow(new Date(form.createdAt!), { addSuffix: true })}
-                          </span>
-                        </div>
-                        {form.description && (
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {form.description}
-                          </p>
-                        )}
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-3 w-3" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Copy className="mr-2 h-3 w-3" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="mr-2 h-3 w-3" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* Project info */}
+        {project && (
+          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                {project.name}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {forms.length} form{forms.length !== 1 ? 's' : ''}
+            </p>
           </div>
+        )}
+
+        {/* Forms list */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="p-4 space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                </div>
+              ))}
+            </div>
+          ) : filteredForms.length === 0 ? (
+            <div className="p-4">
+              <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <CardContent className="p-6 text-center">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    No forms yet
+                  </CardTitle>
+                  <CardDescription className="text-xs text-gray-600 dark:text-gray-400 mb-4">
+                    Create your first form to get started with collecting data
+                  </CardDescription>
+                  <Button size="sm" className="h-8 text-xs" onClick={handleNewFormClick}>
+                    <Plus className="w-3 h-3 mr-1" />
+                    Create form
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="p-2 space-y-1">
+              {filteredForms.map((form) => (
+                <div
+                  key={form.id}
+                  className={`p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer group border ${
+                    selectedFormId === form.id 
+                      ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950" 
+                      : "border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+                  }`}
+                  onClick={() => handleFormSelect(form.id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                          {form.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        {getFormStatusBadge(form)}
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDistanceToNow(new Date(form.updatedAt || form.createdAt!), { addSuffix: true })}
+                        </span>
+                      </div>
+                      {form.description && (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                          {form.description}
+                        </p>
+                      )}
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <MoreHorizontal className="w-3 h-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/form-builder/${form.id}`} className="flex items-center cursor-pointer">
+                            <Edit className="w-3 h-3 mr-2" />
+                            Edit form
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Copy className="w-3 h-3 mr-2" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600 dark:text-red-400">
+                          <Trash2 className="w-3 h-3 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -358,10 +380,10 @@ export default function FormEditor() {
               <div className="p-3 border-b border-gray-200 dark:border-gray-800">
                 <button
                   onClick={() => setShowFormsList(!showFormsList)}
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto hover:text-gray-800 dark:hover:text-gray-200 transition-colors flex items-center justify-center"
+                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
                   title="Toggle Forms List"
                 >
-                  <PanelRightOpen className="w-5 h-5" />
+                  <PanelRightOpen className="w-6 h-6" />
                 </button>
               </div>
               
@@ -419,73 +441,12 @@ export default function FormEditor() {
 
             {/* Canvas Area */}
             <div className="flex-1 flex flex-col">
-              {/* Enhanced Top Toolbar */}
+              {/* Top Toolbar */}
               <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-between px-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Layout className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Form Builder</span>
-                  </div>
-                  
-                  {/* Layout Type */}
-                  <div className="flex items-center gap-2">
-                    <Select 
-                      value={formConfig.layout} 
-                      onValueChange={(value) => setFormConfig({...formConfig, layout: value})}
-                    >
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="single-column">Single</SelectItem>
-                        <SelectItem value="two-column">Two Col</SelectItem>
-                        <SelectItem value="grid">Grid</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    {formConfig.layout === 'grid' && (
-                      <Input
-                        type="number"
-                        value={formConfig.gridColumns}
-                        onChange={(e) => setFormConfig({...formConfig, gridColumns: parseInt(e.target.value) || 2})}
-                        className="w-16 h-8"
-                        min="2"
-                        max="6"
-                      />
-                    )}
-                  </div>
-                  
-                  {/* Field Spacing */}
-                  <div className="flex items-center gap-2">
-                    <Select 
-                      value={formConfig.spacing} 
-                      onValueChange={(value) => setFormConfig({...formConfig, spacing: value})}
-                    >
-                      <SelectTrigger className="w-24 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="compact">Compact</SelectItem>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="relaxed">Relaxed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* Width Toggle */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={formConfig.width === "full" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setFormConfig({...formConfig, width: formConfig.width === "full" ? "auto" : "full"})}
-                      className="h-8"
-                    >
-                      <Maximize className="w-3 h-3 mr-1" />
-                      {formConfig.width === "full" ? "Full" : "Auto"}
-                    </Button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Layout className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Form Builder</span>
                 </div>
-                
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
                     <Eye className="w-4 h-4 mr-1" />
@@ -500,15 +461,10 @@ export default function FormEditor() {
 
               {/* Canvas */}
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6">
-                <div className={`mx-auto ${formConfig.width === "full" ? "w-full" : "max-w-2xl"}`}>
+                <div className="max-w-2xl mx-auto">
                   <div 
-                    className={`bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6 ${
-                      formConfig.spacing === 'compact' ? 'space-y-2' : 
-                      formConfig.spacing === 'relaxed' ? 'space-y-6' : 'space-y-4'
-                    }`}
-                    style={{ 
-                      maxWidth: formConfig.width === "auto" ? `${formConfig.maxWidth}px` : "100%"
-                    }}
+                    className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6"
+                    style={{ maxWidth: `${formConfig.maxWidth}px` }}
                   >
                     {formFields.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-center py-16">
@@ -523,11 +479,7 @@ export default function FormEditor() {
                         </div>
                       </div>
                     ) : (
-                      <div className={`${
-                        formConfig.layout === 'two-column' ? 'grid grid-cols-2 gap-4' :
-                        formConfig.layout === 'grid' ? `grid grid-cols-${formConfig.gridColumns} gap-4` :
-                        'space-y-4'
-                      }`}>
+                      <div className="space-y-4">
                         {formFields.map((field) => (
                           <div
                             key={field.id}
@@ -536,7 +488,7 @@ export default function FormEditor() {
                                 ? "border-blue-500 bg-blue-50 dark:bg-blue-950" 
                                 : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                             }`}
-                            onClick={() => handleFieldSelect(field.id)}
+                            onClick={() => setSelectedFieldId(field.id)}
                           >
                             <div className="flex items-center justify-between mb-2">
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -590,65 +542,134 @@ export default function FormEditor() {
               </div>
             </div>
 
-            {/* Properties Panel - Collapsed by default, shows when field is selected */}
-            {showPropertiesPanel && selectedFieldId && (
-              <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                    Field Properties
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowPropertiesPanel(false)}
-                  >
-                    ×
-                  </Button>
-                </div>
+            {/* Configuration Panel */}
+            <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Form Configuration
+              </h3>
+              
+              <Tabs defaultValue="layout" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="layout">Layout</TabsTrigger>
+                  <TabsTrigger value="style">Style</TabsTrigger>
+                </TabsList>
                 
-                <div className="space-y-4">
+                <TabsContent value="layout" className="space-y-4 mt-4">
                   <div>
-                    <Label className="text-sm font-medium">Label</Label>
-                    <Input
-                      value={formFields.find(f => f.id === selectedFieldId)?.label || ""}
-                      onChange={(e) => {
-                        setFormFields(fields => 
-                          fields.map(f => f.id === selectedFieldId ? {...f, label: e.target.value} : f)
-                        );
-                      }}
-                      className="mt-1"
-                    />
+                    <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                      <Grid3X3 className="w-4 h-4" />
+                      Layout Type
+                    </Label>
+                    <Select 
+                      value={formConfig.layout} 
+                      onValueChange={(value) => setFormConfig({...formConfig, layout: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="single-column">Single Column</SelectItem>
+                        <SelectItem value="two-column">Two Columns</SelectItem>
+                        <SelectItem value="grid">Grid Layout</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium">Placeholder</Label>
+                    <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                      <Square className="w-4 h-4" />
+                      Max Width ({formConfig.maxWidth}px)
+                    </Label>
+                    <Slider
+                      value={[formConfig.maxWidth]}
+                      onValueChange={([value]) => setFormConfig({...formConfig, maxWidth: value})}
+                      min={400}
+                      max={1200}
+                      step={50}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                      <Move className="w-4 h-4" />
+                      Field Spacing
+                    </Label>
+                    <Select 
+                      value={formConfig.spacing} 
+                      onValueChange={(value) => setFormConfig({...formConfig, spacing: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="compact">Compact</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="relaxed">Relaxed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="style" className="space-y-4 mt-4">
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                      <Square className="w-4 h-4" />
+                      Border Radius ({formConfig.borderRadius}px)
+                    </Label>
+                    <Slider
+                      value={[formConfig.borderRadius]}
+                      onValueChange={([value]) => setFormConfig({...formConfig, borderRadius: value})}
+                      min={0}
+                      max={24}
+                      step={2}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                      <Palette className="w-4 h-4" />
+                      Theme
+                    </Label>
+                    <Select 
+                      value={formConfig.theme} 
+                      onValueChange={(value) => setFormConfig({...formConfig, theme: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                        <SelectItem value="modern">Modern</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Background Color</Label>
                     <Input
-                      value={formFields.find(f => f.id === selectedFieldId)?.placeholder || ""}
-                      onChange={(e) => {
-                        setFormFields(fields => 
-                          fields.map(f => f.id === selectedFieldId ? {...f, placeholder: e.target.value} : f)
-                        );
-                      }}
-                      className="mt-1"
+                      type="color"
+                      value={formConfig.backgroundColor}
+                      onChange={(e) => setFormConfig({...formConfig, backgroundColor: e.target.value})}
+                      className="w-full h-10"
                     />
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="required"
-                      checked={formFields.find(f => f.id === selectedFieldId)?.required || false}
-                      onChange={(e) => {
-                        setFormFields(fields => 
-                          fields.map(f => f.id === selectedFieldId ? {...f, required: e.target.checked} : f)
-                        );
-                      }}
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Text Color</Label>
+                    <Input
+                      type="color"
+                      value={formConfig.textColor}
+                      onChange={(e) => setFormConfig({...formConfig, textColor: e.target.value})}
+                      className="w-full h-10"
                     />
-                    <Label htmlFor="required" className="text-sm font-medium">Required field</Label>
                   </div>
-                </div>
-              </div>
-            )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         ) : selectedFormId ? (
           /* Form Editor Interface */
