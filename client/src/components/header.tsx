@@ -10,6 +10,8 @@ import {
   TestTube,
   Globe,
   Box,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,13 +26,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import type { Project } from "@shared/schema";
 
 interface HeaderProps {
@@ -41,6 +49,7 @@ interface HeaderProps {
 export function Header({ selectedProject, onProjectChange }: HeaderProps) {
   const { user } = useAuth();
   const [mode, setMode] = useState<"testing" | "production">("testing");
+  const [projectOpen, setProjectOpen] = useState(false);
 
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -73,48 +82,70 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
         {/* Left: Project Selector and Mode */}
         <div className="flex items-center gap-4">
           {/* Project Selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Popover open={projectOpen} onOpenChange={setProjectOpen}>
+            <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="h-8 px-3 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100"
+                role="combobox"
+                aria-expanded={projectOpen}
+                className="h-8 px-3 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 justify-between min-w-[200px]"
               >
-                <FolderOpen className="w-4 h-4 mr-2" />
-                {currentProject ? currentProject.name : "Select Project"}
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Switch Project</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {projects.map((project) => (
-                <DropdownMenuItem
-                  key={project.id}
-                  onClick={() => onProjectChange?.(project.id)}
-                  className="cursor-pointer"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="truncate">{project.name}</span>
-                    {project.status === "active" && (
-                      <div className="w-2 h-2 bg-green-500 rounded-full ml-2"></div>
-                    )}
-                  </div>
-                </DropdownMenuItem>
-              ))}
-              {projects.length === 0 && (
-                <DropdownMenuItem disabled>
-                  <span className="text-gray-500">No projects available</span>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <a href="/projects" className="cursor-pointer">
+                <div className="flex items-center">
                   <FolderOpen className="w-4 h-4 mr-2" />
-                  Manage Projects
-                </a>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <span className="truncate">
+                    {currentProject ? currentProject.name : "Select Project"}
+                  </span>
+                </div>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search projects..." />
+                <CommandEmpty>No projects found.</CommandEmpty>
+                <CommandGroup>
+                  {projects.map((project) => (
+                    <CommandItem
+                      key={project.id}
+                      value={project.name}
+                      onSelect={() => {
+                        onProjectChange?.(project.id);
+                        setProjectOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedProject === project.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      <div className="flex items-center justify-between w-full">
+                        <span className="truncate">{project.name}</span>
+                        {project.status === "active" && (
+                          <div className="w-2 h-2 bg-green-500 rounded-full ml-2"></div>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                {projects.length > 0 && (
+                  <>
+                    <CommandGroup>
+                      <CommandItem
+                        onSelect={() => {
+                          window.location.href = "/projects";
+                          setProjectOpen(false);
+                        }}
+                      >
+                        <FolderOpen className="w-4 h-4 mr-2" />
+                        Manage Projects
+                      </CommandItem>
+                    </CommandGroup>
+                  </>
+                )}
+              </Command>
+            </PopoverContent>
+          </Popover>
 
           {/* Mode Selector */}
           <div className="flex items-center">
