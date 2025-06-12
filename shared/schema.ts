@@ -39,8 +39,12 @@ export const users = pgTable("users", {
 // Projects table
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
+  projectId: varchar("project_id", { length: 50 }).notNull().unique(), // Custom readable project ID
+  projectKey: varchar("project_key", { length: 100 }).notNull().unique(), // Project API key
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
+  status: varchar("status", { length: 50 }).default("active"), // active, paused, archived
+  region: varchar("region", { length: 50 }).default("us-east-1"),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -99,6 +103,8 @@ export type Submission = typeof submissions.$inferSelect;
 // Insert schemas
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
+  projectId: true,
+  projectKey: true,
   createdAt: true,
   updatedAt: true,
 });

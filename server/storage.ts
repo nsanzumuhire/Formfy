@@ -92,7 +92,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const [newProject] = await db.insert(projects).values(project).returning();
+    const projectId = this.generateProjectId();
+    const projectKey = this.generateProjectKey();
+    
+    const [newProject] = await db.insert(projects).values({
+      ...project,
+      projectId,
+      projectKey,
+    }).returning();
     return newProject;
   }
 
@@ -202,6 +209,21 @@ export class DatabaseStorage implements IStorage {
   // Helper methods
   private generateApiKey(): string {
     return `fk_${randomBytes(32).toString('hex')}`;
+  }
+
+  public generateProjectId(): string {
+    // Generate a readable project ID like "proj_abc123def456"
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = 'proj_';
+    for (let i = 0; i < 12; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  public generateProjectKey(): string {
+    // Generate a secure project key like "pk_live_abc123..."
+    return `pk_live_${randomBytes(24).toString('hex')}`;
   }
 }
 
