@@ -21,6 +21,11 @@ const menuItems = [
     href: "/",
   },
   {
+    icon: FolderOpen,
+    label: "Projects",
+    href: "/projects",
+  },
+  {
     icon: FileText,
     label: "My Forms",
     href: "/forms",
