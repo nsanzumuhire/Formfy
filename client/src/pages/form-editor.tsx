@@ -182,12 +182,6 @@ export default function FormEditor() {
     gridColumns: 2,
     spacing: "8px",
     customSpacing: 8,
-    width: "auto", // "auto" or "full"
-    maxWidth: 600,
-    borderRadius: 8,
-    theme: "light",
-    backgroundColor: "#ffffff",
-    textColor: "#000000",
   });
 
   // UI state for comboboxes
@@ -750,19 +744,7 @@ export default function FormEditor() {
                       />
                     )}
                   </div>
-                  
-                  {/* Width Toggle */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={formConfig.width === "full" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setFormConfig({...formConfig, width: formConfig.width === "full" ? "auto" : "full"})}
-                      className="h-8"
-                    >
-                      <Maximize className="w-3 h-3 mr-1" />
-                      {formConfig.width === "full" ? "Full" : "Auto"}
-                    </Button>
-                  </div>
+
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -779,13 +761,8 @@ export default function FormEditor() {
 
               {/* Canvas */}
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6">
-                <div className={`mx-auto ${formConfig.width === "full" ? "w-full" : "max-w-2xl"}`}>
-                  <div 
-                    className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6"
-                    style={{ 
-                      maxWidth: formConfig.width === "auto" ? `${formConfig.maxWidth}px` : "100%"
-                    }}
-                  >
+                <div className="w-full">
+                  <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
                     {formFields.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-center py-16">
                         <div>
