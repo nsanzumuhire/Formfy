@@ -109,6 +109,10 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   updatedAt: true,
 });
 
+export const createProjectSchema = insertProjectSchema.omit({
+  userId: true,
+});
+
 export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
   id: true,
   key: true,

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertApiKeySchema, insertFormSchema, insertSubmissionSchema } from "@shared/schema";
+import { insertProjectSchema, createProjectSchema, insertApiKeySchema, insertFormSchema, insertSubmissionSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -57,7 +57,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const projectData = insertProjectSchema.parse({ ...req.body, userId });
+      const validatedData = insertProjectSchema.parse(req.body);
+      const projectData = { ...validatedData, userId };
       const project = await storage.createProject(projectData);
       res.status(201).json(project);
     } catch (error) {

@@ -21,7 +21,6 @@ import { formatDistanceToNow } from "date-fns";
 const createProjectSchema = insertProjectSchema.extend({
   name: z.string().min(1, "Project name is required").max(50, "Name must be less than 50 characters"),
   description: z.string().optional(),
-  region: z.string().default("us-east-1"),
 });
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
@@ -39,7 +38,6 @@ export default function Projects() {
     defaultValues: {
       name: "",
       description: "",
-      region: "us-east-1",
     },
   });
 
@@ -209,29 +207,7 @@ export default function Projects() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="region"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Region</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a region" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="us-east-1">US East (N. Virginia)</SelectItem>
-                          <SelectItem value="us-west-2">US West (Oregon)</SelectItem>
-                          <SelectItem value="eu-west-1">Europe (Ireland)</SelectItem>
-                          <SelectItem value="ap-southeast-1">Asia Pacific (Singapore)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
 
                 <div className="flex justify-end space-x-3 pt-4">
                   <Button 

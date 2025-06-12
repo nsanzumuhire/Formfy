@@ -29,7 +29,7 @@ export interface IStorage {
   // Project operations
   getUserProjects(userId: string): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
-  createProject(project: InsertProject): Promise<Project>;
+  createProject(project: Omit<InsertProject, 'projectId' | 'projectKey'>): Promise<Project>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<void>;
   
@@ -91,7 +91,7 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
 
-  async createProject(project: InsertProject): Promise<Project> {
+  async createProject(project: Omit<InsertProject, 'projectId' | 'projectKey'>): Promise<Project> {
     const projectId = this.generateProjectId();
     const projectKey = this.generateProjectKey();
     
