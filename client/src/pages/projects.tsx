@@ -177,8 +177,8 @@ export default function Projects() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Projects</h1>
-          <p className="text-gray-600 mt-1">Manage your form builder projects</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Projects</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your form builder projects</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -254,11 +254,11 @@ export default function Projects() {
 
       {projects.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-            <Plus className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+            <Plus className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-          <p className="text-gray-600 mb-6">Get started by creating your first project</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No projects yet</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Get started by creating your first project</p>
           <Button 
             onClick={() => setIsDialogOpen(true)}
             className="bg-green-600 hover:bg-green-700 text-white"
@@ -270,18 +270,18 @@ export default function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white">
+            <Card key={project.id} className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate text-lg">{project.name}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-lg">{project.name}</h3>
                     <div className="mt-2">
                       {getStatusIndicator(project.status || "active")}
                     </div>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -323,10 +323,10 @@ export default function Projects() {
               <CardContent className="pt-0">
                 <div className="space-y-4">
                   {project.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{project.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">{project.description}</p>
                   )}
                   
-                  <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
+                  <div className="text-xs text-gray-500 dark:text-gray-500 pt-2 border-t border-gray-100 dark:border-gray-800">
                     Created {formatDistanceToNow(new Date(project.createdAt || Date.now()))} ago
                   </div>
                 </div>

@@ -57,14 +57,14 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
   };
 
   return (
-    <header className="border-b border-gray-200 bg-white px-6 py-3">
+    <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-6 py-3">
       <div className="flex items-center justify-between">
         {/* Left: Project Selector and Mode */}
         <div className="flex items-center gap-4">
           {/* Project Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-8 px-3 text-sm font-medium border-gray-300 hover:bg-gray-50">
+              <Button variant="outline" className="h-8 px-3 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100">
                 <FolderOpen className="w-4 h-4 mr-2" />
                 {currentProject ? currentProject.name : "Select Project"}
                 <ChevronDown className="w-4 h-4 ml-2" />
@@ -103,44 +103,38 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
           </DropdownMenu>
 
           {/* Mode Selector */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant={mode === "testing" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setMode("testing")}
-              className={`h-7 px-3 text-xs ${
+          <div className="flex items-center">
+            <Badge 
+              variant="outline" 
+              className={`h-7 px-3 text-xs font-medium border-0 ${
                 mode === "testing" 
-                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                  : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
+                  : "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300"
               }`}
             >
-              <TestTube className="w-3 h-3 mr-1" />
-              Testing
-            </Button>
-            <Button
-              variant={mode === "production" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setMode("production")}
-              className={`h-7 px-3 text-xs ${
-                mode === "production" 
-                  ? "bg-green-600 hover:bg-green-700 text-white" 
-                  : "border-gray-300 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              <Globe className="w-3 h-3 mr-1" />
-              Production
-            </Button>
+              {mode === "testing" ? (
+                <>
+                  <TestTube className="w-3 h-3 mr-1.5" />
+                  Testing
+                </>
+              ) : (
+                <>
+                  <Globe className="w-3 h-3 mr-1.5" />
+                  Production
+                </>
+              )}
+            </Badge>
           </div>
         </div>
 
         {/* Center: Global Search */}
         <div className="flex-1 max-w-md mx-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
             <Input
               type="search"
               placeholder="Search projects, forms..."
-              className="pl-10 h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              className="pl-10 h-9 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400"
             />
           </div>
         </div>
