@@ -113,16 +113,36 @@ export default function Projects() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusIndicator = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="text-sm text-gray-600">Active</span>
+          </div>
+        );
       case "paused":
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Paused</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            <span className="text-sm text-gray-600">Paused</span>
+          </div>
+        );
       case "archived":
-        return <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">Archived</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            <span className="text-sm text-gray-600">Archived</span>
+          </div>
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            <span className="text-sm text-gray-600">{status}</span>
+          </div>
+        );
     }
   };
 
@@ -137,13 +157,13 @@ export default function Projects() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2 mt-2"></div>
+            <Card key={i} className="animate-pulse border-0 shadow-sm bg-white">
+              <CardHeader className="pb-4">
+                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mt-3"></div>
               </CardHeader>
-              <CardContent>
-                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+              <CardContent className="pt-0">
+                <div className="h-4 bg-gray-200 rounded w-full mb-3"></div>
                 <div className="h-3 bg-gray-200 rounded w-2/3"></div>
               </CardContent>
             </Card>
@@ -250,16 +270,18 @@ export default function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="hover:shadow-md transition-shadow duration-200 border-gray-200">
-              <CardHeader className="pb-3">
+            <Card key={project.id} className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white">
+              <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{project.projectId}</p>
+                    <h3 className="font-semibold text-gray-900 truncate text-lg">{project.name}</h3>
+                    <div className="mt-2">
+                      {getStatusIndicator(project.status || "active")}
+                    </div>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -298,20 +320,13 @@ export default function Projects() {
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    {getStatusBadge(project.status || "active")}
-                    <span className="text-xs text-gray-500">
-                      {project.region}
-                    </span>
-                  </div>
-                  
+              <CardContent className="pt-0">
+                <div className="space-y-4">
                   {project.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
+                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{project.description}</p>
                   )}
                   
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
                     Created {formatDistanceToNow(new Date(project.createdAt || Date.now()))} ago
                   </div>
                 </div>
