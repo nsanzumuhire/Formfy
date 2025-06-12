@@ -27,8 +27,8 @@ const menuItems = [
   },
   {
     icon: FileText,
-    label: "My Forms",
-    href: "/forms",
+    label: "Form Editor",
+    href: "/form-editor",
   },
   {
     icon: Key,
@@ -55,7 +55,7 @@ export function Sidebar() {
     <div
       className={cn(
         "bg-card border-r transition-all duration-300 ease-in-out shadow-sm flex flex-col h-full",
-        isHovered ? "w-64" : "w-16"
+        isHovered ? "w-64" : "w-16",
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -68,7 +68,7 @@ export function Sidebar() {
         <span
           className={cn(
             "ml-3 font-semibold text-lg transition-opacity duration-300 whitespace-nowrap",
-            isHovered ? "opacity-100" : "opacity-0"
+            isHovered ? "opacity-100" : "opacity-0",
           )}
         >
           Formfy
@@ -90,14 +90,14 @@ export function Sidebar() {
                   "w-full justify-start px-2 py-2 h-10",
                   isActive
                     ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "hover:bg-accent hover:text-accent-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground",
                 )}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
                 <span
                   className={cn(
                     "ml-3 transition-opacity duration-300 whitespace-nowrap",
-                    isHovered ? "opacity-100" : "opacity-0"
+                    isHovered ? "opacity-100" : "opacity-0",
                   )}
                 >
                   {item.label}
@@ -112,15 +112,19 @@ export function Sidebar() {
       <div className="border-t p-2">
         <div className="flex items-center px-2 py-2 mb-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || ""} />
+            <AvatarImage
+              src={user?.profileImageUrl || ""}
+              alt={user?.firstName || ""}
+            />
             <AvatarFallback>
-              {user?.firstName?.[0]}{user?.lastName?.[0]}
+              {user?.firstName?.[0]}
+              {user?.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
           <div
             className={cn(
               "ml-3 transition-opacity duration-300 whitespace-nowrap",
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0",
             )}
           >
             <p className="text-sm font-medium">
@@ -139,7 +143,7 @@ export function Sidebar() {
           <span
             className={cn(
               "ml-3 transition-opacity duration-300 whitespace-nowrap",
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0",
             )}
           >
             Logout

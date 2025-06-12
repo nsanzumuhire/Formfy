@@ -12,6 +12,7 @@ import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
 import Forms from "@/pages/forms";
 import FormBuilder from "@/pages/form-builder";
+import FormEditor from "@/pages/form-editor";
 import ApiKeys from "@/pages/api-keys";
 import Settings from "@/pages/settings";
 import Landing from "@/pages/landing";
@@ -71,6 +72,11 @@ function Router() {
           <Route path="/form-builder/:id?">
             <AuthenticatedLayout>
               <FormBuilder />
+            </AuthenticatedLayout>
+          </Route>
+          <Route path="/form-editor/:projectId?">
+            <AuthenticatedLayout>
+              <FormEditor />
             </AuthenticatedLayout>
           </Route>
           <Route path="/api-keys">
