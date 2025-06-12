@@ -13,17 +13,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertProjectSchema, type Project } from "@shared/schema";
+import { createProjectSchema, type Project } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
-const createProjectSchema = insertProjectSchema.extend({
+const formSchema = createProjectSchema.extend({
   name: z.string().min(1, "Project name is required").max(50, "Name must be less than 50 characters"),
   description: z.string().optional(),
 });
 
-type CreateProjectForm = z.infer<typeof createProjectSchema>;
+type CreateProjectForm = z.infer<typeof formSchema>;
 
 export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function Projects() {
   });
 
   const form = useForm<CreateProjectForm>({
-    resolver: zodResolver(createProjectSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
