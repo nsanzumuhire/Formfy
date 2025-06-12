@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import { 
   FileText, Plus, Search, MoreHorizontal, Edit, Trash2, Copy, 
-  Settings, Grid3X3, Rows, Square, Palette, Type, Move 
+  Settings, Grid3X3, Rows, Square, Palette, Type, Move, 
+  MousePointer, AlignLeft, Hash, CheckSquare, Circle, ChevronDown,
+  Grip, Save, Eye, Layout
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -47,6 +51,9 @@ export default function FormEditor() {
   const [isCreatingForm, setIsCreatingForm] = useState(false);
   
   // Form creation state
+  const [formFields, setFormFields] = useState<any[]>([]);
+  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
   
@@ -132,11 +139,54 @@ export default function FormEditor() {
   const handleNewFormClick = () => {
     setIsCreatingForm(true);
     setSelectedFormId(null);
+    setFormFields([]);
+    setSelectedFieldId(null);
   };
 
   const handleFormSelect = (formId: string) => {
     setSelectedFormId(formId);
     setIsCreatingForm(false);
+  };
+
+  const handleSaveForm = () => {
+    setShowSaveDialog(true);
+  };
+
+  const handleAddField = (fieldType: string) => {
+    const newField = {
+      id: Date.now().toString(),
+      type: fieldType,
+      label: getFieldLabel(fieldType),
+      placeholder: getFieldPlaceholder(fieldType),
+      required: false,
+      order: formFields.length,
+    };
+    setFormFields([...formFields, newField]);
+    setSelectedFieldId(newField.id);
+  };
+
+  const getFieldLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      text: "Text Input",
+      email: "Email",
+      number: "Number",
+      checkbox: "Checkbox",
+      radio: "Radio Button",
+      select: "Dropdown",
+    };
+    return labels[type] || "Field";
+  };
+
+  const getFieldPlaceholder = (type: string) => {
+    const placeholders: Record<string, string> = {
+      text: "Enter text...",
+      email: "Enter email address...",
+      number: "Enter number...",
+      checkbox: "Check this option",
+      radio: "Select option",
+      select: "Choose an option",
+    };
+    return placeholders[type] || "Enter value...";
   };
 
   if (!currentProjectId) {
@@ -299,98 +349,166 @@ export default function FormEditor() {
       {/* Main content area */}
       <div className="flex-1 bg-white dark:bg-gray-950">
         {isCreatingForm ? (
-          /* Form Creation Interface */
+          /* Form Builder Interface */
           <div className="h-full flex">
-            {/* Form Builder Canvas */}
-            <div className="flex-1 p-6">
-              <div className="max-w-4xl mx-auto">
-                <div className="mb-6">
-                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Create New Form
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Build your form with drag-and-drop fields and customize its appearance
-                  </p>
+            {/* Toolbox Sidebar */}
+            <div className="w-16 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
+              {/* Tools Header */}
+              <div className="p-3 border-b border-gray-200 dark:border-gray-800">
+                <MousePointer className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto" />
+              </div>
+              
+              {/* Field Tools */}
+              <div className="flex-1 p-2 space-y-2">
+                <button
+                  onClick={() => handleAddField('text')}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Text Input"
+                >
+                  <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+                
+                <button
+                  onClick={() => handleAddField('email')}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Email Input"
+                >
+                  <Type className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+                
+                <button
+                  onClick={() => handleAddField('number')}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Number Input"
+                >
+                  <Hash className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+                
+                <button
+                  onClick={() => handleAddField('checkbox')}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Checkbox"
+                >
+                  <CheckSquare className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+                
+                <button
+                  onClick={() => handleAddField('radio')}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Radio Button"
+                >
+                  <Circle className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+                
+                <button
+                  onClick={() => handleAddField('select')}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Dropdown"
+                >
+                  <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+              </div>
+            </div>
+
+            {/* Canvas Area */}
+            <div className="flex-1 flex flex-col">
+              {/* Top Toolbar */}
+              <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-between px-4">
+                <div className="flex items-center gap-2">
+                  <Layout className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Form Builder</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4 mr-1" />
+                    Preview
+                  </Button>
+                  <Button size="sm" onClick={handleSaveForm}>
+                    <Save className="w-4 h-4 mr-1" />
+                    Save
+                  </Button>
+                </div>
+              </div>
 
-                {/* Form Basic Info */}
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Form Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="form-name">Form Name</Label>
-                      <Input
-                        id="form-name"
-                        placeholder="Enter form name..."
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="form-description">Description (optional)</Label>
-                      <Textarea
-                        id="form-description"
-                        placeholder="Brief description of your form..."
-                        value={formDescription}
-                        onChange={(e) => setFormDescription(e.target.value)}
-                        className="mt-1 resize-none"
-                        rows={3}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Form Preview */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Form Preview</CardTitle>
-                    <CardDescription>
-                      This is how your form will appear to users
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div 
-                      className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-center min-h-[300px] flex items-center justify-center"
-                      style={{
-                        maxWidth: `${formConfig.maxWidth}px`,
-                        backgroundColor: formConfig.backgroundColor,
-                        borderRadius: `${formConfig.borderRadius}px`,
-                        color: formConfig.textColor,
-                      }}
-                    >
-                      <div>
-                        <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                        <h3 className="text-lg font-medium mb-2">
-                          {formName || "Untitled Form"}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4">
-                          {formDescription || "Add fields to start building your form"}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          Drag fields from the toolbox to start building
-                        </p>
+              {/* Canvas */}
+              <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6">
+                <div className="max-w-2xl mx-auto">
+                  <div 
+                    className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6"
+                    style={{ maxWidth: `${formConfig.maxWidth}px` }}
+                  >
+                    {formFields.length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-center py-16">
+                        <div>
+                          <Grip className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                            Start building your form
+                          </h3>
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">
+                            Click on field icons from the left sidebar to add them to your form
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-3 mt-6">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsCreatingForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleCreateForm}
-                    disabled={!formName.trim() || createFormMutation.isPending}
-                  >
-                    {createFormMutation.isPending ? "Creating..." : "Create Form"}
-                  </Button>
+                    ) : (
+                      <div className="space-y-4">
+                        {formFields.map((field) => (
+                          <div
+                            key={field.id}
+                            className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                              selectedFieldId === field.id 
+                                ? "border-blue-500 bg-blue-50 dark:bg-blue-950" 
+                                : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                            }`}
+                            onClick={() => setSelectedFieldId(field.id)}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {field.label}
+                                {field.required && <span className="text-red-500 ml-1">*</span>}
+                              </label>
+                              <div className="flex items-center gap-1">
+                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                                  <Edit className="w-3 h-3 text-gray-400" />
+                                </button>
+                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                                  <Trash2 className="w-3 h-3 text-gray-400" />
+                                </button>
+                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab">
+                                  <Grip className="w-3 h-3 text-gray-400" />
+                                </button>
+                              </div>
+                            </div>
+                            
+                            {field.type === 'text' || field.type === 'email' || field.type === 'number' ? (
+                              <Input placeholder={field.placeholder} disabled className="bg-gray-50 dark:bg-gray-900" />
+                            ) : field.type === 'checkbox' ? (
+                              <div className="flex items-center gap-2">
+                                <input type="checkbox" disabled className="rounded" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">{field.placeholder}</span>
+                              </div>
+                            ) : field.type === 'radio' ? (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Circle className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-600 dark:text-gray-400">Option 1</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Circle className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-600 dark:text-gray-400">Option 2</span>
+                                </div>
+                              </div>
+                            ) : field.type === 'select' ? (
+                              <Select disabled>
+                                <SelectTrigger className="bg-gray-50 dark:bg-gray-900">
+                                  <SelectValue placeholder={field.placeholder} />
+                                </SelectTrigger>
+                              </Select>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
