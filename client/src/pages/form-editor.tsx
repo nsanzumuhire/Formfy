@@ -811,11 +811,14 @@ export default function FormEditor() {
                           <div 
                             className={`${
                               formConfig.layout === 'two-column' ? 'grid grid-cols-2' :
-                              formConfig.layout === 'grid' ? `grid grid-cols-${formConfig.gridColumns}` :
+                              formConfig.layout === 'grid' ? 'grid' :
                               'flex flex-col'
                             }`}
                             style={{
-                              gap: getSpacingValue()
+                              gap: getSpacingValue(),
+                              ...(formConfig.layout === 'grid' && {
+                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`
+                              })
                             }}
                           >
                             {formFields.map((field) => (
