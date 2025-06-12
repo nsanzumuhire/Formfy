@@ -9,33 +9,66 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
-} from '@dnd-kit/sortable';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
-  CSS,
-} from '@dnd-kit/utilities';
-import { 
-  FileText, Plus, Search, MoreHorizontal, Edit, Trash2, Copy, 
-  Settings, Grid3X3, Rows, Square, Palette, Type, Move, 
-  PanelRightOpen, AlignLeft, Hash, CheckSquare, Circle, ChevronDown,
-  Grip, Save, Eye, Layout, Maximize, ArrowLeftRight
+  FileText,
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Copy,
+  Settings,
+  Grid3X3,
+  Rows,
+  Square,
+  Palette,
+  Type,
+  Move,
+  PanelRightOpen,
+  AlignLeft,
+  Hash,
+  CheckSquare,
+  Circle,
+  ChevronDown,
+  Grip,
+  Save,
+  Eye,
+  Layout,
+  Maximize,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -62,12 +95,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from "@/hooks/useProject";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -77,19 +105,19 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Sortable Field Component
-function SortableField({ field, isSelected, onSelect, onUpdate }: { 
-  field: any; 
-  isSelected: boolean; 
-  onSelect: () => void; 
-  onUpdate: (updates: any) => void; 
+function SortableField({
+  field,
+  isSelected,
+  onSelect,
+  onUpdate,
+}: {
+  field: any;
+  isSelected: boolean;
+  onSelect: () => void;
+  onUpdate: (updates: any) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: field.id });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: field.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -101,8 +129,8 @@ function SortableField({ field, isSelected, onSelect, onUpdate }: {
       ref={setNodeRef}
       style={style}
       className={`p-4 border rounded-lg cursor-pointer transition-all ${
-        isSelected 
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-950" 
+        isSelected
+          ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
       }`}
       onClick={onSelect}
@@ -119,7 +147,7 @@ function SortableField({ field, isSelected, onSelect, onUpdate }: {
           <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
             <Trash2 className="w-3 h-3 text-gray-400" />
           </button>
-          <button 
+          <button
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab"
             {...attributes}
             {...listeners}
@@ -128,26 +156,38 @@ function SortableField({ field, isSelected, onSelect, onUpdate }: {
           </button>
         </div>
       </div>
-      
-      {field.type === 'text' || field.type === 'email' || field.type === 'number' ? (
-        <Input placeholder={field.placeholder} disabled className="bg-gray-50 dark:bg-gray-900" />
-      ) : field.type === 'checkbox' ? (
+
+      {field.type === "text" ||
+      field.type === "email" ||
+      field.type === "number" ? (
+        <Input
+          placeholder={field.placeholder}
+          disabled
+          className="bg-gray-50 dark:bg-gray-900"
+        />
+      ) : field.type === "checkbox" ? (
         <div className="flex items-center gap-2">
           <input type="checkbox" disabled className="rounded" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">{field.placeholder}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {field.placeholder}
+          </span>
         </div>
-      ) : field.type === 'radio' ? (
+      ) : field.type === "radio" ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">Option 1</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Option 1
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">Option 2</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Option 2
+            </span>
           </div>
         </div>
-      ) : field.type === 'select' ? (
+      ) : field.type === "select" ? (
         <Select disabled>
           <SelectTrigger className="bg-gray-50 dark:bg-gray-900">
             <SelectValue placeholder={field.placeholder} />
@@ -164,23 +204,23 @@ export default function FormEditor() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   const [isCreatingForm, setIsCreatingForm] = useState(false);
-  
+
   // Form creation state
   const [formFields, setFormFields] = useState<any[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
-  
+
   // UI state
   const [showFormsList, setShowFormsList] = useState(true);
   const [showPropertiesPanel, setShowPropertiesPanel] = useState(false);
-  
+
   // Form configuration state
   const [formConfig, setFormConfig] = useState({
-    layout: "single-column",
+    layout: "",
     gridColumns: 2,
-    spacing: "8px",
+    spacing: "",
     customSpacing: 8,
   });
 
@@ -191,7 +231,7 @@ export default function FormEditor() {
   const { selectedProject } = useProject();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const currentProjectId = projectId || selectedProject;
 
   // DnD sensors
@@ -199,7 +239,7 @@ export default function FormEditor() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Fetch project details
@@ -214,27 +254,37 @@ export default function FormEditor() {
     enabled: !!currentProjectId,
   });
 
-  const filteredForms = forms.filter(form =>
-    form.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredForms = forms.filter((form) =>
+    form.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Create form mutation
   const createFormMutation = useMutation({
-    mutationFn: async (formData: { name: string; description?: string; projectId: string }) => {
-      return await apiRequest(`/api/projects/${formData.projectId}/forms`, "POST", {
-        ...formData,
-        schema: { 
-          fields: formFields,
-          settings: {
-            ...formConfig,
-            title: formData.name,
-            description: formData.description
-          }
+    mutationFn: async (formData: {
+      name: string;
+      description?: string;
+      projectId: string;
+    }) => {
+      return await apiRequest(
+        `/api/projects/${formData.projectId}/forms`,
+        "POST",
+        {
+          ...formData,
+          schema: {
+            fields: formFields,
+            settings: {
+              ...formConfig,
+              title: formData.name,
+              description: formData.description,
+            },
+          },
         },
-      });
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${currentProjectId}/forms`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/projects/${currentProjectId}/forms`],
+      });
       setIsCreatingForm(false);
       setShowSaveDialog(false);
       setFormName("");
@@ -266,7 +316,7 @@ export default function FormEditor() {
 
   const handleCreateForm = () => {
     if (!formName.trim() || !currentProjectId) return;
-    
+
     createFormMutation.mutate({
       name: formName.trim(),
       description: formDescription.trim() || undefined,
@@ -382,7 +432,9 @@ export default function FormEditor() {
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Forms</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">
+                Forms
+              </h2>
               <Button size="sm" className="h-7" onClick={handleNewFormClick}>
                 <Plus className="w-3 h-3 mr-1" />
                 New
@@ -403,7 +455,7 @@ export default function FormEditor() {
           {/* Forms List */}
           <div className="flex-1 overflow-y-auto">
             {filteredForms.length === 0 ? (
-              <div className="p-6 text-center">
+              <div className="p-4 text-center">
                 <Card className="border-dashed">
                   <CardContent className="pt-6">
                     <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -415,7 +467,11 @@ export default function FormEditor() {
                     <CardDescription className="text-xs text-gray-600 dark:text-gray-400 mb-4">
                       Create your first form to get started with collecting data
                     </CardDescription>
-                    <Button size="sm" className="h-8 text-xs" onClick={handleNewFormClick}>
+                    <Button
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={handleNewFormClick}
+                    >
                       <Plus className="w-3 h-3 mr-1" />
                       Create form
                     </Button>
@@ -428,8 +484,8 @@ export default function FormEditor() {
                   <div
                     key={form.id}
                     className={`p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer group border ${
-                      selectedFormId === form.id 
-                        ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950" 
+                      selectedFormId === form.id
+                        ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950"
                         : "border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                     }`}
                     onClick={() => handleFormSelect(form.id)}
@@ -445,7 +501,9 @@ export default function FormEditor() {
                         <div className="flex items-center gap-2 mb-2">
                           {getFormStatusBadge(form)}
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatDistanceToNow(new Date(form.createdAt!), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(form.createdAt!), {
+                              addSuffix: true,
+                            })}
                           </span>
                         </div>
                         {form.description && (
@@ -506,51 +564,51 @@ export default function FormEditor() {
                   <PanelRightOpen className="w-5 h-5" />
                 </button>
               </div>
-              
+
               {/* Field Tools */}
               <div className="flex-1 p-2 space-y-2">
                 <button
-                  onClick={() => handleAddField('text')}
+                  onClick={() => handleAddField("text")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Text Input"
                 >
                   <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
-                
+
                 <button
-                  onClick={() => handleAddField('email')}
+                  onClick={() => handleAddField("email")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Email Input"
                 >
                   <Type className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
-                
+
                 <button
-                  onClick={() => handleAddField('number')}
+                  onClick={() => handleAddField("number")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Number Input"
                 >
                   <Hash className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
-                
+
                 <button
-                  onClick={() => handleAddField('checkbox')}
+                  onClick={() => handleAddField("checkbox")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Checkbox"
                 >
                   <CheckSquare className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
-                
+
                 <button
-                  onClick={() => handleAddField('radio')}
+                  onClick={() => handleAddField("radio")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Radio Button"
                 >
                   <Circle className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
-                
+
                 <button
-                  onClick={() => handleAddField('select')}
+                  onClick={() => handleAddField("select")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Dropdown"
                 >
@@ -566,9 +624,11 @@ export default function FormEditor() {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Layout className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Form Builder</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Form Builder
+                    </span>
                   </div>
-                  
+
                   {/* Layout Type Combobox */}
                   <div className="flex items-center gap-2">
                     <Popover open={layoutOpen} onOpenChange={setLayoutOpen}>
@@ -579,8 +639,15 @@ export default function FormEditor() {
                           aria-expanded={layoutOpen}
                           className="w-32 h-8 justify-between"
                         >
-                          {formConfig.layout === "single-column" ? "Single" :
-                           formConfig.layout === "two-column" ? "Two Col" : "Grid"}
+                          {formConfig.layout === "single-column"
+                            ? "Single"
+                            : formConfig.layout === "two-column"
+                              ? "Two Col"
+                              : formConfig.layout === "grid"
+                                ? "Grid"
+                                : formConfig.layout === "mixed"
+                                  ? "Mixed"
+                                  : "Select form layout"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -590,14 +657,19 @@ export default function FormEditor() {
                             <CommandItem
                               value="single-column"
                               onSelect={() => {
-                                setFormConfig({...formConfig, layout: "single-column"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "single-column",
+                                });
                                 setLayoutOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.layout === "single-column" ? "opacity-100" : "opacity-0"
+                                  formConfig.layout === "single-column"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               Single
@@ -605,14 +677,19 @@ export default function FormEditor() {
                             <CommandItem
                               value="two-column"
                               onSelect={() => {
-                                setFormConfig({...formConfig, layout: "two-column"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "two-column",
+                                });
                                 setLayoutOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.layout === "two-column" ? "opacity-100" : "opacity-0"
+                                  formConfig.layout === "two-column"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               Two Col
@@ -620,35 +697,65 @@ export default function FormEditor() {
                             <CommandItem
                               value="grid"
                               onSelect={() => {
-                                setFormConfig({...formConfig, layout: "grid"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "grid",
+                                });
                                 setLayoutOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.layout === "grid" ? "opacity-100" : "opacity-0"
+                                  formConfig.layout === "grid"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               Grid
+                            </CommandItem>
+                            <CommandItem
+                              value="mixed"
+                              onSelect={() => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "mixed",
+                                });
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "mixed"
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              Mixed
                             </CommandItem>
                           </CommandGroup>
                         </Command>
                       </PopoverContent>
                     </Popover>
-                    
-                    {formConfig.layout === 'grid' && (
+
+                    {formConfig.layout === "grid" && (
                       <Input
                         type="number"
                         value={formConfig.gridColumns}
-                        onChange={(e) => setFormConfig({...formConfig, gridColumns: parseInt(e.target.value) || 2})}
+                        onChange={(e) =>
+                          setFormConfig({
+                            ...formConfig,
+                            gridColumns: parseInt(e.target.value) || 2,
+                          })
+                        }
                         className="w-16 h-8"
                         min="2"
                         max="6"
                       />
                     )}
                   </div>
-                  
+
                   {/* Field Spacing Combobox */}
                   <div className="flex items-center gap-2">
                     <Popover open={spacingOpen} onOpenChange={setSpacingOpen}>
@@ -659,9 +766,15 @@ export default function FormEditor() {
                           aria-expanded={spacingOpen}
                           className="w-24 h-8 justify-between"
                         >
-                          {formConfig.spacing === "2px" ? "2px" :
-                           formConfig.spacing === "4px" ? "4px" :
-                           formConfig.spacing === "8px" ? "8px" : "Custom"}
+                          {formConfig.spacing === "2px"
+                            ? "2px"
+                            : formConfig.spacing === "4px"
+                              ? "4px"
+                              : formConfig.spacing === "8px"
+                                ? "8px"
+                                : formConfig.spacing === "custom"
+                                  ? "Custom"
+                                  : "Select field spacing"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -671,14 +784,19 @@ export default function FormEditor() {
                             <CommandItem
                               value="2px"
                               onSelect={() => {
-                                setFormConfig({...formConfig, spacing: "2px"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  spacing: "2px",
+                                });
                                 setSpacingOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.spacing === "2px" ? "opacity-100" : "opacity-0"
+                                  formConfig.spacing === "2px"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               2px
@@ -686,14 +804,19 @@ export default function FormEditor() {
                             <CommandItem
                               value="4px"
                               onSelect={() => {
-                                setFormConfig({...formConfig, spacing: "4px"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  spacing: "4px",
+                                });
                                 setSpacingOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.spacing === "4px" ? "opacity-100" : "opacity-0"
+                                  formConfig.spacing === "4px"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               4px
@@ -701,14 +824,19 @@ export default function FormEditor() {
                             <CommandItem
                               value="8px"
                               onSelect={() => {
-                                setFormConfig({...formConfig, spacing: "8px"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  spacing: "8px",
+                                });
                                 setSpacingOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.spacing === "8px" ? "opacity-100" : "opacity-0"
+                                  formConfig.spacing === "8px"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               8px
@@ -716,14 +844,19 @@ export default function FormEditor() {
                             <CommandItem
                               value="custom"
                               onSelect={() => {
-                                setFormConfig({...formConfig, spacing: "custom"});
+                                setFormConfig({
+                                  ...formConfig,
+                                  spacing: "custom",
+                                });
                                 setSpacingOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formConfig.spacing === "custom" ? "opacity-100" : "opacity-0"
+                                  formConfig.spacing === "custom"
+                                    ? "opacity-100"
+                                    : "opacity-0",
                                 )}
                               />
                               Custom
@@ -732,21 +865,25 @@ export default function FormEditor() {
                         </Command>
                       </PopoverContent>
                     </Popover>
-                    
+
                     {formConfig.spacing === "custom" && (
                       <Input
                         type="number"
                         value={formConfig.customSpacing}
-                        onChange={(e) => setFormConfig({...formConfig, customSpacing: parseInt(e.target.value) || 8})}
+                        onChange={(e) =>
+                          setFormConfig({
+                            ...formConfig,
+                            customSpacing: parseInt(e.target.value) || 8,
+                          })
+                        }
                         className="w-16 h-8"
                         min="0"
                         max="100"
                       />
                     )}
                   </div>
-
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
                     <Eye className="w-4 h-4 mr-1" />
@@ -771,31 +908,36 @@ export default function FormEditor() {
                             Start building your form
                           </h3>
                           <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Click on field icons from the left sidebar to add them to your form
+                            Click on field icons from the left sidebar to add
+                            them to your form
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <DndContext 
+                      <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
                         onDragEnd={handleDragEnd}
                       >
-                        <SortableContext 
-                          items={formFields.map(f => f.id)}
+                        <SortableContext
+                          items={formFields.map((f) => f.id)}
                           strategy={verticalListSortingStrategy}
                         >
-                          <div 
+                          <div
                             className={`${
-                              formConfig.layout === 'two-column' ? 'grid grid-cols-2' :
-                              formConfig.layout === 'grid' ? 'grid' :
-                              'flex flex-col'
+                              formConfig.layout === "two-column"
+                                ? "grid grid-cols-2"
+                                : formConfig.layout === "grid"
+                                  ? "grid"
+                                  : formConfig.layout === "mixed"
+                                    ? "space-y-4"
+                                    : "flex flex-col"
                             }`}
                             style={{
-                              gap: getSpacingValue(),
-                              ...(formConfig.layout === 'grid' && {
-                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`
-                              })
+                              gap: formConfig.layout !== "mixed" ? getSpacingValue() : undefined,
+                              ...(formConfig.layout === "grid" && {
+                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
+                              }),
                             }}
                           >
                             {formFields.map((field) => (
@@ -805,8 +947,12 @@ export default function FormEditor() {
                                 isSelected={selectedFieldId === field.id}
                                 onSelect={() => handleFieldSelect(field.id)}
                                 onUpdate={(updates) => {
-                                  setFormFields(fields => 
-                                    fields.map(f => f.id === field.id ? {...f, ...updates} : f)
+                                  setFormFields((fields) =>
+                                    fields.map((f) =>
+                                      f.id === field.id
+                                        ? { ...f, ...updates }
+                                        : f,
+                                    ),
                                   );
                                 }}
                               />
@@ -835,46 +981,69 @@ export default function FormEditor() {
                     ×
                   </Button>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Label</Label>
                     <Input
-                      value={formFields.find(f => f.id === selectedFieldId)?.label || ""}
+                      value={
+                        formFields.find((f) => f.id === selectedFieldId)
+                          ?.label || ""
+                      }
                       onChange={(e) => {
-                        setFormFields(fields => 
-                          fields.map(f => f.id === selectedFieldId ? {...f, label: e.target.value} : f)
+                        setFormFields((fields) =>
+                          fields.map((f) =>
+                            f.id === selectedFieldId
+                              ? { ...f, label: e.target.value }
+                              : f,
+                          ),
                         );
                       }}
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div>
                     <Label className="text-sm font-medium">Placeholder</Label>
                     <Input
-                      value={formFields.find(f => f.id === selectedFieldId)?.placeholder || ""}
+                      value={
+                        formFields.find((f) => f.id === selectedFieldId)
+                          ?.placeholder || ""
+                      }
                       onChange={(e) => {
-                        setFormFields(fields => 
-                          fields.map(f => f.id === selectedFieldId ? {...f, placeholder: e.target.value} : f)
+                        setFormFields((fields) =>
+                          fields.map((f) =>
+                            f.id === selectedFieldId
+                              ? { ...f, placeholder: e.target.value }
+                              : f,
+                          ),
                         );
                       }}
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       id="required"
-                      checked={formFields.find(f => f.id === selectedFieldId)?.required || false}
+                      checked={
+                        formFields.find((f) => f.id === selectedFieldId)
+                          ?.required || false
+                      }
                       onChange={(e) => {
-                        setFormFields(fields => 
-                          fields.map(f => f.id === selectedFieldId ? {...f, required: e.target.checked} : f)
+                        setFormFields((fields) =>
+                          fields.map((f) =>
+                            f.id === selectedFieldId
+                              ? { ...f, required: e.target.checked }
+                              : f,
+                          ),
                         );
                       }}
                     />
-                    <Label htmlFor="required" className="text-sm font-medium">Required field</Label>
+                    <Label htmlFor="required" className="text-sm font-medium">
+                      Required field
+                    </Label>
                   </div>
                 </div>
               </div>
@@ -906,7 +1075,8 @@ export default function FormEditor() {
                 Select a form to edit
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                Choose a form from the sidebar to start editing, or create a new form to get started
+                Choose a form from the sidebar to start editing, or create a new
+                form to get started
               </p>
               <Button onClick={handleNewFormClick}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -922,7 +1092,8 @@ export default function FormEditor() {
             <DialogHeader>
               <DialogTitle>Save Form</DialogTitle>
               <DialogDescription>
-                Give your form a name and description to save it to your project.
+                Give your form a name and description to save it to your
+                project.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -937,7 +1108,9 @@ export default function FormEditor() {
                 />
               </div>
               <div>
-                <Label htmlFor="save-form-description">Description (optional)</Label>
+                <Label htmlFor="save-form-description">
+                  Description (optional)
+                </Label>
                 <Textarea
                   id="save-form-description"
                   placeholder="Brief description of your form..."
@@ -949,10 +1122,13 @@ export default function FormEditor() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowSaveDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleCreateForm}
                 disabled={!formName.trim() || createFormMutation.isPending}
               >

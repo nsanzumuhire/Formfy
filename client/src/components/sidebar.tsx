@@ -107,49 +107,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
-      {/* User Section */}
-      <div className="border-t p-2">
-        <div className="flex items-center px-2 py-2 mb-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={user?.profileImageUrl || ""}
-              alt={user?.firstName || ""}
-            />
-            <AvatarFallback>
-              {user?.firstName?.[0]}
-              {user?.lastName?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div
-            className={cn(
-              "ml-3 transition-opacity duration-300 whitespace-nowrap",
-              isHovered ? "opacity-100" : "opacity-0",
-            )}
-          >
-            <p className="text-sm font-medium">
-              {user?.firstName} {user?.lastName}
-            </p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          className="w-full justify-start px-2 py-2 h-10 hover:bg-destructive/10 hover:text-destructive"
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          <span
-            className={cn(
-              "ml-3 transition-opacity duration-300 whitespace-nowrap",
-              isHovered ? "opacity-100" : "opacity-0",
-            )}
-          >
-            Logout
-          </span>
-        </Button>
-      </div>
     </div>
   );
 }

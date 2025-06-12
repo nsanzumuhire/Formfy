@@ -77,7 +77,7 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
   };
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-6 py-3">
+    <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3">
       <div className="flex items-center justify-between">
         {/* Left: Project Selector and Mode */}
         <div className="flex items-center gap-4">
@@ -116,7 +116,9 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",
-                          selectedProject === project.id ? "opacity-100" : "opacity-0"
+                          selectedProject === project.id
+                            ? "opacity-100"
+                            : "opacity-0",
                         )}
                       />
                       <div className="flex items-center justify-between w-full">
