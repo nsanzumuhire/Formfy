@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useProject } from "@/hooks/useProject";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Key,
@@ -17,10 +18,10 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import type { ApiKey, Project } from "@shared/schema";
+import type { ApiKey } from "@shared/schema";
 
 export default function ApiKeys() {
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const { selectedProject, setSelectedProject, projects } = useProject();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyEnvironment, setNewKeyEnvironment] = useState<"testing" | "production">("testing");
@@ -29,20 +30,9 @@ export default function ApiKeys() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: projects } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-  });
-
   const { data: apiKeys, isLoading } = useQuery<ApiKey[]>({
     queryKey: selectedProject ? [`/api/projects/${selectedProject}/api-keys`] : [],
     enabled: !!selectedProject,
-  });
-
-  // Auto-select first project
-  useState(() => {
-    if (projects && projects.length > 0 && !selectedProject) {
-      setSelectedProject(projects[0].id);
-    }
   });
 
   const createApiKeyMutation = useMutation({

@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
+import { useProject } from "@/hooks/useProject";
 import {
   FileText,
   Plus,
@@ -13,25 +13,14 @@ import {
   Eye,
   Calendar,
 } from "lucide-react";
-import type { Form, Project } from "@shared/schema";
+import type { Form } from "@shared/schema";
 
 export default function Forms() {
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-
-  const { data: projects } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-  });
+  const { selectedProject, setSelectedProject, projects } = useProject();
 
   const { data: forms, isLoading } = useQuery<Form[]>({
     queryKey: selectedProject ? [`/api/projects/${selectedProject}/forms`] : [],
     enabled: !!selectedProject,
-  });
-
-  // Auto-select first project if available
-  useState(() => {
-    if (projects && projects.length > 0 && !selectedProject) {
-      setSelectedProject(projects[0].id);
-    }
   });
 
   const formatDate = (dateString: string) => {

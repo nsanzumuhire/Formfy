@@ -5,7 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
+import { useProject } from "@/hooks/useProject";
 import { Sidebar } from "@/components/sidebar";
+import { Header } from "@/components/header";
 import Dashboard from "@/pages/dashboard";
 import Forms from "@/pages/forms";
 import FormBuilder from "@/pages/form-builder";
@@ -15,11 +17,19 @@ import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const { selectedProject, setSelectedProject } = useProject();
+  
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto">
-        {children}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header 
+          selectedProject={selectedProject || undefined}
+          onProjectChange={setSelectedProject}
+        />
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );
