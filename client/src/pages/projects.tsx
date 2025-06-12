@@ -157,14 +157,14 @@ export default function Projects() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse border-0 shadow-sm bg-white">
+            <Card key={i} className="animate-pulse border-0 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader className="pb-4">
-                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mt-3"></div>
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-3"></div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="h-4 bg-gray-200 rounded w-full mb-3"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-3"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
               </CardContent>
             </Card>
           ))}
@@ -311,7 +311,7 @@ export default function Projects() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         onClick={() => handleDeleteProject(project)}
-                        className="text-red-600 focus:text-red-600"
+                        className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete project

@@ -104,12 +104,12 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
 
           {/* Mode Selector */}
           <div className="flex items-center">
-            <Badge 
-              variant="outline" 
-              className={`h-7 px-3 text-xs font-medium border-0 ${
+            <button
+              onClick={() => setMode(mode === "testing" ? "production" : "testing")}
+              className={`h-7 px-3 text-xs font-medium border-0 rounded-md transition-colors ${
                 mode === "testing" 
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
-                  : "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                  ? "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50" 
+                  : "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
               }`}
             >
               {mode === "testing" ? (
@@ -123,7 +123,7 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
                   Production
                 </>
               )}
-            </Badge>
+            </button>
           </div>
         </div>
 
