@@ -95,14 +95,24 @@ export default function FormEditor() {
     mutationFn: async (formData: { name: string; description?: string; projectId: string }) => {
       return await apiRequest(`/api/projects/${formData.projectId}/forms`, "POST", {
         ...formData,
-        schema: { fields: [], settings: formConfig },
+        schema: { 
+          fields: formFields,
+          settings: {
+            ...formConfig,
+            title: formData.name,
+            description: formData.description
+          }
+        },
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${currentProjectId}/forms`] });
       setIsCreatingForm(false);
+      setShowSaveDialog(false);
       setFormName("");
       setFormDescription("");
+      setFormFields([]);
+      setSelectedFieldId(null);
       toast({
         title: "Form created",
         description: "Your new form has been created successfully.",
@@ -677,6 +687,52 @@ export default function FormEditor() {
             </div>
           </div>
         )}
+
+        {/* Save Form Dialog */}
+        <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Save Form</DialogTitle>
+              <DialogDescription>
+                Give your form a name and description to save it to your project.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="save-form-name">Form Name</Label>
+                <Input
+                  id="save-form-name"
+                  placeholder="Enter form name..."
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="save-form-description">Description (optional)</Label>
+                <Textarea
+                  id="save-form-description"
+                  placeholder="Brief description of your form..."
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  className="mt-1 resize-none"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCreateForm}
+                disabled={!formName.trim() || createFormMutation.isPending}
+              >
+                {createFormMutation.isPending ? "Saving..." : "Save Form"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
