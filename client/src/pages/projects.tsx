@@ -45,10 +45,7 @@ export default function Projects() {
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: CreateProjectForm) => {
-      return await apiRequest("/api/projects", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("/api/projects", "POST", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -70,10 +67,7 @@ export default function Projects() {
 
   const updateProjectMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      return await apiRequest(`/api/projects/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
+      return await apiRequest(`/api/projects/${id}`, "PATCH", { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -93,9 +87,7 @@ export default function Projects() {
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/projects/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest(`/api/projects/${id}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });

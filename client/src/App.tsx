@@ -9,6 +9,7 @@ import { useProject } from "@/hooks/useProject";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import Dashboard from "@/pages/dashboard";
+import Projects from "@/pages/projects";
 import Forms from "@/pages/forms";
 import FormBuilder from "@/pages/form-builder";
 import ApiKeys from "@/pages/api-keys";
@@ -55,6 +56,11 @@ function Router() {
           <Route path="/">
             <AuthenticatedLayout>
               <Dashboard />
+            </AuthenticatedLayout>
+          </Route>
+          <Route path="/projects">
+            <AuthenticatedLayout>
+              <Projects />
             </AuthenticatedLayout>
           </Route>
           <Route path="/forms">

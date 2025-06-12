@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Home,
+  FolderOpen,
   FileText,
   Key,
   Settings,
