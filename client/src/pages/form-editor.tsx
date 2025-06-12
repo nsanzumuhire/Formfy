@@ -1,6 +1,25 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import {
+  CSS,
+} from '@dnd-kit/utilities';
 import { 
   FileText, Plus, Search, MoreHorizontal, Edit, Trash2, Copy, 
   Settings, Grid3X3, Rows, Square, Palette, Type, Move, 
@@ -25,6 +44,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -42,6 +73,90 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Form, Project } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Sortable Field Component
+function SortableField({ field, isSelected, onSelect, onUpdate }: { 
+  field: any; 
+  isSelected: boolean; 
+  onSelect: () => void; 
+  onUpdate: (updates: any) => void; 
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: field.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`p-4 border rounded-lg cursor-pointer transition-all ${
+        isSelected 
+          ? "border-blue-500 bg-blue-50 dark:bg-blue-950" 
+          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+      }`}
+      onClick={onSelect}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {field.label}
+          {field.required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        <div className="flex items-center gap-1">
+          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+            <Edit className="w-3 h-3 text-gray-400" />
+          </button>
+          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+            <Trash2 className="w-3 h-3 text-gray-400" />
+          </button>
+          <button 
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab"
+            {...attributes}
+            {...listeners}
+          >
+            <Grip className="w-3 h-3 text-gray-400" />
+          </button>
+        </div>
+      </div>
+      
+      {field.type === 'text' || field.type === 'email' || field.type === 'number' ? (
+        <Input placeholder={field.placeholder} disabled className="bg-gray-50 dark:bg-gray-900" />
+      ) : field.type === 'checkbox' ? (
+        <div className="flex items-center gap-2">
+          <input type="checkbox" disabled className="rounded" />
+          <span className="text-sm text-gray-600 dark:text-gray-400">{field.placeholder}</span>
+        </div>
+      ) : field.type === 'radio' ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Circle className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Option 1</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Circle className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Option 2</span>
+          </div>
+        </div>
+      ) : field.type === 'select' ? (
+        <Select disabled>
+          <SelectTrigger className="bg-gray-50 dark:bg-gray-900">
+            <SelectValue placeholder={field.placeholder} />
+          </SelectTrigger>
+        </Select>
+      ) : null}
+    </div>
+  );
+}
 
 export default function FormEditor() {
   const [, params] = useRoute("/form-editor/:projectId?");
@@ -65,7 +180,8 @@ export default function FormEditor() {
   const [formConfig, setFormConfig] = useState({
     layout: "single-column",
     gridColumns: 2,
-    spacing: "normal",
+    spacing: "8px",
+    customSpacing: 8,
     width: "auto", // "auto" or "full"
     maxWidth: 600,
     borderRadius: 8,
@@ -74,11 +190,23 @@ export default function FormEditor() {
     textColor: "#000000",
   });
 
+  // UI state for comboboxes
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const [spacingOpen, setSpacingOpen] = useState(false);
+
   const { selectedProject } = useProject();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   const currentProjectId = projectId || selectedProject;
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Fetch project details
   const { data: project } = useQuery<Project>({
@@ -186,6 +314,26 @@ export default function FormEditor() {
     setFormFields([...formFields, newField]);
     setSelectedFieldId(newField.id);
     setShowPropertiesPanel(true);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setFormFields((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over?.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const getSpacingValue = () => {
+    if (formConfig.spacing === "custom") {
+      return `${formConfig.customSpacing}px`;
+    }
+    return formConfig.spacing;
   };
 
   const getFieldLabel = (type: string) => {
@@ -427,21 +575,73 @@ export default function FormEditor() {
                     <span className="text-sm text-gray-600 dark:text-gray-400">Form Builder</span>
                   </div>
                   
-                  {/* Layout Type */}
+                  {/* Layout Type Combobox */}
                   <div className="flex items-center gap-2">
-                    <Select 
-                      value={formConfig.layout} 
-                      onValueChange={(value) => setFormConfig({...formConfig, layout: value})}
-                    >
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="single-column">Single</SelectItem>
-                        <SelectItem value="two-column">Two Col</SelectItem>
-                        <SelectItem value="grid">Grid</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Popover open={layoutOpen} onOpenChange={setLayoutOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={layoutOpen}
+                          className="w-32 h-8 justify-between"
+                        >
+                          {formConfig.layout === "single-column" ? "Single" :
+                           formConfig.layout === "two-column" ? "Two Col" : "Grid"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-32 p-0">
+                        <Command>
+                          <CommandGroup>
+                            <CommandItem
+                              value="single-column"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, layout: "single-column"});
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "single-column" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              Single
+                            </CommandItem>
+                            <CommandItem
+                              value="two-column"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, layout: "two-column"});
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "two-column" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              Two Col
+                            </CommandItem>
+                            <CommandItem
+                              value="grid"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, layout: "grid"});
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "grid" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              Grid
+                            </CommandItem>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     
                     {formConfig.layout === 'grid' && (
                       <Input
@@ -455,21 +655,100 @@ export default function FormEditor() {
                     )}
                   </div>
                   
-                  {/* Field Spacing */}
+                  {/* Field Spacing Combobox */}
                   <div className="flex items-center gap-2">
-                    <Select 
-                      value={formConfig.spacing} 
-                      onValueChange={(value) => setFormConfig({...formConfig, spacing: value})}
-                    >
-                      <SelectTrigger className="w-24 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="compact">Compact</SelectItem>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="relaxed">Relaxed</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Popover open={spacingOpen} onOpenChange={setSpacingOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={spacingOpen}
+                          className="w-24 h-8 justify-between"
+                        >
+                          {formConfig.spacing === "2px" ? "2px" :
+                           formConfig.spacing === "4px" ? "4px" :
+                           formConfig.spacing === "8px" ? "8px" : "Custom"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-32 p-0">
+                        <Command>
+                          <CommandGroup>
+                            <CommandItem
+                              value="2px"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, spacing: "2px"});
+                                setSpacingOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.spacing === "2px" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              2px
+                            </CommandItem>
+                            <CommandItem
+                              value="4px"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, spacing: "4px"});
+                                setSpacingOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.spacing === "4px" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              4px
+                            </CommandItem>
+                            <CommandItem
+                              value="8px"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, spacing: "8px"});
+                                setSpacingOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.spacing === "8px" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              8px
+                            </CommandItem>
+                            <CommandItem
+                              value="custom"
+                              onSelect={() => {
+                                setFormConfig({...formConfig, spacing: "custom"});
+                                setSpacingOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.spacing === "custom" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              Custom
+                            </CommandItem>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    
+                    {formConfig.spacing === "custom" && (
+                      <Input
+                        type="number"
+                        value={formConfig.customSpacing}
+                        onChange={(e) => setFormConfig({...formConfig, customSpacing: parseInt(e.target.value) || 8})}
+                        className="w-16 h-8"
+                        min="0"
+                        max="100"
+                      />
+                    )}
                   </div>
                   
                   {/* Width Toggle */}
@@ -502,10 +781,7 @@ export default function FormEditor() {
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6">
                 <div className={`mx-auto ${formConfig.width === "full" ? "w-full" : "max-w-2xl"}`}>
                   <div 
-                    className={`bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6 ${
-                      formConfig.spacing === 'compact' ? 'space-y-2' : 
-                      formConfig.spacing === 'relaxed' ? 'space-y-6' : 'space-y-4'
-                    }`}
+                    className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6"
                     style={{ 
                       maxWidth: formConfig.width === "auto" ? `${formConfig.maxWidth}px` : "100%"
                     }}
@@ -523,67 +799,41 @@ export default function FormEditor() {
                         </div>
                       </div>
                     ) : (
-                      <div className={`${
-                        formConfig.layout === 'two-column' ? 'grid grid-cols-2 gap-4' :
-                        formConfig.layout === 'grid' ? `grid grid-cols-${formConfig.gridColumns} gap-4` :
-                        'space-y-4'
-                      }`}>
-                        {formFields.map((field) => (
-                          <div
-                            key={field.id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                              selectedFieldId === field.id 
-                                ? "border-blue-500 bg-blue-50 dark:bg-blue-950" 
-                                : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                      <DndContext 
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext 
+                          items={formFields.map(f => f.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div 
+                            className={`${
+                              formConfig.layout === 'two-column' ? 'grid grid-cols-2' :
+                              formConfig.layout === 'grid' ? `grid grid-cols-${formConfig.gridColumns}` :
+                              'flex flex-col'
                             }`}
-                            onClick={() => handleFieldSelect(field.id)}
+                            style={{
+                              gap: getSpacingValue()
+                            }}
                           >
-                            <div className="flex items-center justify-between mb-2">
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {field.label}
-                                {field.required && <span className="text-red-500 ml-1">*</span>}
-                              </label>
-                              <div className="flex items-center gap-1">
-                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-                                  <Edit className="w-3 h-3 text-gray-400" />
-                                </button>
-                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-                                  <Trash2 className="w-3 h-3 text-gray-400" />
-                                </button>
-                                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab">
-                                  <Grip className="w-3 h-3 text-gray-400" />
-                                </button>
-                              </div>
-                            </div>
-                            
-                            {field.type === 'text' || field.type === 'email' || field.type === 'number' ? (
-                              <Input placeholder={field.placeholder} disabled className="bg-gray-50 dark:bg-gray-900" />
-                            ) : field.type === 'checkbox' ? (
-                              <div className="flex items-center gap-2">
-                                <input type="checkbox" disabled className="rounded" />
-                                <span className="text-sm text-gray-600 dark:text-gray-400">{field.placeholder}</span>
-                              </div>
-                            ) : field.type === 'radio' ? (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <Circle className="w-4 h-4 text-gray-400" />
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">Option 1</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Circle className="w-4 h-4 text-gray-400" />
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">Option 2</span>
-                                </div>
-                              </div>
-                            ) : field.type === 'select' ? (
-                              <Select disabled>
-                                <SelectTrigger className="bg-gray-50 dark:bg-gray-900">
-                                  <SelectValue placeholder={field.placeholder} />
-                                </SelectTrigger>
-                              </Select>
-                            ) : null}
+                            {formFields.map((field) => (
+                              <SortableField
+                                key={field.id}
+                                field={field}
+                                isSelected={selectedFieldId === field.id}
+                                onSelect={() => handleFieldSelect(field.id)}
+                                onUpdate={(updates) => {
+                                  setFormFields(fields => 
+                                    fields.map(f => f.id === field.id ? {...f, ...updates} : f)
+                                  );
+                                }}
+                              />
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </SortableContext>
+                      </DndContext>
                     )}
                   </div>
                 </div>
