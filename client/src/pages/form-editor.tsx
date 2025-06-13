@@ -326,6 +326,22 @@ export default function FormEditor() {
   const handleCreateForm = () => {
     if (!formName.trim() || !currentProjectId) return;
 
+    const formSchema = {
+      fields: formFields,
+      config: formConfig,
+      settings: {
+        title: formName.trim(),
+        description: formDescription.trim() || undefined,
+        showLabels: formConfig.showLabels,
+        buttonLayout: formConfig.buttonLayout,
+        submitButtonText: formConfig.submitButtonText,
+        cancelButtonText: formConfig.cancelButtonText,
+        submitButtonColor: formConfig.submitButtonColor,
+        cancelButtonColor: formConfig.cancelButtonColor,
+        showCancelButton: formConfig.showCancelButton,
+      },
+    };
+
     createFormMutation.mutate({
       name: formName.trim(),
       description: formDescription.trim() || undefined,

@@ -278,6 +278,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public form access endpoint (no auth required)
+  app.get('/api/forms/:projectId/:formName', async (req, res) => {
+    try {
+      const { projectId, formName } = req.params;
+      const form = await storage.getFormByName(projectId, formName);
+      
+      if (!form || !form.isActive) {
+        return res.status(404).json({ message: "Form not found or inactive" });
+      }
+      
+      // Return form schema without sensitive data
+      res.json({
+        id: form.id,
+        name: form.name,
+        description: form.description,
+        schema: form.schema,
+        projectId: form.projectId,
+      });
+    } catch (error) {
+      console.error("Error fetching public form:", error);
+      res.status(500).json({ message: "Failed to fetch form" });
+    }
+  });
+
   // Public form submission endpoint (no auth required)
   app.post('/api/forms/:projectId/:formName/submit', async (req, res) => {
     try {
