@@ -964,7 +964,7 @@ export default function FormEditor() {
 
             {/* Properties Panel - Collapsed by default, shows when field is selected */}
             {showPropertiesPanel && selectedFieldId && (
-              <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+              <div className="w-64 border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                     Field Properties
