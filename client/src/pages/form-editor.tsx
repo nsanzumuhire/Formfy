@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute, Link } from "wouter";
+import { useRoute } from "wouter";
 import {
   DndContext,
   closestCenter,
@@ -26,6 +26,7 @@ import {
   Edit,
   Trash2,
   Copy,
+  Link as LinkIcon,
   Settings,
   Grid3X3,
   Rows,
@@ -290,7 +291,7 @@ export default function FormEditor() {
         },
       );
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: [`/api/projects/${currentProjectId}/forms`],
       });
@@ -300,9 +301,27 @@ export default function FormEditor() {
       setFormDescription("");
       setFormFields([]);
       setSelectedFieldId(null);
+      
+      // Generate public form URL
+      const publicUrl = `${window.location.origin}/form/${currentProjectId}/${formName.trim().toLowerCase().replace(/\s+/g, '-')}`;
+      
       toast({
-        title: "Form created",
-        description: "Your new form has been created successfully.",
+        title: "Form created successfully",
+        description: "Click to copy the public form URL",
+        action: (
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(publicUrl);
+              toast({
+                title: "URL copied",
+                description: "Form URL copied to clipboard",
+              });
+            }}
+            className="text-sm underline"
+          >
+            Copy URL
+          </button>
+        ),
       });
     },
     onError: (error: any) => {
@@ -590,10 +609,23 @@ export default function FormEditor() {
                             <MoreHorizontal className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem>
                             <Edit className="mr-2 h-3 w-3" />
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const publicUrl = `${window.location.origin}/form/${currentProjectId}/${form.name.toLowerCase().replace(/\s+/g, '-')}`;
+                              navigator.clipboard.writeText(publicUrl);
+                              toast({
+                                title: "URL copied",
+                                description: "Form URL copied to clipboard",
+                              });
+                            }}
+                          >
+                            <LinkIcon className="mr-2 h-3 w-3" />
+                            Copy Public URL
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Copy className="mr-2 h-3 w-3" />
