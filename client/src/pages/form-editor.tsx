@@ -1478,6 +1478,79 @@ export default function FormEditor() {
                               />
                             ))}
                           </div>
+
+                          {/* Submit Button Preview in Edit Mode */}
+                          {formFields.length > 0 && (
+                            <div
+                              className={`pt-6 ${
+                                formConfig.buttonLayout === "left"
+                                  ? "flex justify-start"
+                                  : formConfig.buttonLayout === "center"
+                                    ? "flex justify-center"
+                                    : formConfig.buttonLayout === "right"
+                                      ? "flex justify-end"
+                                      : formConfig.buttonLayout === "justify"
+                                        ? "flex justify-between"
+                                        : formConfig.buttonLayout === "split"
+                                          ? "flex justify-between"
+                                          : "flex justify-center"
+                              }`}
+                            >
+                              {formConfig.buttonLayout === "split" &&
+                                formConfig.showCancelButton && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      borderColor: formConfig.cancelButtonColor,
+                                      color: formConfig.cancelButtonColor,
+                                    }}
+                                    className="px-6 pointer-events-none"
+                                  >
+                                    {formConfig.cancelButtonText}
+                                  </Button>
+                                )}
+
+                              <div
+                                className={`${
+                                  formConfig.buttonLayout === "split"
+                                    ? ""
+                                    : formConfig.showCancelButton
+                                      ? "flex gap-3"
+                                      : ""
+                                }`}
+                              >
+                                {formConfig.showCancelButton &&
+                                  formConfig.buttonLayout !== "split" && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      style={{
+                                        backgroundColor: "transparent",
+                                        borderColor: formConfig.cancelButtonColor,
+                                        color: formConfig.cancelButtonColor,
+                                      }}
+                                      className="px-6 pointer-events-none"
+                                    >
+                                      {formConfig.cancelButtonText}
+                                    </Button>
+                                  )}
+
+                                <Button
+                                  type="submit"
+                                  style={{
+                                    backgroundColor: formConfig.submitButtonColor,
+                                    borderColor: formConfig.submitButtonColor,
+                                    color: "#ffffff",
+                                  }}
+                                  className="px-6 pointer-events-none"
+                                >
+                                  {formConfig.submitButtonText}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </SortableContext>
                       </DndContext>
                     )}
