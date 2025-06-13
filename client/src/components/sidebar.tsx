@@ -83,8 +83,11 @@ export function Sidebar() {
       }}
     >
       {/* Logo/Brand */}
-      <div className="flex items-center px-4 py-4 border-b">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+      <div className={cn(
+        "flex items-center border-b transition-all duration-300",
+        isShowingText ? "px-4 py-4" : "px-2 py-4 justify-center"
+      )}>
+        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
           <Box className="h-4 w-4 text-primary-foreground" />
         </div>
         <span
