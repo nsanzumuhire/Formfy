@@ -943,8 +943,8 @@ export default function FormEditor() {
                   <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
                     {isPreviewMode ? (
                       /* Preview Mode */
-                      <div className="max-w-2xl mx-auto">
-                        <div className="space-y-6">
+                      <div className="w-full h-full">
+                        <div className="space-y-6 h-full">
                           <div className="text-center border-b pb-4">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                               {formName || "Form Preview"}
@@ -956,94 +956,138 @@ export default function FormEditor() {
                             )}
                           </div>
                           
-                          <form className="space-y-4">
-                            {formFields.map((field) => (
-                              <div key={field.id} className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {field.label}
-                                    {field.required && <span className="text-red-500">*</span>}
-                                  </Label>
-                                </div>
-                                
-                                {field.hint && (
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {field.hint}
-                                  </p>
-                                )}
-                                
-                                <div className="relative">
-                                  {field.prefix && (
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
-                                      {field.prefix}
-                                    </span>
-                                  )}
+                          <form className="w-full">
+                            <div
+                              className={`w-full ${
+                                formConfig.layout === "two-column"
+                                  ? "grid grid-cols-2"
+                                  : formConfig.layout === "grid"
+                                    ? "grid"
+                                    : formConfig.layout === "mixed"
+                                      ? "space-y-4"
+                                      : "flex flex-col"
+                              }`}
+                              style={{
+                                gap:
+                                  formConfig.layout !== "mixed"
+                                    ? getSpacingValue()
+                                    : undefined,
+                                ...(formConfig.layout === "grid" && {
+                                  gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
+                                }),
+                              }}
+                            >
+                              {formFields.map((field) => (
+                                <div key={field.id} className={`${
+                                  field.layout === "horizontal" 
+                                    ? "flex items-center gap-4" 
+                                    : field.layout === "inline"
+                                      ? "flex items-center gap-2"
+                                      : "space-y-2"
+                                }`}>
+                                  <div className={`${
+                                    field.layout === "horizontal" ? "min-w-[120px]" : ""
+                                  }`}>
+                                    <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                      {field.label}
+                                      {field.required && <span className="text-red-500">*</span>}
+                                    </Label>
+                                  </div>
                                   
-                                  {field.type === "text" || field.type === "email" || field.type === "number" ? (
-                                    <Input
-                                      type={field.type}
-                                      placeholder={field.placeholder}
-                                      disabled={field.disabled}
-                                      readOnly={field.readonly}
-                                      autoFocus={field.autofocus}
-                                      autoComplete={field.autocomplete}
-                                      className={`${field.prefix ? 'pl-8' : ''} ${field.suffix ? 'pr-8' : ''} ${field.class}`}
-                                      style={{ width: field.width }}
-                                    />
-                                  ) : field.type === "checkbox" ? (
-                                    <div className="flex items-center space-x-2">
-                                      <input
-                                        type="checkbox"
-                                        disabled={field.disabled}
-                                        className="h-4 w-4"
-                                      />
-                                      <span className="text-sm">{field.placeholder || "Check this option"}</span>
-                                    </div>
-                                  ) : field.type === "radio" ? (
-                                    <div className="space-y-2">
-                                      {field.options?.map((option, index) => (
-                                        <div key={index} className="flex items-center space-x-2">
+                                  <div className={`${
+                                    field.layout === "horizontal" || field.layout === "inline" ? "flex-1" : ""
+                                  }`}>
+                                    {field.hint && (
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                        {field.hint}
+                                      </p>
+                                    )}
+                                    
+                                    <div className="relative">
+                                      {field.prefix && (
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
+                                          {field.prefix}
+                                        </span>
+                                      )}
+                                      
+                                      {field.type === "text" || field.type === "email" || field.type === "number" ? (
+                                        <Input
+                                          type={field.type}
+                                          placeholder={field.placeholder}
+                                          disabled={field.disabled}
+                                          readOnly={field.readonly}
+                                          autoFocus={field.autofocus}
+                                          autoComplete={field.autocomplete}
+                                          className={`${field.prefix ? 'pl-8' : ''} ${field.suffix ? 'pr-8' : ''} ${field.class || ''}`}
+                                          style={{ 
+                                            width: field.width || "100%",
+                                            ...(field.layout === "inline" && { minWidth: "120px" })
+                                          }}
+                                        />
+                                      ) : field.type === "checkbox" ? (
+                                        <div className="flex items-center space-x-2">
                                           <input
-                                            type="radio"
-                                            name={field.name}
-                                            value={option.value}
+                                            type="checkbox"
                                             disabled={field.disabled}
                                             className="h-4 w-4"
                                           />
-                                          <span className="text-sm">{option.label}</span>
+                                          <span className="text-sm">{field.placeholder || "Check this option"}</span>
                                         </div>
-                                      )) || (
-                                        <div className="flex items-center space-x-2">
-                                          <input type="radio" disabled className="h-4 w-4" />
-                                          <span className="text-sm text-gray-400">No options configured</span>
+                                      ) : field.type === "radio" ? (
+                                        <div className={`${
+                                          field.layout === "horizontal" ? "flex flex-wrap gap-4" : "space-y-2"
+                                        }`}>
+                                          {field.options?.map((option: any, index: number) => (
+                                            <div key={index} className="flex items-center space-x-2">
+                                              <input
+                                                type="radio"
+                                                name={field.name}
+                                                value={option.value}
+                                                disabled={field.disabled}
+                                                className="h-4 w-4"
+                                              />
+                                              <span className="text-sm">{option.label}</span>
+                                            </div>
+                                          )) || (
+                                            <div className="flex items-center space-x-2">
+                                              <input type="radio" disabled className="h-4 w-4" />
+                                              <span className="text-sm text-gray-400">No options configured</span>
+                                            </div>
+                                          )}
                                         </div>
+                                      ) : field.type === "select" ? (
+                                        <Select disabled={field.disabled}>
+                                          <SelectTrigger 
+                                            className={field.class || ''}
+                                            style={{ 
+                                              width: field.width || "100%",
+                                              ...(field.layout === "inline" && { minWidth: "120px" })
+                                            }}
+                                          >
+                                            <SelectValue placeholder={field.placeholder} />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {field.options?.map((option: any, index: number) => (
+                                              <SelectItem key={index} value={option.value}>
+                                                {option.label}
+                                              </SelectItem>
+                                            )) || (
+                                              <SelectItem value="no-options">No options configured</SelectItem>
+                                            )}
+                                          </SelectContent>
+                                        </Select>
+                                      ) : null}
+                                      
+                                      {field.suffix && (
+                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
+                                          {field.suffix}
+                                        </span>
                                       )}
                                     </div>
-                                  ) : field.type === "select" ? (
-                                    <Select disabled={field.disabled}>
-                                      <SelectTrigger className={field.class} style={{ width: field.width }}>
-                                        <SelectValue placeholder={field.placeholder} />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {field.options?.map((option, index) => (
-                                          <SelectItem key={index} value={option.value}>
-                                            {option.label}
-                                          </SelectItem>
-                                        )) || (
-                                          <SelectItem value="no-options">No options configured</SelectItem>
-                                        )}
-                                      </SelectContent>
-                                    </Select>
-                                  ) : null}
-                                  
-                                  {field.suffix && (
-                                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
-                                      {field.suffix}
-                                    </span>
-                                  )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                             
                             {formFields.length === 0 && (
                               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -1052,8 +1096,15 @@ export default function FormEditor() {
                             )}
                             
                             {formFields.length > 0 && (
-                              <div className="pt-4">
-                                <Button type="button" className="w-full">
+                              <div className="pt-6 flex justify-center">
+                                <Button 
+                                  type="button" 
+                                  className={`${
+                                    formConfig.layout === "two-column" || formConfig.layout === "grid" 
+                                      ? "col-span-full w-auto px-8" 
+                                      : "w-full max-w-xs"
+                                  }`}
+                                >
                                   Submit Form
                                 </Button>
                               </div>
