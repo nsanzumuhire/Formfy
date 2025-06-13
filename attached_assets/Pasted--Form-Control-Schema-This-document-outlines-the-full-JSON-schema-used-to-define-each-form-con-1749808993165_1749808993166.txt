@@ -1,0 +1,158 @@
+# 📄 Form Control Schema
+
+This document outlines the full JSON schema used to define each form control in the `ngx-formfy` form builder.
+
+---
+
+## 🔹 Basic Structure
+
+Each form control is defined using a consistent schema that supports UI configuration, validation, logic, and conditional behavior.
+
+```ts
+{
+  name: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  class?: string;
+  icon?: string;
+  prefix?: string;
+  suffix?: string;
+  hint?: string;
+  autofocus?: boolean;
+  autocomplete?: string;
+  debounce?: number;
+  width?: string;
+  layout?: 'horizontal' | 'vertical' | 'inline';
+  multiple?: boolean;
+  options?: Array<{ label: string; value: any }>;
+  optionSource?: string | Function;
+  minDate?: string;
+  maxDate?: string;
+  dateFormat?: string;
+  watch?: string[];
+  calculatedValue?: string;
+  testId?: string;
+  validation?: FormControlValidation;
+  condition?: FormCondition;
+}
+```
+
+---
+
+## 🔸 `validation` Object
+
+Defines field-level validation logic.
+
+```ts
+interface FormControlValidation {
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  min?: number;
+  max?: number;
+  customValidator?: string | ((value: any) => boolean | string);
+  errorMessages?: {
+    [key: string]: string;
+  };
+}
+```
+
+### Example
+
+```json
+"validation": {
+  "minLength": 5,
+  "maxLength": 20,
+  "pattern": "^[a-zA-Z]+$",
+  "errorMessages": {
+    "required": "This field is required.",
+    "minLength": "Too short.",
+    "maxLength": "Too long.",
+    "pattern": "Only letters allowed."
+  }
+}
+```
+
+---
+
+## 🔸 `condition` Object
+
+Controls dynamic visibility, enablement, or auto-value of fields based on other field values.
+
+```ts
+interface FormCondition {
+  type: 'visibility' | 'enable' | 'value';
+  logic: 'AND' | 'OR';
+  rules: FormConditionRule[];
+}
+
+interface FormConditionRule {
+  field: string;
+  operator: '==' | '!=' | '>' | '>=' | '<' | '<=' | 'in' | 'not-in';
+  value: any;
+}
+```
+
+### Example: Show field only when `subscribe` is `true`
+
+```json
+"condition": {
+  "type": "visibility",
+  "logic": "AND",
+  "rules": [
+    {
+      "field": "subscribe",
+      "operator": "==",
+      "value": true
+    }
+  ]
+}
+```
+
+---
+
+## 🧩 Example Form Control
+
+```json
+{
+  "name": "email",
+  "label": "Email Address",
+  "type": "email",
+  "placeholder": "Enter your email",
+  "required": true,
+  "icon": "mail",
+  "class": "w-full",
+  "validation": {
+    "pattern": "^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$",
+    "errorMessages": {
+      "required": "Email is required",
+      "pattern": "Invalid email format"
+    }
+  },
+  "condition": {
+    "type": "visibility",
+    "logic": "AND",
+    "rules": [
+      {
+        "field": "subscribe",
+        "operator": "==",
+        "value": true
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 🔚 Notes
+
+- **Custom validation** can be referenced by name and handled via Angular `ValidatorFn` injection.
+- **Condition logic** should be parsed and evaluated in the form engine at runtime.
+- **Options** can be provided statically or dynamically using `optionSource`.
+
+---

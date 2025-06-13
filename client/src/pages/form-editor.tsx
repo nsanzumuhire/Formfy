@@ -208,6 +208,7 @@ export default function FormEditor() {
   // Form creation state
   const [formFields, setFormFields] = useState<any[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
@@ -349,10 +350,53 @@ export default function FormEditor() {
   const handleAddField = (fieldType: string) => {
     const newField = {
       id: Date.now().toString(),
-      type: fieldType,
+      name: `field_${Date.now()}`,
       label: getFieldLabel(fieldType),
+      type: fieldType,
       placeholder: getFieldPlaceholder(fieldType),
       required: false,
+      disabled: false,
+      readonly: false,
+      class: "",
+      icon: "",
+      prefix: "",
+      suffix: "",
+      hint: "",
+      autofocus: false,
+      autocomplete: "",
+      debounce: 0,
+      width: "100%",
+      layout: "vertical",
+      multiple: false,
+      options: [],
+      optionSource: "",
+      minDate: "",
+      maxDate: "",
+      dateFormat: "YYYY-MM-DD",
+      watch: [],
+      calculatedValue: "",
+      testId: "",
+      validation: {
+        minLength: null,
+        maxLength: null,
+        pattern: "",
+        min: null,
+        max: null,
+        customValidator: "",
+        errorMessages: {
+          required: "This field is required",
+          minLength: "Value is too short",
+          maxLength: "Value is too long",
+          pattern: "Invalid format",
+          min: "Value is too small",
+          max: "Value is too large"
+        }
+      },
+      condition: {
+        type: "visibility",
+        logic: "AND",
+        rules: []
+      },
       order: formFields.length,
     };
     setFormFields([...formFields, newField]);
@@ -878,9 +922,13 @@ export default function FormEditor() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setIsPreviewMode(!isPreviewMode)}
+                  >
                     <Eye className="w-4 h-4 mr-1" />
-                    Preview
+                    {isPreviewMode ? "Edit" : "Preview"}
                   </Button>
                   <Button size="sm" onClick={handleSaveForm}>
                     <Save className="w-4 h-4 mr-1" />
@@ -978,68 +1026,505 @@ export default function FormEditor() {
                   </Button>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium">Label</Label>
-                    <Input
-                      value={
-                        formFields.find((f) => f.id === selectedFieldId)
-                          ?.label || ""
-                      }
-                      onChange={(e) => {
-                        setFormFields((fields) =>
-                          fields.map((f) =>
-                            f.id === selectedFieldId
-                              ? { ...f, label: e.target.value }
-                              : f,
-                          ),
-                        );
-                      }}
-                      className="mt-1"
-                    />
+                <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                  {/* Basic Properties */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Basic Properties</h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Field Name</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.name || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, name: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium">Test ID</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.testId || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, testId: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Label</Label>
+                      <Input
+                        value={formFields.find((f) => f.id === selectedFieldId)?.label || ""}
+                        onChange={(e) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId ? { ...f, label: e.target.value } : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Placeholder</Label>
+                      <Input
+                        value={formFields.find((f) => f.id === selectedFieldId)?.placeholder || ""}
+                        onChange={(e) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId ? { ...f, placeholder: e.target.value } : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Hint</Label>
+                      <Input
+                        value={formFields.find((f) => f.id === selectedFieldId)?.hint || ""}
+                        onChange={(e) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId ? { ...f, hint: e.target.value } : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                        placeholder="Helper text for this field"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Icon</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.icon || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, icon: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="Icon name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium">CSS Class</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.class || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, class: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="Custom CSS classes"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Prefix</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.prefix || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, prefix: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="Text before input"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium">Suffix</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.suffix || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, suffix: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="Text after input"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <Label className="text-sm font-medium">Placeholder</Label>
-                    <Input
-                      value={
-                        formFields.find((f) => f.id === selectedFieldId)
-                          ?.placeholder || ""
-                      }
-                      onChange={(e) => {
-                        setFormFields((fields) =>
-                          fields.map((f) =>
-                            f.id === selectedFieldId
-                              ? { ...f, placeholder: e.target.value }
-                              : f,
-                          ),
-                        );
-                      }}
-                      className="mt-1"
-                    />
+                  {/* Field States */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Field States</h4>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="required"
+                          checked={formFields.find((f) => f.id === selectedFieldId)?.required || false}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, required: e.target.checked } : f,
+                              ),
+                            );
+                          }}
+                          className="h-3 w-3"
+                        />
+                        <Label htmlFor="required" className="text-xs">Required</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="disabled"
+                          checked={formFields.find((f) => f.id === selectedFieldId)?.disabled || false}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, disabled: e.target.checked } : f,
+                              ),
+                            );
+                          }}
+                          className="h-3 w-3"
+                        />
+                        <Label htmlFor="disabled" className="text-xs">Disabled</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="readonly"
+                          checked={formFields.find((f) => f.id === selectedFieldId)?.readonly || false}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, readonly: e.target.checked } : f,
+                              ),
+                            );
+                          }}
+                          className="h-3 w-3"
+                        />
+                        <Label htmlFor="readonly" className="text-xs">Read Only</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="autofocus"
+                          checked={formFields.find((f) => f.id === selectedFieldId)?.autofocus || false}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, autofocus: e.target.checked } : f,
+                              ),
+                            );
+                          }}
+                          className="h-3 w-3"
+                        />
+                        <Label htmlFor="autofocus" className="text-xs">Auto Focus</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="multiple"
+                          checked={formFields.find((f) => f.id === selectedFieldId)?.multiple || false}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, multiple: e.target.checked } : f,
+                              ),
+                            );
+                          }}
+                          className="h-3 w-3"
+                        />
+                        <Label htmlFor="multiple" className="text-xs">Multiple</Label>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="required"
-                      checked={
-                        formFields.find((f) => f.id === selectedFieldId)
-                          ?.required || false
-                      }
-                      onChange={(e) => {
-                        setFormFields((fields) =>
-                          fields.map((f) =>
-                            f.id === selectedFieldId
-                              ? { ...f, required: e.target.checked }
-                              : f,
-                          ),
-                        );
-                      }}
-                    />
-                    <Label htmlFor="required" className="text-sm font-medium">
-                      Required field
-                    </Label>
+                  {/* Validation Rules */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Validation</h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Min Length</Label>
+                        <Input
+                          type="number"
+                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.minLength || ""}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseInt(e.target.value) : null;
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { ...f, validation: { ...f.validation, minLength: value } } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium">Max Length</Label>
+                        <Input
+                          type="number"
+                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.maxLength || ""}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseInt(e.target.value) : null;
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { ...f, validation: { ...f.validation, maxLength: value } } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Min Value</Label>
+                        <Input
+                          type="number"
+                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.min || ""}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseFloat(e.target.value) : null;
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { ...f, validation: { ...f.validation, min: value } } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium">Max Value</Label>
+                        <Input
+                          type="number"
+                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.max || ""}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseFloat(e.target.value) : null;
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { ...f, validation: { ...f.validation, max: value } } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Pattern (Regex)</Label>
+                      <Input
+                        value={formFields.find((f) => f.id === selectedFieldId)?.validation?.pattern || ""}
+                        onChange={(e) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId 
+                                ? { ...f, validation: { ...f.validation, pattern: e.target.value } } 
+                                : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                        placeholder="^[a-zA-Z]+$"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Custom Validator</Label>
+                      <Input
+                        value={formFields.find((f) => f.id === selectedFieldId)?.validation?.customValidator || ""}
+                        onChange={(e) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId 
+                                ? { ...f, validation: { ...f.validation, customValidator: e.target.value } } 
+                                : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                        placeholder="Function name or expression"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Error Messages */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Error Messages</h4>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <Label className="text-xs font-medium">Required Message</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.errorMessages?.required || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { 
+                                      ...f, 
+                                      validation: { 
+                                        ...f.validation, 
+                                        errorMessages: { 
+                                          ...f.validation?.errorMessages, 
+                                          required: e.target.value 
+                                        } 
+                                      } 
+                                    } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="This field is required"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs font-medium">Pattern Message</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.errorMessages?.pattern || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { 
+                                      ...f, 
+                                      validation: { 
+                                        ...f.validation, 
+                                        errorMessages: { 
+                                          ...f.validation?.errorMessages, 
+                                          pattern: e.target.value 
+                                        } 
+                                      } 
+                                    } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="Invalid format"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Layout & Styling */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Layout & Styling</h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Layout</Label>
+                        <Select
+                          value={formFields.find((f) => f.id === selectedFieldId)?.layout || "vertical"}
+                          onValueChange={(value) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, layout: value } : f,
+                              ),
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="mt-1 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="vertical">Vertical</SelectItem>
+                            <SelectItem value="horizontal">Horizontal</SelectItem>
+                            <SelectItem value="inline">Inline</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs font-medium">Width</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.width || "100%"}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, width: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="100%, 50px, auto"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Autocomplete</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.autocomplete || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, autocomplete: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="email, name, etc."
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs font-medium">Debounce (ms)</Label>
+                        <Input
+                          type="number"
+                          value={formFields.find((f) => f.id === selectedFieldId)?.debounce || 0}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, debounce: parseInt(e.target.value) || 0 } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
