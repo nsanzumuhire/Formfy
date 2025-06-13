@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute, Link } from "wouter";
+import { useState, useCallback } from "react";
+import { useLocation, useRoute } from "wouter";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
   closestCenter,
@@ -9,665 +9,536 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  useSortable,
 } from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  FileText,
-  Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Copy,
-  Settings,
-  Grid3X3,
-  Rows,
-  Square,
-  Palette,
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Plus, 
+  Settings, 
+  Eye, 
+  Save, 
+  Trash2, 
+  GripVertical,
   Type,
-  Move,
-  PanelRightOpen,
-  AlignLeft,
+  Mail,
   Hash,
   CheckSquare,
   Circle,
-  ChevronDown,
-  Grip,
-  Save,
-  Eye,
-  Layout,
-  Maximize,
-  ArrowLeftRight,
+  List,
+  Check,
+  ChevronsUpDown
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProject } from "@/hooks/useProject";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import type { Form, Project } from "@shared/schema";
-import { formatDistanceToNow } from "date-fns";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiRequest } from "@/lib/queryClient";
+import { useProject } from "@/hooks/useProject";
+
+// Types
+interface FormField {
+  id: string;
+  type: 'text' | 'email' | 'number' | 'checkbox' | 'radio' | 'select';
+  label: string;
+  placeholder?: string;
+  description?: string;
+  required?: boolean;
+  options?: { label: string; value: string }[];
+  order: number;
+}
+
+interface FormConfig {
+  layout: 'single-column' | 'two-column' | 'grid' | 'mixed';
+  spacing: 'compact' | 'normal' | 'relaxed';
+  gridColumns?: number;
+}
+
+interface Form {
+  id: string;
+  name: string;
+  description?: string;
+  schema: {
+    fields: FormField[];
+    settings: {
+      title: string;
+      description?: string;
+    };
+  };
+  status: 'draft' | 'published' | 'archived';
+}
+
+// Helper functions
+const generateFieldId = () => `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+const createFormField = (type: FormField['type']): FormField => ({
+  id: generateFieldId(),
+  type,
+  label: getDefaultLabel(type),
+  placeholder: getDefaultPlaceholder(type),
+  required: false,
+  order: 0,
+  ...(type === 'radio' || type === 'select' ? { options: [{ label: 'Option 1', value: 'option1' }] } : {})
+});
+
+const getDefaultLabel = (type: FormField['type']): string => {
+  const labels = {
+    text: 'Text Field',
+    email: 'Email Address', 
+    number: 'Number',
+    checkbox: 'Checkbox',
+    radio: 'Radio Group',
+    select: 'Select Dropdown'
+  };
+  return labels[type];
+};
+
+const getDefaultPlaceholder = (type: FormField['type']): string => {
+  const placeholders = {
+    text: 'Enter text...',
+    email: 'Enter email address...',
+    number: 'Enter number...',
+    checkbox: '',
+    radio: '',
+    select: ''
+  };
+  return placeholders[type];
+};
+
+// Draggable Field Component
+function DraggableField({ type, label, icon: Icon }: { type: FormField['type']; label: string; icon: any }) {
+  return (
+    <div
+      className="flex items-center gap-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 cursor-grab hover:shadow-md transition-shadow"
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('application/json', JSON.stringify({ type }));
+      }}
+    >
+      <Icon className="h-4 w-4 text-gray-500" />
+      <span className="text-sm font-medium">{label}</span>
+    </div>
+  );
+}
 
 // Sortable Field Component
-function SortableField({
-  field,
-  isSelected,
-  onSelect,
-  onUpdate,
-}: {
-  field: any;
+function SortableField({ field, isSelected, onSelect, onUpdate, onDelete }: {
+  field: FormField;
   isSelected: boolean;
   onSelect: () => void;
-  onUpdate: (updates: any) => void;
+  onUpdate: (updates: Partial<FormField>) => void;
+  onDelete: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: field.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-4 border rounded-lg cursor-pointer transition-all ${
-        isSelected
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-      }`}
+      className={cn(
+        "p-4 border rounded-lg bg-white dark:bg-gray-800 cursor-pointer transition-colors",
+        isSelected ? "border-blue-500 bg-blue-50 dark:bg-blue-950" : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
+      )}
       onClick={onSelect}
     >
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        <div className="flex items-center gap-1">
-          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-            <Edit className="w-3 h-3 text-gray-400" />
-          </button>
-          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-            <Trash2 className="w-3 h-3 text-gray-400" />
-          </button>
-          <button
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab"
-            {...attributes}
-            {...listeners}
-          >
-            <Grip className="w-3 h-3 text-gray-400" />
-          </button>
+      <div className="flex items-center gap-2 mb-2">
+        <div {...attributes} {...listeners} className="cursor-grab">
+          <GripVertical className="h-4 w-4 text-gray-400" />
         </div>
+        <Label className="font-medium">{field.label}</Label>
+        {field.required && <Badge variant="secondary" className="text-xs">Required</Badge>}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="ml-auto p-1 h-auto"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
       </div>
-
-      {field.type === "text" ||
-      field.type === "email" ||
-      field.type === "number" ? (
-        <Input
-          placeholder={field.placeholder}
-          disabled
-          className="bg-gray-50 dark:bg-gray-900"
-        />
-      ) : field.type === "checkbox" ? (
-        <div className="flex items-center gap-2">
-          <input type="checkbox" disabled className="rounded" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {field.placeholder}
-          </span>
-        </div>
-      ) : field.type === "radio" ? (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              Option 1
-            </span>
+      
+      <div className="ml-6">
+        {field.type === 'text' || field.type === 'email' || field.type === 'number' ? (
+          <Input placeholder={field.placeholder} disabled className="text-sm" />
+        ) : field.type === 'checkbox' ? (
+          <div className="flex items-center space-x-2">
+            <Checkbox disabled />
+            <Label className="text-sm">{field.label}</Label>
           </div>
-          <div className="flex items-center gap-2">
-            <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              Option 2
-            </span>
-          </div>
-        </div>
-      ) : field.type === "select" ? (
-        <Select disabled>
-          <SelectTrigger className="bg-gray-50 dark:bg-gray-900">
-            <SelectValue placeholder={field.placeholder} />
-          </SelectTrigger>
-        </Select>
-      ) : null}
+        ) : field.type === 'radio' ? (
+          <RadioGroup disabled>
+            {field.options?.map((option, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <RadioGroupItem value={option.value} disabled />
+                <Label className="text-sm">{option.label}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+        ) : field.type === 'select' ? (
+          <Select disabled>
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+          </Select>
+        ) : null}
+      </div>
     </div>
   );
 }
 
+// Field Properties Panel
+function FieldPropertiesPanel({ field, onUpdate }: {
+  field: FormField;
+  onUpdate: (updates: Partial<FormField>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="field-label">Label</Label>
+        <Input
+          id="field-label"
+          value={field.label}
+          onChange={(e) => onUpdate({ label: e.target.value })}
+        />
+      </div>
+
+      {(field.type === 'text' || field.type === 'email' || field.type === 'number') && (
+        <div>
+          <Label htmlFor="field-placeholder">Placeholder</Label>
+          <Input
+            id="field-placeholder"
+            value={field.placeholder || ''}
+            onChange={(e) => onUpdate({ placeholder: e.target.value })}
+          />
+        </div>
+      )}
+
+      <div>
+        <Label htmlFor="field-description">Description</Label>
+        <Textarea
+          id="field-description"
+          value={field.description || ''}
+          onChange={(e) => onUpdate({ description: e.target.value })}
+          rows={2}
+        />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="field-required"
+          checked={field.required}
+          onCheckedChange={(checked) => onUpdate({ required: checked as boolean })}
+        />
+        <Label htmlFor="field-required">Required field</Label>
+      </div>
+
+      {(field.type === 'radio' || field.type === 'select') && (
+        <div>
+          <Label>Options</Label>
+          <div className="space-y-2 mt-2">
+            {field.options?.map((option, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={option.label}
+                  onChange={(e) => {
+                    const newOptions = [...(field.options || [])];
+                    newOptions[index] = { ...option, label: e.target.value, value: e.target.value.toLowerCase().replace(/\s+/g, '_') };
+                    onUpdate({ options: newOptions });
+                  }}
+                  placeholder="Option label"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newOptions = field.options?.filter((_, i) => i !== index);
+                    onUpdate({ options: newOptions });
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const newOptions = [...(field.options || []), { label: `Option ${(field.options?.length || 0) + 1}`, value: `option${(field.options?.length || 0) + 1}` }];
+                onUpdate({ options: newOptions });
+              }}
+              className="w-full"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Add Option
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Form Preview Component
+function FormPreview({ fields, config }: { fields: FormField[]; config: FormConfig }) {
+  const getSpacingClass = (spacing: string) => {
+    switch (spacing) {
+      case 'compact': return 'space-y-2';
+      case 'relaxed': return 'space-y-6';
+      default: return 'space-y-4';
+    }
+  };
+
+  const getLayoutClass = (layout: string) => {
+    switch (layout) {
+      case 'two-column': return 'grid grid-cols-2 gap-4';
+      case 'grid': return `grid grid-cols-${config.gridColumns || 2} gap-4`;
+      default: return 'space-y-4';
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg border">
+      <div className={cn(getLayoutClass(config.layout), getSpacingClass(config.spacing))}>
+        {fields.map((field) => (
+          <div key={field.id} className="space-y-2">
+            <Label className="text-sm font-medium">
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            {field.description && (
+              <p className="text-xs text-gray-500">{field.description}</p>
+            )}
+            
+            {field.type === 'text' || field.type === 'email' || field.type === 'number' ? (
+              <Input type={field.type} placeholder={field.placeholder} />
+            ) : field.type === 'checkbox' ? (
+              <div className="flex items-center space-x-2">
+                <Checkbox />
+                <Label className="text-sm">{field.label}</Label>
+              </div>
+            ) : field.type === 'radio' ? (
+              <RadioGroup>
+                {field.options?.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option.value} />
+                    <Label className="text-sm">{option.label}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            ) : field.type === 'select' ? (
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an option" />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options?.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Main Form Editor Component
 export default function FormEditor() {
-  const [, params] = useRoute("/form-editor/:projectId?");
-  const projectId = params?.projectId;
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
-  const [isCreatingForm, setIsCreatingForm] = useState(false);
-
-  // Form creation state
-  const [formFields, setFormFields] = useState<any[]>([]);
-  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [formName, setFormName] = useState("");
-  const [formDescription, setFormDescription] = useState("");
-
-  // UI state
-  const [showFormsList, setShowFormsList] = useState(true);
-  const [showPropertiesPanel, setShowPropertiesPanel] = useState(false);
-
-  // Form configuration state
-  const [formConfig, setFormConfig] = useState({
-    layout: "",
-    gridColumns: 2,
-    spacing: "",
-    customSpacing: 8,
-  });
-
-  // UI state for comboboxes
-  const [layoutOpen, setLayoutOpen] = useState(false);
-  const [spacingOpen, setSpacingOpen] = useState(false);
-
+  const [, navigate] = useLocation();
+  const [match, params] = useRoute("/form-editor/:id?");
   const { selectedProject } = useProject();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const currentProjectId = projectId || selectedProject;
+  // State
+  const [fields, setFields] = useState<FormField[]>([]);
+  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formConfig, setFormConfig] = useState<FormConfig>({
+    layout: 'single-column',
+    spacing: 'normal',
+    gridColumns: 2
+  });
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const [spacingOpen, setSpacingOpen] = useState(false);
 
-  // DnD sensors
+  // DnD Sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
-  // Fetch project details
-  const { data: project } = useQuery<Project>({
-    queryKey: [`/api/projects/${currentProjectId}`],
-    enabled: !!currentProjectId,
-  });
-
-  // Fetch forms
-  const { data: forms = [] } = useQuery<Form[]>({
-    queryKey: [`/api/projects/${currentProjectId}/forms`],
-    enabled: !!currentProjectId,
-  });
-
-  const filteredForms = forms.filter((form) =>
-    form.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  // Create form mutation
+  // Mutations
   const createFormMutation = useMutation({
-    mutationFn: async (formData: {
-      name: string;
-      description?: string;
-      projectId: string;
-    }) => {
-      return await apiRequest(
-        `/api/projects/${formData.projectId}/forms`,
-        "POST",
-        {
-          ...formData,
-          schema: {
-            fields: formFields,
-            settings: {
-              ...formConfig,
-              title: formData.name,
-              description: formData.description,
-            },
-          },
-        },
-      );
+    mutationFn: async (formData: { name: string; description?: string; schema: any }) => {
+      return await apiRequest(`/api/projects/${selectedProject}/forms`, "POST", formData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [`/api/projects/${currentProjectId}/forms`],
-      });
-      setIsCreatingForm(false);
-      setShowSaveDialog(false);
-      setFormName("");
-      setFormDescription("");
-      setFormFields([]);
-      setSelectedFieldId(null);
       toast({
-        title: "Form created",
-        description: "Your new form has been created successfully.",
+        title: "Success",
+        description: "Form created successfully!",
       });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${selectedProject}/forms`] });
+      navigate("/forms");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
-        title: "Error creating form",
-        description: error.message || "Failed to create form",
+        title: "Error", 
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const getFormStatusBadge = (form: Form) => {
-    const isActive = form.isActive;
-    return (
-      <Badge variant={isActive ? "default" : "secondary"} className="text-xs">
-        {isActive ? "Active" : "Inactive"}
-      </Badge>
-    );
-  };
-
-  const handleCreateForm = () => {
-    if (!formName.trim() || !currentProjectId) return;
-
-    createFormMutation.mutate({
-      name: formName.trim(),
-      description: formDescription.trim() || undefined,
-      projectId: currentProjectId,
-    });
-  };
-
-  const handleNewFormClick = () => {
-    setIsCreatingForm(true);
-    setSelectedFormId(null);
-    setFormFields([]);
-    setSelectedFieldId(null);
-    setShowPropertiesPanel(false);
-  };
-
-  const handleFormSelect = (formId: string) => {
-    setSelectedFormId(formId);
-    setIsCreatingForm(false);
-  };
-
-  const handleFieldSelect = (fieldId: string) => {
-    setSelectedFieldId(fieldId);
-    setShowPropertiesPanel(true);
-  };
-
-  const handleSaveForm = () => {
-    setShowSaveDialog(true);
-  };
-
-  const handleAddField = (fieldType: string) => {
-    const newField = {
-      id: Date.now().toString(),
-      name: `field_${Date.now()}`,
-      label: getFieldLabel(fieldType),
-      type: fieldType,
-      placeholder: getFieldPlaceholder(fieldType),
-      required: false,
-      disabled: false,
-      readonly: false,
-      class: "",
-      icon: "",
-      prefix: "",
-      suffix: "",
-      hint: "",
-      autofocus: false,
-      autocomplete: "",
-      debounce: 0,
-      width: "100%",
-      layout: "vertical",
-      multiple: false,
-      options: [],
-      optionSource: "",
-      minDate: "",
-      maxDate: "",
-      dateFormat: "YYYY-MM-DD",
-      watch: [],
-      calculatedValue: "",
-      testId: "",
-      validation: {
-        minLength: null,
-        maxLength: null,
-        pattern: "",
-        min: null,
-        max: null,
-        customValidator: "",
-        errorMessages: {
-          required: "This field is required",
-          minLength: "Value is too short",
-          maxLength: "Value is too long",
-          pattern: "Invalid format",
-          min: "Value is too small",
-          max: "Value is too large",
-        },
-      },
-      condition: {
-        type: "visibility",
-        logic: "AND",
-        rules: [],
-      },
-      order: formFields.length,
-    };
-    setFormFields([...formFields, newField]);
-    setSelectedFieldId(newField.id);
-    setShowPropertiesPanel(true);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
+  // Event Handlers
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
+    
+    if (!over) return;
 
-    if (active.id !== over?.id) {
-      setFormFields((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-
+    if (active.id !== over.id) {
+      setFields((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
     }
-  };
+  }, []);
 
-  const getSpacingValue = () => {
-    if (formConfig.spacing === "custom") {
-      return `${formConfig.customSpacing}px`;
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    // Handle drag over canvas
+  }, []);
+
+  const handleCanvasDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (data.type) {
+        const newField = createFormField(data.type);
+        newField.order = fields.length;
+        setFields(prev => [...prev, newField]);
+        setSelectedFieldId(newField.id);
+      }
+    } catch (error) {
+      console.error('Failed to parse drag data:', error);
     }
-    return formConfig.spacing;
-  };
+  }, [fields.length]);
 
-  const getFieldLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      text: "Text Input",
-      email: "Email",
-      number: "Number",
-      checkbox: "Checkbox",
-      radio: "Radio Button",
-      select: "Dropdown",
+  const handleFieldUpdate = useCallback((fieldId: string, updates: Partial<FormField>) => {
+    setFields(prev => prev.map(field => 
+      field.id === fieldId ? { ...field, ...updates } : field
+    ));
+  }, []);
+
+  const handleFieldDelete = useCallback((fieldId: string) => {
+    setFields(prev => prev.filter(field => field.id !== fieldId));
+    if (selectedFieldId === fieldId) {
+      setSelectedFieldId(null);
+    }
+  }, [selectedFieldId]);
+
+  const handleSave = useCallback(() => {
+    setShowSaveDialog(true);
+  }, []);
+
+  const handleCreateForm = useCallback((name: string, description?: string) => {
+    const schema = {
+      fields: fields,
+      settings: {
+        title: name,
+        description: description,
+      },
     };
-    return labels[type] || "Field";
-  };
 
-  const getFieldPlaceholder = (type: string) => {
-    const placeholders: Record<string, string> = {
-      text: "Enter text...",
-      email: "Enter email address...",
-      number: "Enter number...",
-      checkbox: "Check this option",
-      radio: "Select option",
-      select: "Choose an option",
-    };
-    return placeholders[type] || "Enter value...";
-  };
+    createFormMutation.mutate({
+      name,
+      description,
+      schema,
+    });
 
-  if (!currentProjectId) {
-    return (
-      <div className="flex h-full">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-              <FileText className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              No project selected
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Please select a project from the header to manage forms
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    setShowSaveDialog(false);
+  }, [fields, createFormMutation]);
+
+  // Field types for toolbox
+  const fieldTypes = [
+    { type: 'text' as const, label: 'Text', icon: Type },
+    { type: 'email' as const, label: 'Email', icon: Mail },
+    { type: 'number' as const, label: 'Number', icon: Hash },
+    { type: 'checkbox' as const, label: 'Checkbox', icon: CheckSquare },
+    { type: 'radio' as const, label: 'Radio', icon: Circle },
+    { type: 'select' as const, label: 'Select', icon: List },
+  ];
 
   return (
-    <div className="flex h-full">
-      {/* Sub-sidebar for forms */}
-      {showFormsList && (
-        <div className="w-64 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-gray-900 dark:text-gray-100">
-                Forms
-              </h2>
-              <Button size="sm" className="h-7" onClick={handleNewFormClick}>
-                <Plus className="w-3 h-3 mr-1" />
-                New
-              </Button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex h-screen">
+        {/* Toolbox */}
+        <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4">Form Elements</h2>
+            <div className="space-y-2">
+              {fieldTypes.map((fieldType) => (
+                <DraggableField
+                  key={fieldType.type}
+                  type={fieldType.type}
+                  label={fieldType.label}
+                  icon={fieldType.icon}
+                />
+              ))}
             </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="search"
-                placeholder="Search forms..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
-              />
-            </div>
-          </div>
-
-          {/* Forms List */}
-          <div className="flex-1 overflow-y-auto">
-            {filteredForms.length === 0 ? (
-              <div className="p-4 text-center">
-                <Card className="border-dashed">
-                  <CardContent className="pt-6">
-                    <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                    </div>
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      No forms found
-                    </CardTitle>
-                    <CardDescription className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-                      Create your first form to get started with collecting data
-                    </CardDescription>
-                    <Button
-                      size="sm"
-                      className="h-8 text-xs"
-                      onClick={handleNewFormClick}
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      Create form
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <div className="p-2 space-y-1">
-                {filteredForms.map((form) => (
-                  <div
-                    key={form.id}
-                    className={`p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer group border ${
-                      selectedFormId === form.id
-                        ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950"
-                        : "border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-                    }`}
-                    onClick={() => handleFormSelect(form.id)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {form.name}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 mb-2">
-                          {getFormStatusBadge(form)}
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatDistanceToNow(new Date(form.createdAt!), {
-                              addSuffix: true,
-                            })}
-                          </span>
-                        </div>
-                        {form.description && (
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {form.description}
-                          </p>
-                        )}
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-3 w-3" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Copy className="mr-2 h-3 w-3" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="mr-2 h-3 w-3" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
-      )}
 
-      {/* Main content area */}
-      <div className="flex-1 bg-white dark:bg-gray-950">
-        {isCreatingForm ? (
-          /* Form Builder Interface */
-          <div className="h-full flex">
-            {/* Toolbox Sidebar */}
-            <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
-              {/* Tools Header */}
-              <div className="p-3 border-b border-gray-200 dark:border-gray-800">
-                <button
-                  onClick={() => setShowFormsList(!showFormsList)}
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto hover:text-gray-800 dark:hover:text-gray-200 transition-colors flex items-center justify-center"
-                  title="Toggle Forms List"
-                >
-                  <PanelRightOpen className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Field Tools */}
-              <div className="flex-1 p-2 space-y-2">
-                <button
-                  onClick={() => handleAddField("text")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
-                  title="Text Input"
-                >
-                  <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  onClick={() => handleAddField("email")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
-                  title="Email Input"
-                >
-                  <Type className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  onClick={() => handleAddField("number")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
-                  title="Number Input"
-                >
-                  <Hash className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  onClick={() => handleAddField("checkbox")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
-                  title="Checkbox"
-                >
-                  <CheckSquare className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  onClick={() => handleAddField("radio")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
-                  title="Radio Button"
-                >
-                  <Circle className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  onClick={() => handleAddField("select")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
-                  title="Dropdown"
-                >
-                  <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-              </div>
-            </div>
-
-            {/* Canvas Area */}
-            <div className="flex-1 flex flex-col">
-              {/* Enhanced Top Toolbar */}
-              <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-between px-4">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  {/* Layout Type Combobox */}
+                  <h1 className="text-xl font-semibold">Form Builder</h1>
+                  
+                  {/* Layout Configuration */}
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <Popover open={layoutOpen} onOpenChange={setLayoutOpen}>
@@ -690,13 +561,7 @@ export default function FormEditor() {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <Label 
-                          className={`absolute left-3 transition-all duration-200 pointer-events-none text-xs ${
-                            formConfig.layout && formConfig.layout !== "" 
-                              ? "top-1 text-gray-500 dark:text-gray-400" 
-                              : "top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                          }`}
-                        >
+                        <Label className="absolute left-3 top-1 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
                           Form Layout
                         </Label>
                         <PopoverContent className="w-40 p-0">
@@ -805,7 +670,7 @@ export default function FormEditor() {
                     )}
                   </div>
 
-                  {/* Field Spacing Combobox */}
+                  {/* Field Spacing Configuration */}
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <Popover open={spacingOpen} onOpenChange={setSpacingOpen}>
@@ -826,13 +691,7 @@ export default function FormEditor() {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <Label 
-                          className={`absolute left-3 transition-all duration-200 pointer-events-none text-xs ${
-                            formConfig.spacing && formConfig.spacing !== "" 
-                              ? "top-1 text-gray-500 dark:text-gray-400" 
-                              : "top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                          }`}
-                        >
+                        <Label className="absolute left-3 top-1 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
                           Field Spacing
                         </Label>
                         <PopoverContent className="w-32 p-0">
@@ -904,2258 +763,140 @@ export default function FormEditor() {
                       </Popover>
                     </div>
                   </div>
-
-                  {/* Form Configuration Actions */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowPreview(!showPreview)}
-                      className="flex items-center gap-1"
-                    >
-                      <Eye className="h-4 w-4" />
-                      {showPreview ? "Edit" : "Preview"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleSave}
-                      className="flex items-center gap-1"
-                    >
-                      <Save className="h-4 w-4" />
-                      Save Form
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Canvas */}
-              <div className="flex-1 bg-white dark:bg-gray-900">
-                {showPreview ? (
-                  <div className="p-6">
-                    <FormPreview
-                      fields={fields}
-                      config={formConfig}
-                    />
-                  </div>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <div className="h-full p-6">
-                      <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                        <div className="min-h-[400px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-                          {fields.length === 0 ? (
-                            <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-                              <div className="text-center">
-                                <Plus className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                <p>Drag fields from the toolbox to start building your form</p>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              {fields.map((field) => (
-                                <SortableField
-                                  key={field.id}
-                                  field={field}
-                                  isSelected={selectedFieldId === field.id}
-                                  onSelect={() => setSelectedFieldId(field.id)}
-                                  onUpdate={(updates) => handleFieldUpdate(field.id, updates)}
-                                  onDelete={() => handleFieldDelete(field.id)}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </SortableContext>
-                    </div>
-                  </DndContext>
-                )}
-              </div>
-
-              {/* Properties Panel */}
-              <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Field Properties</h3>
-                  {selectedFieldId && (
-                    <FieldPropertiesPanel
-                      field={fields.find(f => f.id === selectedFieldId)!}
-                      onUpdate={(updates) => handleFieldUpdate(selectedFieldId, updates)}
-                    />
-                  )}
-                  {!selectedFieldId && (
-                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                      <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>Select a field to edit its properties</p>
-                    </div>
-                  )}
-              </div>
-            </div>
-          </div>
-
-          {/* Save Form Dialog */}
-          <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Save Form</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="form-name">Form Name</Label>
-                  <Input
-                    id="form-name"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    placeholder="Enter form name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="form-description">Description (optional)</Label>
-                  <Input
-                    id="form-description"
-                    value={formDescription}
-                    onChange={(e) => setFormDescription(e.target.value)}
-                    placeholder="Enter form description"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => handleCreateForm(formName, formDescription)}
-                  disabled={!formName.trim() || createFormMutation.isPending}
-                >
-                  {createFormMutation.isPending ? "Saving..." : "Save Form"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-    </div>
-  );
-}
-                                onSelect={() => {
-                                  setFormConfig({
-                                    ...formConfig,
-                                    spacing: "compact",
-                                  });
-                                  setSpacingOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formConfig.spacing === "compact"
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                                Compact
-                              </CommandItem>
-                              <CommandItem
-                                value="normal"
-                                onSelect={() => {
-                                  setFormConfig({
-                                    ...formConfig,
-                                    spacing: "normal",
-                                  });
-                                  setSpacingOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formConfig.spacing === "normal"
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                                Normal
-                              </CommandItem>
-                              <CommandItem
-                                value="relaxed"
-                                onSelect={() => {
-                                  setFormConfig({
-                                    ...formConfig,
-                                    spacing: "relaxed",
-                                  });
-                                  setSpacingOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formConfig.spacing === "relaxed"
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                )}
-                              />
-                              Relaxed
-                            </CommandItem>
-                            </CommandGroup>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                  </div>
-
-                    {formConfig.spacing === "custom" && (
-                      <Input
-                        type="number"
-                        value={formConfig.customSpacing}
-                        onChange={(e) =>
-                          setFormConfig({
-                            ...formConfig,
-                            customSpacing: parseInt(e.target.value) || 8,
-                          })
-                        }
-                        className="w-16 h-8"
-                        min="0"
-                        max="100"
-                      />
-                    )}
-                  </div>
                 </div>
 
+                {/* Actions */}
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsPreviewMode(!isPreviewMode)}
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="flex items-center gap-1"
                   >
-                    <Eye className="w-4 h-4 mr-1" />
-                    {isPreviewMode ? "Edit" : "Preview"}
+                    <Eye className="h-4 w-4" />
+                    {showPreview ? "Edit" : "Preview"}
                   </Button>
-                  <Button size="sm" onClick={handleSaveForm}>
-                    <Save className="w-4 h-4 mr-1" />
-                    Save
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    className="flex items-center gap-1"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Form
                   </Button>
-                </div>
-              </div>
-
-              {/* Canvas */}
-              <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
-                <div className="w-full">
-                  <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
-                    {isPreviewMode ? (
-                      /* Preview Mode */
-                      <div className="w-full h-full">
-                        <div className="space-y-6 h-full">
-                          <div className="text-center border-b pb-4">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                              {formName || "Form Preview"}
-                            </h2>
-                            {formDescription && (
-                              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                                {formDescription}
-                              </p>
-                            )}
-                          </div>
-
-                          <form className="w-full">
-                            <div
-                              className={`w-full ${
-                                formConfig.layout === "two-column"
-                                  ? "grid grid-cols-2"
-                                  : formConfig.layout === "grid"
-                                    ? "grid"
-                                    : formConfig.layout === "mixed"
-                                      ? "space-y-4"
-                                      : "flex flex-col"
-                              }`}
-                              style={{
-                                gap:
-                                  formConfig.layout !== "mixed"
-                                    ? getSpacingValue()
-                                    : undefined,
-                                ...(formConfig.layout === "grid" && {
-                                  gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
-                                }),
-                              }}
-                            >
-                              {formFields.map((field) => (
-                                <div
-                                  key={field.id}
-                                  className={`${
-                                    field.layout === "horizontal"
-                                      ? "flex items-center gap-4"
-                                      : field.layout === "inline"
-                                        ? "flex items-center gap-2"
-                                        : "space-y-2"
-                                  }`}
-                                >
-                                  <div
-                                    className={`${
-                                      field.layout === "horizontal"
-                                        ? "min-w-[120px]"
-                                        : ""
-                                    }`}
-                                  >
-                                    <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                      {field.label}
-                                      {field.required && (
-                                        <span className="text-red-500">*</span>
-                                      )}
-                                    </Label>
-                                  </div>
-
-                                  <div
-                                    className={`${
-                                      field.layout === "horizontal" ||
-                                      field.layout === "inline"
-                                        ? "flex-1"
-                                        : ""
-                                    }`}
-                                  >
-                                    {field.hint && (
-                                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                        {field.hint}
-                                      </p>
-                                    )}
-
-                                    <div className="relative">
-                                      {field.prefix && (
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
-                                          {field.prefix}
-                                        </span>
-                                      )}
-
-                                      {field.type === "text" ||
-                                      field.type === "email" ||
-                                      field.type === "number" ? (
-                                        <Input
-                                          type={field.type}
-                                          placeholder={field.placeholder}
-                                          disabled={field.disabled}
-                                          readOnly={field.readonly}
-                                          autoFocus={field.autofocus}
-                                          autoComplete={field.autocomplete}
-                                          className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
-                                          style={{
-                                            width: field.width || "100%",
-                                            ...(field.layout === "inline" && {
-                                              minWidth: "120px",
-                                            }),
-                                          }}
-                                        />
-                                      ) : field.type === "checkbox" ? (
-                                        <div className="flex items-center space-x-2">
-                                          <Checkbox
-                                            disabled={field.disabled}
-                                            id={`checkbox-${field.id}`}
-                                          />
-                                          <Label
-                                            htmlFor={`checkbox-${field.id}`}
-                                            className="text-sm font-normal cursor-pointer"
-                                          >
-                                            {field.placeholder ||
-                                              "Check this option"}
-                                          </Label>
-                                        </div>
-                                      ) : field.type === "radio" ? (
-                                        <RadioGroup
-                                          disabled={field.disabled}
-                                          className={
-                                            field.layout === "horizontal"
-                                              ? "flex flex-wrap gap-4"
-                                              : "space-y-2"
-                                          }
-                                        >
-                                          {field.options?.map(
-                                            (option: any, index: number) => (
-                                              <div
-                                                key={index}
-                                                className="flex items-center space-x-2"
-                                              >
-                                                <RadioGroupItem
-                                                  value={option.value}
-                                                  id={`radio-${field.id}-${index}`}
-                                                  disabled={field.disabled}
-                                                />
-                                                <Label
-                                                  htmlFor={`radio-${field.id}-${index}`}
-                                                  className="text-sm font-normal cursor-pointer"
-                                                >
-                                                  {option.label}
-                                                </Label>
-                                              </div>
-                                            ),
-                                          ) || (
-                                            <div className="flex items-center space-x-2">
-                                              <RadioGroupItem
-                                                value="no-options"
-                                                disabled
-                                              />
-                                              <Label className="text-sm text-gray-400">
-                                                No options configured
-                                              </Label>
-                                            </div>
-                                          )}
-                                        </RadioGroup>
-                                      ) : field.type === "select" ? (
-                                        <Select disabled={field.disabled}>
-                                          <SelectTrigger
-                                            className={field.class || ""}
-                                            style={{
-                                              width: field.width || "100%",
-                                              ...(field.layout === "inline" && {
-                                                minWidth: "120px",
-                                              }),
-                                            }}
-                                          >
-                                            <SelectValue
-                                              placeholder={field.placeholder}
-                                            />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {field.options?.map(
-                                              (option: any, index: number) => (
-                                                <SelectItem
-                                                  key={index}
-                                                  value={option.value}
-                                                >
-                                                  {option.label}
-                                                </SelectItem>
-                                              ),
-                                            ) || (
-                                              <SelectItem value="no-options">
-                                                No options configured
-                                              </SelectItem>
-                                            )}
-                                          </SelectContent>
-                                        </Select>
-                                      ) : null}
-
-                                      {field.suffix && (
-                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
-                                          {field.suffix}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-
-                            {formFields.length === 0 && (
-                              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                No form fields to preview. Switch to edit mode
-                                to add fields.
-                              </div>
-                            )}
-
-                            {formFields.length > 0 && (
-                              <div className="pt-6 flex justify-center">
-                                <Button
-                                  type="button"
-                                  className={`${
-                                    formConfig.layout === "two-column" ||
-                                    formConfig.layout === "grid"
-                                      ? "col-span-full w-auto px-8"
-                                      : "w-full max-w-xs"
-                                  }`}
-                                >
-                                  Submit Form
-                                </Button>
-                              </div>
-                            )}
-                          </form>
-                        </div>
-                      </div>
-                    ) : /* Edit Mode */
-                    formFields.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-center py-16">
-                        <div>
-                          <Grip className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            Start building your form
-                          </h3>
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Click on field icons from the left sidebar to add
-                            them to your form
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                      >
-                        <SortableContext
-                          items={formFields.map((f) => f.id)}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          <div
-                            className={`${
-                              formConfig.layout === "two-column"
-                                ? "grid grid-cols-2"
-                                : formConfig.layout === "grid"
-                                  ? "grid"
-                                  : formConfig.layout === "mixed"
-                                    ? "space-y-4"
-                                    : "flex flex-col"
-                            }`}
-                            style={{
-                              gap:
-                                formConfig.layout !== "mixed"
-                                  ? getSpacingValue()
-                                  : undefined,
-                              ...(formConfig.layout === "grid" && {
-                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
-                              }),
-                            }}
-                          >
-                            {formFields.map((field) => (
-                              <SortableField
-                                key={field.id}
-                                field={field}
-                                isSelected={selectedFieldId === field.id}
-                                onSelect={() => handleFieldSelect(field.id)}
-                                onUpdate={(updates) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === field.id
-                                        ? { ...f, ...updates }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </DndContext>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Properties Panel - Collapsed by default, shows when field is selected */}
-            {showPropertiesPanel && selectedFieldId && (
-              <div className="w-64 border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                    Field Properties
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowPropertiesPanel(false)}
-                  >
-                    ×
-                  </Button>
-                </div>
-
-                <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-                  {(() => {
-                    const selectedField = formFields.find(
-                      (f) => f.id === selectedFieldId,
-                    );
-                    if (!selectedField) return null;
-
-                    const fieldType = selectedField.type;
-                    const isTextInput = [
-                      "text",
-                      "email",
-                      "number",
-                      "password",
-                    ].includes(fieldType);
-                    const isSelectInput = ["select", "radio"].includes(
-                      fieldType,
-                    );
-                    const isFileInput = fieldType === "file";
-                    const isDateInput = fieldType === "date";
-                    const isCheckboxInput = fieldType === "checkbox";
-
-                    return (
-                      <>
-                        {/* Basic Properties */}
+          {/* Canvas */}
+          <div className="flex-1 bg-white dark:bg-gray-900">
+            {showPreview ? (
+              <div className="p-6">
+                <FormPreview fields={fields} config={formConfig} />
+              </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+              >
+                <div className="h-full p-6">
+                  <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                    <div 
+                      className="min-h-[400px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50"
+                      onDrop={handleCanvasDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                    >
+                      {fields.length === 0 ? (
+                        <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+                          <div className="text-center">
+                            <Plus className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                            <p>Drag fields from the toolbox to start building your form</p>
+                          </div>
+                        </div>
+                      ) : (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Field Name
-                              </Label>
-                              <Input
-                                value={selectedField.name || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, name: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Test ID
-                              </Label>
-                              <Input
-                                value={selectedField.testId || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, testId: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <Label className="text-xs font-medium">Label</Label>
-                            <Input
-                              value={selectedField.label || ""}
-                              onChange={(e) => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? { ...f, label: e.target.value }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="mt-1 h-8 text-xs"
+                          {fields.map((field) => (
+                            <SortableField
+                              key={field.id}
+                              field={field}
+                              isSelected={selectedFieldId === field.id}
+                              onSelect={() => setSelectedFieldId(field.id)}
+                              onUpdate={(updates) => handleFieldUpdate(field.id, updates)}
+                              onDelete={() => handleFieldDelete(field.id)}
                             />
-                          </div>
-
-                          {/* Placeholder - Show for most inputs except radio */}
-                          {fieldType !== "radio" && (
-                            <div>
-                              <Label className="text-xs font-medium">
-                                {isCheckboxInput
-                                  ? "Checkbox Text"
-                                  : "Placeholder"}
-                              </Label>
-                              <Input
-                                value={selectedField.placeholder || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, placeholder: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder={
-                                  isCheckboxInput
-                                    ? "Text next to checkbox"
-                                    : "Placeholder text"
-                                }
-                              />
-                            </div>
-                          )}
-
-                          <div>
-                            <Label className="text-xs font-medium">Hint</Label>
-                            <Input
-                              value={selectedField.hint || ""}
-                              onChange={(e) => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? { ...f, hint: e.target.value }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="mt-1 h-8 text-xs"
-                              placeholder="Helper text for this field"
-                            />
-                          </div>
-
-                          {/* Icon and CSS - Show for all */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Icon
-                              </Label>
-                              <Input
-                                value={selectedField.icon || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, icon: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="Icon name"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium">
-                                CSS Class
-                              </Label>
-                              <Input
-                                value={selectedField.class || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, class: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="Custom CSS classes"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Prefix/Suffix - Only for text inputs */}
-                          {isTextInput && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Prefix
-                                </Label>
-                                <Input
-                                  value={selectedField.prefix || ""}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, prefix: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                  placeholder="Text before input"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Suffix
-                                </Label>
-                                <Input
-                                  value={selectedField.suffix || ""}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, suffix: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                  placeholder="Text after input"
-                                />
-                              </div>
-                            </div>
-                          )}
+                          ))}
                         </div>
-
-                        {/* Field States */}
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                            Field States
-                          </h4>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            {/* Required - Show for all except file inputs (typically) */}
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="required"
-                                checked={selectedField.required || false}
-                                onCheckedChange={(checked) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, required: !!checked }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                              />
-                              <Label
-                                htmlFor="required"
-                                className="text-xs cursor-pointer"
-                              >
-                                Required
-                              </Label>
-                            </div>
-
-                            {/* Disabled - Show for all */}
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="disabled"
-                                checked={selectedField.disabled || false}
-                                onCheckedChange={(checked) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, disabled: !!checked }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                              />
-                              <Label
-                                htmlFor="disabled"
-                                className="text-xs cursor-pointer"
-                              >
-                                Disabled
-                              </Label>
-                            </div>
-
-                            {/* Read Only - Only for text inputs */}
-                            {isTextInput && (
-                              <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  id="readonly"
-                                  checked={selectedField.readonly || false}
-                                  onCheckedChange={(checked) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, readonly: !!checked }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                />
-                                <Label
-                                  htmlFor="readonly"
-                                  className="text-xs cursor-pointer"
-                                >
-                                  Read Only
-                                </Label>
-                              </div>
-                            )}
-
-                            {/* Auto Focus - Show for text inputs and selects */}
-                            {(isTextInput || fieldType === "select") && (
-                              <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  id="autofocus"
-                                  checked={selectedField.autofocus || false}
-                                  onCheckedChange={(checked) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, autofocus: !!checked }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                />
-                                <Label
-                                  htmlFor="autofocus"
-                                  className="text-xs cursor-pointer"
-                                >
-                                  Auto Focus
-                                </Label>
-                              </div>
-                            )}
-
-                            {/* Multiple - Only for select and file inputs */}
-                            {(fieldType === "select" || isFileInput) && (
-                              <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  id="multiple"
-                                  checked={selectedField.multiple || false}
-                                  onCheckedChange={(checked) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, multiple: !!checked }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                />
-                                <Label
-                                  htmlFor="multiple"
-                                  className="text-xs cursor-pointer"
-                                >
-                                  Multiple
-                                </Label>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Validation Rules - Only show relevant validations per field type */}
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                            Validation
-                          </h4>
-
-                          {/* Text length validation - Only for text inputs */}
-                          {isTextInput && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Min Length
-                                </Label>
-                                <Input
-                                  type="number"
-                                  value={
-                                    selectedField.validation?.minLength || ""
-                                  }
-                                  onChange={(e) => {
-                                    const value = e.target.value
-                                      ? parseInt(e.target.value)
-                                      : null;
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? {
-                                              ...f,
-                                              validation: {
-                                                ...f.validation,
-                                                minLength: value,
-                                              },
-                                            }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Max Length
-                                </Label>
-                                <Input
-                                  type="number"
-                                  value={
-                                    selectedField.validation?.maxLength || ""
-                                  }
-                                  onChange={(e) => {
-                                    const value = e.target.value
-                                      ? parseInt(e.target.value)
-                                      : null;
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? {
-                                              ...f,
-                                              validation: {
-                                                ...f.validation,
-                                                maxLength: value,
-                                              },
-                                            }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Numeric validation - Only for number inputs */}
-                          {fieldType === "number" && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Min Value
-                                </Label>
-                                <Input
-                                  type="number"
-                                  value={selectedField.validation?.min || ""}
-                                  onChange={(e) => {
-                                    const value = e.target.value
-                                      ? parseFloat(e.target.value)
-                                      : null;
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? {
-                                              ...f,
-                                              validation: {
-                                                ...f.validation,
-                                                min: value,
-                                              },
-                                            }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Max Value
-                                </Label>
-                                <Input
-                                  type="number"
-                                  value={selectedField.validation?.max || ""}
-                                  onChange={(e) => {
-                                    const value = e.target.value
-                                      ? parseFloat(e.target.value)
-                                      : null;
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? {
-                                              ...f,
-                                              validation: {
-                                                ...f.validation,
-                                                max: value,
-                                              },
-                                            }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Pattern validation - For text inputs */}
-                          {isTextInput && (
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Pattern (Regex)
-                              </Label>
-                              <Input
-                                value={selectedField.validation?.pattern || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? {
-                                            ...f,
-                                            validation: {
-                                              ...f.validation,
-                                              pattern: e.target.value,
-                                            },
-                                          }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="^[a-zA-Z]+$"
-                              />
-                            </div>
-                          )}
-
-                          {/* Custom validator - Show for all field types */}
-                          <div>
-                            <Label className="text-xs font-medium">
-                              Custom Validator
-                            </Label>
-                            <Input
-                              value={
-                                selectedField.validation?.customValidator || ""
-                              }
-                              onChange={(e) => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? {
-                                          ...f,
-                                          validation: {
-                                            ...f.validation,
-                                            customValidator: e.target.value,
-                                          },
-                                        }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="mt-1 h-8 text-xs"
-                              placeholder="Function name or expression"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Options Management - Only for select and radio */}
-                        {isSelectInput && (
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                              Options
-                            </h4>
-
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Option Source
-                              </Label>
-                              <Input
-                                value={selectedField.optionSource || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, optionSource: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="API endpoint or function name"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-xs font-medium">
-                                Static Options
-                              </Label>
-                              {(selectedField.options || []).map(
-                                (option: any, index: number) => (
-                                  <div key={index} className="flex gap-2">
-                                    <Input
-                                      value={option.label}
-                                      onChange={(e) => {
-                                        setFormFields((fields) =>
-                                          fields.map((f) =>
-                                            f.id === selectedFieldId
-                                              ? {
-                                                  ...f,
-                                                  options:
-                                                    f.options?.map(
-                                                      (opt: any, i: number) =>
-                                                        i === index
-                                                          ? {
-                                                              ...opt,
-                                                              label:
-                                                                e.target.value,
-                                                            }
-                                                          : opt,
-                                                    ) || [],
-                                                }
-                                              : f,
-                                          ),
-                                        );
-                                      }}
-                                      className="h-8 text-xs flex-1"
-                                      placeholder="Label"
-                                    />
-                                    <Input
-                                      value={option.value}
-                                      onChange={(e) => {
-                                        setFormFields((fields) =>
-                                          fields.map((f) =>
-                                            f.id === selectedFieldId
-                                              ? {
-                                                  ...f,
-                                                  options:
-                                                    f.options?.map(
-                                                      (opt: any, i: number) =>
-                                                        i === index
-                                                          ? {
-                                                              ...opt,
-                                                              value:
-                                                                e.target.value,
-                                                            }
-                                                          : opt,
-                                                    ) || [],
-                                                }
-                                              : f,
-                                          ),
-                                        );
-                                      }}
-                                      className="h-8 text-xs flex-1"
-                                      placeholder="Value"
-                                    />
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setFormFields((fields) =>
-                                          fields.map((f) =>
-                                            f.id === selectedFieldId
-                                              ? {
-                                                  ...f,
-                                                  options:
-                                                    f.options?.filter(
-                                                      (_: any, i: number) =>
-                                                        i !== index,
-                                                    ) || [],
-                                                }
-                                              : f,
-                                          ),
-                                        );
-                                      }}
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      ×
-                                    </Button>
-                                  </div>
-                                ),
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? {
-                                            ...f,
-                                            options: [
-                                              ...(f.options || []),
-                                              { label: "", value: "" },
-                                            ],
-                                          }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="h-8 text-xs w-full"
-                              >
-                                + Add Option
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Date Configuration - Only for date inputs */}
-                        {isDateInput && (
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                              Date Settings
-                            </h4>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Min Date
-                                </Label>
-                                <Input
-                                  type="date"
-                                  value={selectedField.minDate || ""}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, minDate: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Max Date
-                                </Label>
-                                <Input
-                                  type="date"
-                                  value={selectedField.maxDate || ""}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, maxDate: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Date Format
-                              </Label>
-                              <Select
-                                value={selectedField.dateFormat || "YYYY-MM-DD"}
-                                onValueChange={(value) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, dateFormat: value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                              >
-                                <SelectTrigger className="mt-1 h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="YYYY-MM-DD">
-                                    YYYY-MM-DD
-                                  </SelectItem>
-                                  <SelectItem value="MM/DD/YYYY">
-                                    MM/DD/YYYY
-                                  </SelectItem>
-                                  <SelectItem value="DD/MM/YYYY">
-                                    DD/MM/YYYY
-                                  </SelectItem>
-                                  <SelectItem value="DD-MM-YYYY">
-                                    DD-MM-YYYY
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Layout & Styling - Show for relevant inputs */}
-                        {(isTextInput || fieldType === "select") && (
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                              Layout & Styling
-                            </h4>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Layout
-                                </Label>
-                                <Select
-                                  value={selectedField.layout || "vertical"}
-                                  onValueChange={(value) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, layout: value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                >
-                                  <SelectTrigger className="mt-1 h-8 text-xs">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="vertical">
-                                      Vertical
-                                    </SelectItem>
-                                    <SelectItem value="horizontal">
-                                      Horizontal
-                                    </SelectItem>
-                                    <SelectItem value="inline">
-                                      Inline
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Width
-                                </Label>
-                                <Input
-                                  value={selectedField.width || "100%"}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, width: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                  placeholder="100%, 50px, auto"
-                                />
-                              </div>
-                            </div>
-
-                            {isTextInput && (
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <Label className="text-xs font-medium">
-                                    Autocomplete
-                                  </Label>
-                                  <Input
-                                    value={selectedField.autocomplete || ""}
-                                    onChange={(e) => {
-                                      setFormFields((fields) =>
-                                        fields.map((f) =>
-                                          f.id === selectedFieldId
-                                            ? {
-                                                ...f,
-                                                autocomplete: e.target.value,
-                                              }
-                                            : f,
-                                        ),
-                                      );
-                                    }}
-                                    className="mt-1 h-8 text-xs"
-                                    placeholder="email, name, etc."
-                                  />
-                                </div>
-
-                                <div>
-                                  <Label className="text-xs font-medium">
-                                    Debounce (ms)
-                                  </Label>
-                                  <Input
-                                    type="number"
-                                    value={selectedField.debounce || 0}
-                                    onChange={(e) => {
-                                      setFormFields((fields) =>
-                                        fields.map((f) =>
-                                          f.id === selectedFieldId
-                                            ? {
-                                                ...f,
-                                                debounce:
-                                                  parseInt(e.target.value) || 0,
-                                              }
-                                            : f,
-                                        ),
-                                      );
-                                    }}
-                                    className="mt-1 h-8 text-xs"
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-
-                  {/* Error Messages */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                      Error Messages
-                    </h4>
-
-                    <div className="space-y-2">
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Required Message
-                        </Label>
-                        <Input
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.validation?.errorMessages?.required || ""
-                          }
-                          onChange={(e) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? {
-                                      ...f,
-                                      validation: {
-                                        ...f.validation,
-                                        errorMessages: {
-                                          ...f.validation?.errorMessages,
-                                          required: e.target.value,
-                                        },
-                                      },
-                                    }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="mt-1 h-8 text-xs"
-                          placeholder="This field is required"
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Pattern Message
-                        </Label>
-                        <Input
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.validation?.errorMessages?.pattern || ""
-                          }
-                          onChange={(e) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? {
-                                      ...f,
-                                      validation: {
-                                        ...f.validation,
-                                        errorMessages: {
-                                          ...f.validation?.errorMessages,
-                                          pattern: e.target.value,
-                                        },
-                                      },
-                                    }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="mt-1 h-8 text-xs"
-                          placeholder="Invalid format"
-                        />
-                      </div>
+                      )}
                     </div>
-                  </div>
-
-                  {/* Layout & Styling */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                      Layout & Styling
-                    </h4>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs font-medium">Layout</Label>
-                        <Select
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.layout || "vertical"
-                          }
-                          onValueChange={(value) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? { ...f, layout: value }
-                                  : f,
-                              ),
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="mt-1 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="vertical">Vertical</SelectItem>
-                            <SelectItem value="horizontal">
-                              Horizontal
-                            </SelectItem>
-                            <SelectItem value="inline">Inline</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label className="text-xs font-medium">Width</Label>
-                        <Input
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.width || "100%"
-                          }
-                          onChange={(e) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? { ...f, width: e.target.value }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="mt-1 h-8 text-xs"
-                          placeholder="100%, 50px, auto"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Autocomplete
-                        </Label>
-                        <Input
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.autocomplete || ""
-                          }
-                          onChange={(e) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? { ...f, autocomplete: e.target.value }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="mt-1 h-8 text-xs"
-                          placeholder="email, name, etc."
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Debounce (ms)
-                        </Label>
-                        <Input
-                          type="number"
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.debounce || 0
-                          }
-                          onChange={(e) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? {
-                                      ...f,
-                                      debounce: parseInt(e.target.value) || 0,
-                                    }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="mt-1 h-8 text-xs"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Options Management (for select, radio, checkbox) */}
-                  {(formFields.find((f) => f.id === selectedFieldId)?.type ===
-                    "select" ||
-                    formFields.find((f) => f.id === selectedFieldId)?.type ===
-                      "radio") && (
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                        Options
-                      </h4>
-
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Option Source
-                        </Label>
-                        <Input
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.optionSource || ""
-                          }
-                          onChange={(e) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? { ...f, optionSource: e.target.value }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="mt-1 h-8 text-xs"
-                          placeholder="API endpoint or function name"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-xs font-medium">
-                          Static Options
-                        </Label>
-                        {(
-                          formFields.find((f) => f.id === selectedFieldId)
-                            ?.options || []
-                        ).map((option, index) => (
-                          <div key={index} className="flex gap-2">
-                            <Input
-                              value={option.label}
-                              onChange={(e) => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? {
-                                          ...f,
-                                          options:
-                                            f.options?.map((opt, i) =>
-                                              i === index
-                                                ? {
-                                                    ...opt,
-                                                    label: e.target.value,
-                                                  }
-                                                : opt,
-                                            ) || [],
-                                        }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="h-8 text-xs flex-1"
-                              placeholder="Label"
-                            />
-                            <Input
-                              value={option.value}
-                              onChange={(e) => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? {
-                                          ...f,
-                                          options:
-                                            f.options?.map((opt, i) =>
-                                              i === index
-                                                ? {
-                                                    ...opt,
-                                                    value: e.target.value,
-                                                  }
-                                                : opt,
-                                            ) || [],
-                                        }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="h-8 text-xs flex-1"
-                              placeholder="Value"
-                            />
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? {
-                                          ...f,
-                                          options:
-                                            f.options?.filter(
-                                              (_, i) => i !== index,
-                                            ) || [],
-                                        }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="h-8 w-8 p-0"
-                            >
-                              ×
-                            </Button>
-                          </div>
-                        ))}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? {
-                                      ...f,
-                                      options: [
-                                        ...(f.options || []),
-                                        { label: "", value: "" },
-                                      ],
-                                    }
-                                  : f,
-                              ),
-                            );
-                          }}
-                          className="h-8 text-xs w-full"
-                        >
-                          + Add Option
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Date Configuration */}
-                  {formFields.find((f) => f.id === selectedFieldId)?.type ===
-                    "date" && (
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                        Date Settings
-                      </h4>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs font-medium">
-                            Min Date
-                          </Label>
-                          <Input
-                            type="date"
-                            value={
-                              formFields.find((f) => f.id === selectedFieldId)
-                                ?.minDate || ""
-                            }
-                            onChange={(e) => {
-                              setFormFields((fields) =>
-                                fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? { ...f, minDate: e.target.value }
-                                    : f,
-                                ),
-                              );
-                            }}
-                            className="mt-1 h-8 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs font-medium">
-                            Max Date
-                          </Label>
-                          <Input
-                            type="date"
-                            value={
-                              formFields.find((f) => f.id === selectedFieldId)
-                                ?.maxDate || ""
-                            }
-                            onChange={(e) => {
-                              setFormFields((fields) =>
-                                fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? { ...f, maxDate: e.target.value }
-                                    : f,
-                                ),
-                              );
-                            }}
-                            className="mt-1 h-8 text-xs"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Date Format
-                        </Label>
-                        <Select
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.dateFormat || "YYYY-MM-DD"
-                          }
-                          onValueChange={(value) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? { ...f, dateFormat: value }
-                                  : f,
-                              ),
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="mt-1 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="YYYY-MM-DD">
-                              YYYY-MM-DD
-                            </SelectItem>
-                            <SelectItem value="MM/DD/YYYY">
-                              MM/DD/YYYY
-                            </SelectItem>
-                            <SelectItem value="DD/MM/YYYY">
-                              DD/MM/YYYY
-                            </SelectItem>
-                            <SelectItem value="DD-MM-YYYY">
-                              DD-MM-YYYY
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Conditional Logic */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                      Conditional Logic
-                    </h4>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs font-medium">
-                          Condition Type
-                        </Label>
-                        <Select
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.condition?.type || "visibility"
-                          }
-                          onValueChange={(value) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? {
-                                      ...f,
-                                      condition: {
-                                        ...f.condition,
-                                        type: value as
-                                          | "visibility"
-                                          | "enable"
-                                          | "value",
-                                      },
-                                    }
-                                  : f,
-                              ),
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="mt-1 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="visibility">
-                              Visibility
-                            </SelectItem>
-                            <SelectItem value="enable">
-                              Enable/Disable
-                            </SelectItem>
-                            <SelectItem value="value">Auto Value</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label className="text-xs font-medium">Logic</Label>
-                        <Select
-                          value={
-                            formFields.find((f) => f.id === selectedFieldId)
-                              ?.condition?.logic || "AND"
-                          }
-                          onValueChange={(value) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId
-                                  ? {
-                                      ...f,
-                                      condition: {
-                                        ...f.condition,
-                                        logic: value as "AND" | "OR",
-                                      },
-                                    }
-                                  : f,
-                              ),
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="mt-1 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="AND">AND</SelectItem>
-                            <SelectItem value="OR">OR</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium">
-                        Condition Rules
-                      </Label>
-                      {(
-                        formFields.find((f) => f.id === selectedFieldId)
-                          ?.condition?.rules || []
-                      ).map((rule, index) => (
-                        <div key={index} className="grid grid-cols-4 gap-2">
-                          <Select
-                            value={rule.field}
-                            onValueChange={(value) => {
-                              setFormFields((fields) =>
-                                fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? {
-                                        ...f,
-                                        condition: {
-                                          ...f.condition,
-                                          rules:
-                                            f.condition?.rules?.map((r, i) =>
-                                              i === index
-                                                ? { ...r, field: value }
-                                                : r,
-                                            ) || [],
-                                        },
-                                      }
-                                    : f,
-                                ),
-                              );
-                            }}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Field" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {formFields
-                                .filter((f) => f.id !== selectedFieldId)
-                                .map((field) => (
-                                  <SelectItem key={field.id} value={field.name}>
-                                    {field.label}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-
-                          <Select
-                            value={rule.operator}
-                            onValueChange={(value) => {
-                              setFormFields((fields) =>
-                                fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? {
-                                        ...f,
-                                        condition: {
-                                          ...f.condition,
-                                          rules:
-                                            f.condition?.rules?.map((r, i) =>
-                                              i === index
-                                                ? {
-                                                    ...r,
-                                                    operator: value as any,
-                                                  }
-                                                : r,
-                                            ) || [],
-                                        },
-                                      }
-                                    : f,
-                                ),
-                              );
-                            }}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Op" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="==">=</SelectItem>
-                              <SelectItem value="!=">!=</SelectItem>
-                              <SelectItem value=">">&gt;</SelectItem>
-                              <SelectItem value=">=">&gt;=</SelectItem>
-                              <SelectItem value="<">&lt;</SelectItem>
-                              <SelectItem value="<=">&lt;=</SelectItem>
-                              <SelectItem value="in">in</SelectItem>
-                              <SelectItem value="not-in">not in</SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Input
-                            value={rule.value}
-                            onChange={(e) => {
-                              setFormFields((fields) =>
-                                fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? {
-                                        ...f,
-                                        condition: {
-                                          ...f.condition,
-                                          rules:
-                                            f.condition?.rules?.map((r, i) =>
-                                              i === index
-                                                ? {
-                                                    ...r,
-                                                    value: e.target.value,
-                                                  }
-                                                : r,
-                                            ) || [],
-                                        },
-                                      }
-                                    : f,
-                                ),
-                              );
-                            }}
-                            className="h-8 text-xs"
-                            placeholder="Value"
-                          />
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setFormFields((fields) =>
-                                fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? {
-                                        ...f,
-                                        condition: {
-                                          ...f.condition,
-                                          rules:
-                                            f.condition?.rules?.filter(
-                                              (_, i) => i !== index,
-                                            ) || [],
-                                        },
-                                      }
-                                    : f,
-                                ),
-                              );
-                            }}
-                            className="h-8 w-8 p-0"
-                          >
-                            ×
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setFormFields((fields) =>
-                            fields.map((f) =>
-                              f.id === selectedFieldId
-                                ? {
-                                    ...f,
-                                    condition: {
-                                      ...f.condition,
-                                      rules: [
-                                        ...(f.condition?.rules || []),
-                                        {
-                                          field: "",
-                                          operator: "==" as const,
-                                          value: "",
-                                        },
-                                      ],
-                                    },
-                                  }
-                                : f,
-                            ),
-                          );
-                        }}
-                        className="h-8 text-xs w-full"
-                      >
-                        + Add Rule
-                      </Button>
-                    </div>
-
-                    <div>
-                      <Label className="text-xs font-medium">
-                        Watch Fields
-                      </Label>
-                      <Input
-                        value={(
-                          formFields.find((f) => f.id === selectedFieldId)
-                            ?.watch || []
-                        ).join(", ")}
-                        onChange={(e) => {
-                          const watchFields = e.target.value
-                            .split(",")
-                            .map((s) => s.trim())
-                            .filter(Boolean);
-                          setFormFields((fields) =>
-                            fields.map((f) =>
-                              f.id === selectedFieldId
-                                ? { ...f, watch: watchFields }
-                                : f,
-                            ),
-                          );
-                        }}
-                        className="mt-1 h-8 text-xs"
-                        placeholder="field1, field2, field3"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-xs font-medium">
-                        Calculated Value
-                      </Label>
-                      <Input
-                        value={
-                          formFields.find((f) => f.id === selectedFieldId)
-                            ?.calculatedValue || ""
-                        }
-                        onChange={(e) => {
-                          setFormFields((fields) =>
-                            fields.map((f) =>
-                              f.id === selectedFieldId
-                                ? { ...f, calculatedValue: e.target.value }
-                                : f,
-                            ),
-                          );
-                        }}
-                        className="mt-1 h-8 text-xs"
-                        placeholder="Expression or function"
-                      />
-                    </div>
-                  </div>
+                  </SortableContext>
                 </div>
+              </DndContext>
+            )}
+          </div>
+        </div>
+
+        {/* Properties Panel */}
+        <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Field Properties</h3>
+            {selectedFieldId && (
+              <FieldPropertiesPanel
+                field={fields.find(f => f.id === selectedFieldId)!}
+                onUpdate={(updates) => handleFieldUpdate(selectedFieldId, updates)}
+              />
+            )}
+            {!selectedFieldId && (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>Select a field to edit its properties</p>
               </div>
             )}
           </div>
-        ) : selectedFormId ? (
-          /* Form Editor Interface */
-          <div className="p-6">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <Edit className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                Form Editor Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                Form editing interface will be available in the next update
-              </p>
-            </div>
-          </div>
-        ) : (
-          /* Default State */
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <FileText className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                Select a form to edit
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                Choose a form from the sidebar to start editing, or create a new
-                form to get started
-              </p>
-              <Button onClick={handleNewFormClick}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create new form
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Save Form Dialog */}
-        <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Save Form</DialogTitle>
-              <DialogDescription>
-                Give your form a name and description to save it to your
-                project.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="save-form-name">Form Name</Label>
-                <Input
-                  id="save-form-name"
-                  placeholder="Enter form name..."
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="save-form-description">
-                  Description (optional)
-                </Label>
-                <Textarea
-                  id="save-form-description"
-                  placeholder="Brief description of your form..."
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  className="mt-1 resize-none"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowSaveDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateForm}
-                disabled={!formName.trim() || createFormMutation.isPending}
-              >
-                {createFormMutation.isPending ? "Saving..." : "Save Form"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        </div>
       </div>
+
+      {/* Save Form Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Form</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="form-name">Form Name</Label>
+              <Input
+                id="form-name"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="Enter form name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="form-description">Description (optional)</Label>
+              <Input
+                id="form-description"
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                placeholder="Enter form description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleCreateForm(formName, formDescription)}
+              disabled={!formName.trim() || createFormMutation.isPending}
+            >
+              {createFormMutation.isPending ? "Saving..." : "Save Form"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
