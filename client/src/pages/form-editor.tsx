@@ -3361,10 +3361,12 @@ export default function FormEditor() {
         <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Save Form</DialogTitle>
+              <DialogTitle>{editingFormId ? "Update Form" : "Save Form"}</DialogTitle>
               <DialogDescription>
-                Give your form a name and description to save it to your
-                project.
+                {editingFormId 
+                  ? "Update your form name and description."
+                  : "Give your form a name and description to save it to your project."
+                }
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -3401,9 +3403,14 @@ export default function FormEditor() {
               </Button>
               <Button
                 onClick={handleCreateForm}
-                disabled={!formName.trim() || createFormMutation.isPending}
+                disabled={!formName.trim() || createFormMutation.isPending || updateFormMutation.isPending}
               >
-                {createFormMutation.isPending ? "Saving..." : "Save Form"}
+                {(createFormMutation.isPending || updateFormMutation.isPending) 
+                  ? "Saving..." 
+                  : editingFormId 
+                    ? "Update Form" 
+                    : "Save Form"
+                }
               </Button>
             </DialogFooter>
           </DialogContent>
