@@ -224,6 +224,13 @@ export default function FormEditor() {
     gridColumns: 2,
     spacing: "",
     customSpacing: 8,
+    showLabels: true,
+    buttonLayout: "right" as "left" | "center" | "right" | "justify" | "split",
+    submitButtonText: "Submit",
+    cancelButtonText: "Cancel",
+    submitButtonColor: "#3b82f6",
+    cancelButtonColor: "#6b7280",
+    showCancelButton: false,
   });
 
   // UI state for comboboxes
@@ -794,6 +801,23 @@ export default function FormEditor() {
                     )}
                   </div>
 
+                  {/* Show Labels Toggle */}
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="show-labels"
+                      checked={formConfig.showLabels}
+                      onCheckedChange={(checked) => {
+                        setFormConfig({
+                          ...formConfig,
+                          showLabels: !!checked,
+                        });
+                      }}
+                    />
+                    <Label htmlFor="show-labels" className="text-xs cursor-pointer">
+                      Show Labels
+                    </Label>
+                  </div>
+
                   {/* Field Spacing Combobox */}
                   <div className="flex items-center gap-2">
                     <Popover open={spacingOpen} onOpenChange={setSpacingOpen}>
@@ -923,6 +947,125 @@ export default function FormEditor() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {/* Button Configuration */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8">
+                        <Settings className="w-4 h-4 mr-1" />
+                        Buttons
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-4">
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-sm">Button Configuration</h4>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs">Button Layout</Label>
+                            <Select
+                              value={formConfig.buttonLayout}
+                              onValueChange={(value: any) => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  buttonLayout: value,
+                                });
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                                <SelectItem value="justify">Justify</SelectItem>
+                                <SelectItem value="split">Split</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="show-cancel"
+                              checked={formConfig.showCancelButton}
+                              onCheckedChange={(checked) => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  showCancelButton: !!checked,
+                                });
+                              }}
+                            />
+                            <Label htmlFor="show-cancel" className="text-xs cursor-pointer">
+                              Show Cancel Button
+                            </Label>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Submit Text</Label>
+                              <Input
+                                value={formConfig.submitButtonText}
+                                onChange={(e) => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    submitButtonText: e.target.value,
+                                  });
+                                }}
+                                className="h-8 text-xs"
+                                placeholder="Submit"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Cancel Text</Label>
+                              <Input
+                                value={formConfig.cancelButtonText}
+                                onChange={(e) => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    cancelButtonText: e.target.value,
+                                  });
+                                }}
+                                className="h-8 text-xs"
+                                placeholder="Cancel"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Submit Color</Label>
+                              <Input
+                                type="color"
+                                value={formConfig.submitButtonColor}
+                                onChange={(e) => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    submitButtonColor: e.target.value,
+                                  });
+                                }}
+                                className="h-8 w-full"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Cancel Color</Label>
+                              <Input
+                                type="color"
+                                value={formConfig.cancelButtonColor}
+                                onChange={(e) => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    cancelButtonColor: e.target.value,
+                                  });
+                                }}
+                                className="h-8 w-full"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -986,14 +1129,16 @@ export default function FormEditor() {
                                       ? "flex items-center gap-2"
                                       : "space-y-2"
                                 }`}>
-                                  <div className={`${
-                                    field.layout === "horizontal" ? "min-w-[120px]" : ""
-                                  }`}>
-                                    <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                      {field.label}
-                                      {field.required && <span className="text-red-500">*</span>}
-                                    </Label>
-                                  </div>
+                                  {formConfig.showLabels && (
+                                    <div className={`${
+                                      field.layout === "horizontal" ? "min-w-[120px]" : ""
+                                    }`}>
+                                      <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {field.label}
+                                        {field.required && <span className="text-red-500">*</span>}
+                                      </Label>
+                                    </div>
+                                  )}
                                   
                                   <div className={`${
                                     field.layout === "horizontal" || field.layout === "inline" ? "flex-1" : ""
@@ -1105,17 +1250,60 @@ export default function FormEditor() {
                             )}
                             
                             {formFields.length > 0 && (
-                              <div className="pt-6 flex justify-center">
-                                <Button 
-                                  type="button" 
-                                  className={`${
-                                    formConfig.layout === "two-column" || formConfig.layout === "grid" 
-                                      ? "col-span-full w-auto px-8" 
-                                      : "w-full max-w-xs"
-                                  }`}
-                                >
-                                  Submit Form
-                                </Button>
+                              <div className={`pt-6 ${
+                                formConfig.buttonLayout === "left" ? "flex justify-start" :
+                                formConfig.buttonLayout === "center" ? "flex justify-center" :
+                                formConfig.buttonLayout === "right" ? "flex justify-end" :
+                                formConfig.buttonLayout === "justify" ? "flex justify-between" :
+                                formConfig.buttonLayout === "split" ? "flex justify-between" :
+                                "flex justify-center"
+                              }`}>
+                                {formConfig.buttonLayout === "split" && formConfig.showCancelButton && (
+                                  <Button 
+                                    type="button"
+                                    variant="outline"
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      borderColor: formConfig.cancelButtonColor,
+                                      color: formConfig.cancelButtonColor
+                                    }}
+                                    className="px-6"
+                                  >
+                                    {formConfig.cancelButtonText}
+                                  </Button>
+                                )}
+                                
+                                <div className={`${
+                                  formConfig.buttonLayout === "split" ? "" : 
+                                  formConfig.showCancelButton ? "flex gap-3" : ""
+                                }`}>
+                                  {formConfig.showCancelButton && formConfig.buttonLayout !== "split" && (
+                                    <Button 
+                                      type="button"
+                                      variant="outline"
+                                      style={{
+                                        backgroundColor: "transparent",
+                                        borderColor: formConfig.cancelButtonColor,
+                                        color: formConfig.cancelButtonColor
+                                      }}
+                                      className="px-6"
+                                    >
+                                      {formConfig.cancelButtonText}
+                                    </Button>
+                                  )}
+                                  
+                                  <Button 
+                                    type="submit"
+                                    style={{
+                                      backgroundColor: formConfig.submitButtonColor,
+                                      borderColor: formConfig.submitButtonColor,
+                                      color: "#ffffff"
+                                    }}
+                                    className="px-6"
+                                  >
+                                    {formConfig.submitButtonText}
+                                  </Button>
+                                </div>
                               </div>
                             )}
                           </form>
