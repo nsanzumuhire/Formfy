@@ -13,6 +13,7 @@ import Projects from "@/pages/projects";
 import Forms from "@/pages/forms";
 import FormBuilder from "@/pages/form-builder";
 import FormEditor from "@/pages/form-editor";
+import FormView from "@/pages/form-view";
 import ApiKeys from "@/pages/api-keys";
 import Settings from "@/pages/settings";
 import Landing from "@/pages/landing";
@@ -50,6 +51,9 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public form route - accessible without authentication */}
+      <Route path="/form/:projectId/:formName" component={FormView} />
+      
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
