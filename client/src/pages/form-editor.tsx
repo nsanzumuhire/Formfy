@@ -221,9 +221,9 @@ export default function FormEditor() {
 
   // Form configuration state
   const [formConfig, setFormConfig] = useState({
-    layout: "",
+    layout: "single",
     gridColumns: 2,
-    spacing: "",
+    spacing: "8px",
     customSpacing: 8,
     showLabels: true,
     buttonLayout: "right" as "left" | "center" | "right" | "justify" | "split",
