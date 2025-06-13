@@ -624,7 +624,7 @@ export default function FormEditor() {
                               });
                             }}
                           >
-                            <LinkIcon className="mr-2 h-3 w-3" />
+                            <Copy className="mr-2 h-3 w-3" />
                             Copy Public URL
                           </DropdownMenuItem>
                           <DropdownMenuItem>
