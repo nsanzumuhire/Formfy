@@ -637,7 +637,7 @@ export default function FormEditor() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={layoutOpen}
-                          className="w-32 h-8 justify-between"
+                          className="w-40 h-8 justify-between"
                         >
                           {formConfig.layout === "single-column"
                             ? "Single"
@@ -647,11 +647,11 @@ export default function FormEditor() {
                                 ? "Grid"
                                 : formConfig.layout === "mixed"
                                   ? "Mixed"
-                                  : "Select form layout"}
+                                  : "Form layout"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-32 p-0">
+                      <PopoverContent className="w-40 p-0">
                         <Command>
                           <CommandGroup>
                             <CommandItem
@@ -764,7 +764,7 @@ export default function FormEditor() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={spacingOpen}
-                          className="w-24 h-8 justify-between"
+                          className="w-44 h-8 justify-between"
                         >
                           {formConfig.spacing === "2px"
                             ? "2px"
@@ -774,11 +774,11 @@ export default function FormEditor() {
                                 ? "8px"
                                 : formConfig.spacing === "custom"
                                   ? "Custom"
-                                  : "Select field spacing"}
+                                  : "Field spacing"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-32 p-0">
+                      <PopoverContent className="w-44 p-0">
                         <Command>
                           <CommandGroup>
                             <CommandItem
@@ -934,7 +934,10 @@ export default function FormEditor() {
                                     : "flex flex-col"
                             }`}
                             style={{
-                              gap: formConfig.layout !== "mixed" ? getSpacingValue() : undefined,
+                              gap:
+                                formConfig.layout !== "mixed"
+                                  ? getSpacingValue()
+                                  : undefined,
                               ...(formConfig.layout === "grid" && {
                                 gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
                               }),
