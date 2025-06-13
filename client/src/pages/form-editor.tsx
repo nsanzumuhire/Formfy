@@ -428,7 +428,7 @@ export default function FormEditor() {
     <div className="flex h-full">
       {/* Sub-sidebar for forms */}
       {showFormsList && (
-        <div className="w-80 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <div className="w-64 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-3">
@@ -553,7 +553,7 @@ export default function FormEditor() {
           /* Form Builder Interface */
           <div className="h-full flex">
             {/* Toolbox Sidebar */}
-            <div className="w-16 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
+            <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
               {/* Tools Header */}
               <div className="p-3 border-b border-gray-200 dark:border-gray-800">
                 <button
@@ -622,13 +622,6 @@ export default function FormEditor() {
               {/* Enhanced Top Toolbar */}
               <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-between px-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Layout className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Form Builder
-                    </span>
-                  </div>
-
                   {/* Layout Type Combobox */}
                   <div className="flex items-center gap-2">
                     <Popover open={layoutOpen} onOpenChange={setLayoutOpen}>
@@ -897,7 +890,7 @@ export default function FormEditor() {
               </div>
 
               {/* Canvas */}
-              <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-6">
+              <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
                 <div className="w-full">
                   <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
                     {formFields.length === 0 ? (

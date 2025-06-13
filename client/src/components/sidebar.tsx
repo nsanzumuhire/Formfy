@@ -10,6 +10,8 @@ import {
   Settings,
   LogOut,
   Box,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,19 +48,37 @@ export function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [sidebarState, setSidebarState] = useState<"expanded" | "collapsed" | "hover">("collapsed");
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
   };
 
+  const getSidebarWidth = () => {
+    if (sidebarState === "expanded") return "w-[200px]"; // 200px
+    if (sidebarState === "hover" && isHovered) return "w-[200px]"; // 200px
+    return "w-12"; // 48px
+  };
+
+  const isShowingText = sidebarState === "expanded" || (sidebarState === "hover" && isHovered);
+
   return (
     <div
       className={cn(
         "bg-card border-r transition-all duration-300 ease-in-out shadow-sm flex flex-col h-full",
-        isHovered ? "w-64" : "w-16",
+        getSidebarWidth(),
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => {
+        if (sidebarState === "hover") {
+          setIsHovered(true);
+        }
+      }}
+      onMouseLeave={() => {
+        if (sidebarState === "hover") {
+          setIsHovered(false);
+        }
+      }}
     >
       {/* Logo/Brand */}
       <div className="flex items-center px-4 py-4 border-b">
@@ -68,7 +88,7 @@ export function Sidebar() {
         <span
           className={cn(
             "ml-3 font-semibold text-lg transition-opacity duration-300 whitespace-nowrap",
-            isHovered ? "opacity-100" : "opacity-0",
+            isShowingText ? "opacity-100" : "opacity-0",
           )}
         >
           Formfy
@@ -97,7 +117,7 @@ export function Sidebar() {
                 <span
                   className={cn(
                     "ml-3 transition-opacity duration-300 whitespace-nowrap",
-                    isHovered ? "opacity-100" : "opacity-0",
+                    isShowingText ? "opacity-100" : "opacity-0",
                   )}
                 >
                   {item.label}
@@ -107,6 +127,73 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Sidebar Configuration Controls */}
+      <div className="border-t p-2">
+        <div className="text-xs text-muted-foreground mb-2">
+          <span
+            className={cn(
+              "transition-opacity duration-300 whitespace-nowrap",
+              isShowingText ? "opacity-100" : "opacity-0",
+            )}
+          >
+            Sidebar control
+          </span>
+        </div>
+        
+        <div className="space-y-1">
+          <Button
+            variant={sidebarState === "expanded" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setSidebarState("expanded")}
+            className="w-full justify-start px-2 py-1 h-8"
+          >
+            <ChevronRight className="h-4 w-4 flex-shrink-0" />
+            <span
+              className={cn(
+                "ml-2 text-xs transition-opacity duration-300 whitespace-nowrap",
+                isShowingText ? "opacity-100" : "opacity-0",
+              )}
+            >
+              Expanded
+            </span>
+          </Button>
+          
+          <Button
+            variant={sidebarState === "collapsed" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setSidebarState("collapsed")}
+            className="w-full justify-start px-2 py-1 h-8"
+          >
+            <ChevronLeft className="h-4 w-4 flex-shrink-0" />
+            <span
+              className={cn(
+                "ml-2 text-xs transition-opacity duration-300 whitespace-nowrap",
+                isShowingText ? "opacity-100" : "opacity-0",
+              )}
+            >
+              Collapsed
+            </span>
+          </Button>
+          
+          <Button
+            variant={sidebarState === "hover" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setSidebarState("hover")}
+            className="w-full justify-start px-2 py-1 h-8"
+          >
+            <Box className="h-4 w-4 flex-shrink-0" />
+            <span
+              className={cn(
+                "ml-2 text-xs transition-opacity duration-300 whitespace-nowrap",
+                isShowingText ? "opacity-100" : "opacity-0",
+              )}
+            >
+              Expand on hover
+            </span>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
