@@ -699,125 +699,91 @@ export default function FormEditor() {
                         >
                           Form Layout
                         </Label>
-                      </Popover>
-                    </div>
-                  </div>
-
-                  {/* Field Spacing Combobox */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <Popover open={spacingOpen} onOpenChange={setSpacingOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={spacingOpen}
-                            className="w-32 h-12 justify-between pt-6 pb-2"
-                          >
-                            {formConfig.spacing === "compact"
-                              ? "Compact"
-                              : formConfig.spacing === "normal"
-                                ? "Normal"
-                                : formConfig.spacing === "relaxed"
-                                  ? "Relaxed"
-                                  : ""}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <Label 
-                          className={`absolute left-3 transition-all duration-200 pointer-events-none text-xs ${
-                            formConfig.spacing && formConfig.spacing !== "" 
-                              ? "top-1 text-gray-500 dark:text-gray-400" 
-                              : "top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                          }`}
-                        >
-                          Field Spacing
-                        </Label>
-                        <PopoverContent className="w-32 p-0">
-                        <Command>
-                          <CommandGroup>
-                            <CommandItem
-                              value="single-column"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "single-column",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "single-column"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Single
-                            </CommandItem>
-                            <CommandItem
-                              value="two-column"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "two-column",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "two-column"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Two Col
-                            </CommandItem>
-                            <CommandItem
-                              value="grid"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "grid",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "grid"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Grid
-                            </CommandItem>
-                            <CommandItem
-                              value="mixed"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "mixed",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "mixed"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Mixed
-                            </CommandItem>
-                          </CommandGroup>
-                        </Command>
+                        <PopoverContent className="w-40 p-0">
+                          <Command>
+                            <CommandGroup>
+                              <CommandItem
+                                value="single-column"
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    layout: "single-column",
+                                  });
+                                  setLayoutOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.layout === "single-column"
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                Single Column
+                              </CommandItem>
+                              <CommandItem
+                                value="two-column"
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    layout: "two-column",
+                                  });
+                                  setLayoutOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.layout === "two-column"
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                Two Column
+                              </CommandItem>
+                              <CommandItem
+                                value="grid"
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    layout: "grid",
+                                  });
+                                  setLayoutOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.layout === "grid"
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                Grid
+                              </CommandItem>
+                              <CommandItem
+                                value="mixed"
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    layout: "mixed",
+                                  });
+                                  setLayoutOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.layout === "mixed"
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                Mixed
+                              </CommandItem>
+                            </CommandGroup>
+                          </Command>
                         </PopoverContent>
                       </Popover>
                     </div>
@@ -928,6 +894,204 @@ export default function FormEditor() {
                                     formConfig.spacing === "relaxed"
                                       ? "opacity-100"
                                       : "opacity-0",
+                                  )}
+                                />
+                                Relaxed
+                              </CommandItem>
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+
+                  {/* Form Configuration Actions */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="flex items-center gap-1"
+                    >
+                      <Eye className="h-4 w-4" />
+                      {showPreview ? "Edit" : "Preview"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      className="flex items-center gap-1"
+                    >
+                      <Save className="h-4 w-4" />
+                      Save Form
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Canvas */}
+              <div className="flex-1 bg-white dark:bg-gray-900">
+                {showPreview ? (
+                  <div className="p-6">
+                    <FormPreview
+                      fields={fields}
+                      config={formConfig}
+                    />
+                  </div>
+                ) : (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <div className="h-full p-6">
+                      <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                        <div className="min-h-[400px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
+                          {fields.length === 0 ? (
+                            <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+                              <div className="text-center">
+                                <Plus className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                <p>Drag fields from the toolbox to start building your form</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {fields.map((field) => (
+                                <SortableField
+                                  key={field.id}
+                                  field={field}
+                                  isSelected={selectedFieldId === field.id}
+                                  onSelect={() => setSelectedFieldId(field.id)}
+                                  onUpdate={(updates) => handleFieldUpdate(field.id, updates)}
+                                  onDelete={() => handleFieldDelete(field.id)}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </SortableContext>
+                    </div>
+                  </DndContext>
+                )}
+              </div>
+
+              {/* Properties Panel */}
+              <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Field Properties</h3>
+                  {selectedFieldId && (
+                    <FieldPropertiesPanel
+                      field={fields.find(f => f.id === selectedFieldId)!}
+                      onUpdate={(updates) => handleFieldUpdate(selectedFieldId, updates)}
+                    />
+                  )}
+                  {!selectedFieldId && (
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>Select a field to edit its properties</p>
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
+
+          {/* Save Form Dialog */}
+          <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Save Form</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="form-name">Form Name</Label>
+                  <Input
+                    id="form-name"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="Enter form name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="form-description">Description (optional)</Label>
+                  <Input
+                    id="form-description"
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    placeholder="Enter form description"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleCreateForm(formName, formDescription)}
+                  disabled={!formName.trim() || createFormMutation.isPending}
+                >
+                  {createFormMutation.isPending ? "Saving..." : "Save Form"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </div>
+  );
+}
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    spacing: "compact",
+                                  });
+                                  setSpacingOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.spacing === "compact"
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                Compact
+                              </CommandItem>
+                              <CommandItem
+                                value="normal"
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    spacing: "normal",
+                                  });
+                                  setSpacingOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.spacing === "normal"
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                Normal
+                              </CommandItem>
+                              <CommandItem
+                                value="relaxed"
+                                onSelect={() => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    spacing: "relaxed",
+                                  });
+                                  setSpacingOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formConfig.spacing === "relaxed"
+                                      ? "opacity-100"
+                                      : "opacity-0",
                                 )}
                               />
                               Relaxed
@@ -936,8 +1100,7 @@ export default function FormEditor() {
                           </Command>
                         </PopoverContent>
                       </Popover>
-                    </div>
-
+                  </div>
 
                     {formConfig.spacing === "custom" && (
                       <Input
