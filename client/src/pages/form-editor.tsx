@@ -214,6 +214,7 @@ export default function FormEditor() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
+  const [editingFormId, setEditingFormId] = useState<string | null>(null);
 
   // UI state
   const [showFormsList, setShowFormsList] = useState(true);
@@ -333,6 +334,57 @@ export default function FormEditor() {
     },
   });
 
+  // Update form mutation
+  const updateFormMutation = useMutation({
+    mutationFn: async (formData: {
+      id: string;
+      name: string;
+      description?: string;
+      projectId: string;
+    }) => {
+      return await apiRequest(
+        `/api/forms/${formData.id}`,
+        "PUT",
+        {
+          name: formData.name,
+          description: formData.description,
+          schema: {
+            fields: formFields,
+            settings: {
+              ...formConfig,
+              title: formData.name,
+              description: formData.description,
+            },
+          },
+        },
+      );
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/projects/${currentProjectId}/forms`],
+      });
+      setIsCreatingForm(false);
+      setShowSaveDialog(false);
+      setFormName("");
+      setFormDescription("");
+      setFormFields([]);
+      setSelectedFieldId(null);
+      setEditingFormId(null);
+
+      toast({
+        title: "Form updated successfully",
+        description: "Your form has been saved",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating form",
+        description: error.message || "Failed to update form",
+        variant: "destructive",
+      });
+    },
+  });
+
   const getFormStatusBadge = (form: Form) => {
     const isActive = form.isActive;
     return (
@@ -345,40 +397,89 @@ export default function FormEditor() {
   const handleCreateForm = () => {
     if (!formName.trim() || !currentProjectId) return;
 
-    const formSchema = {
-      fields: formFields,
-      config: formConfig,
-      settings: {
-        title: formName.trim(),
+    if (editingFormId) {
+      // Update existing form
+      updateFormMutation.mutate({
+        id: editingFormId,
+        name: formName.trim(),
         description: formDescription.trim() || undefined,
-        showLabels: formConfig.showLabels,
-        buttonLayout: formConfig.buttonLayout,
-        submitButtonText: formConfig.submitButtonText,
-        cancelButtonText: formConfig.cancelButtonText,
-        submitButtonColor: formConfig.submitButtonColor,
-        cancelButtonColor: formConfig.cancelButtonColor,
-        showCancelButton: formConfig.showCancelButton,
-      },
-    };
-
-    createFormMutation.mutate({
-      name: formName.trim(),
-      description: formDescription.trim() || undefined,
-      projectId: currentProjectId,
-    });
+        projectId: currentProjectId,
+      });
+    } else {
+      // Create new form
+      createFormMutation.mutate({
+        name: formName.trim(),
+        description: formDescription.trim() || undefined,
+        projectId: currentProjectId,
+      });
+    }
   };
 
   const handleNewFormClick = () => {
     setIsCreatingForm(true);
     setSelectedFormId(null);
+    setEditingFormId(null);
     setFormFields([]);
     setSelectedFieldId(null);
     setShowPropertiesPanel(false);
+    setFormName("");
+    setFormDescription("");
+    // Reset form config to defaults
+    setFormConfig({
+      layout: "single",
+      gridColumns: 2,
+      spacing: "8px",
+      customSpacing: 8,
+      showLabels: true,
+      buttonLayout: "right",
+      submitButtonText: "Submit",
+      cancelButtonText: "Cancel",
+      submitButtonColor: "#3b82f6",
+      cancelButtonColor: "#6b7280",
+      showCancelButton: false,
+    });
   };
 
   const handleFormSelect = (formId: string) => {
     setSelectedFormId(formId);
     setIsCreatingForm(false);
+    
+    // Load and edit the selected form
+    const selectedForm = forms?.find(f => f.id === formId);
+    if (selectedForm) {
+      handleEditForm(selectedForm);
+    }
+  };
+
+  const handleEditForm = (form: any) => {
+    setIsCreatingForm(true);
+    setEditingFormId(form.id);
+    setFormName(form.name);
+    setFormDescription(form.description || "");
+    
+    // Load form schema and fields
+    if (form.schema) {
+      const fields = form.schema.fields || [];
+      const settings = form.schema.settings || {};
+      
+      setFormFields(fields);
+      setFormConfig({
+        layout: settings.layout || "single",
+        gridColumns: settings.gridColumns || 2,
+        spacing: settings.spacing || "8px",
+        customSpacing: settings.customSpacing || 8,
+        showLabels: settings.showLabels !== false,
+        buttonLayout: settings.buttonLayout || "right",
+        submitButtonText: settings.submitButtonText || "Submit",
+        cancelButtonText: settings.cancelButtonText || "Cancel",
+        submitButtonColor: settings.submitButtonColor || "#3b82f6",
+        cancelButtonColor: settings.cancelButtonColor || "#6b7280",
+        showCancelButton: settings.showCancelButton || false,
+      });
+    }
+    
+    setSelectedFieldId(null);
+    setShowPropertiesPanel(false);
   };
 
   const handleFieldSelect = (fieldId: string) => {
@@ -597,7 +698,9 @@ export default function FormEditor() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleEditForm(form)}
+                          >
                             <Edit className="mr-2 h-3 w-3" />
                             Edit
                           </DropdownMenuItem>
@@ -836,26 +939,6 @@ export default function FormEditor() {
                     )}
                   </div>
 
-                  {/* Show Labels Toggle */}
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="show-labels"
-                      checked={formConfig.showLabels}
-                      onCheckedChange={(checked) => {
-                        setFormConfig({
-                          ...formConfig,
-                          showLabels: !!checked,
-                        });
-                      }}
-                    />
-                    <Label
-                      htmlFor="show-labels"
-                      className="text-xs cursor-pointer"
-                    >
-                      Show Labels
-                    </Label>
-                  </div>
-
                   {/* Field Spacing Combobox */}
                   <div className="flex items-center gap-2">
                     <Popover open={spacingOpen} onOpenChange={setSpacingOpen}>
@@ -942,6 +1025,26 @@ export default function FormEditor() {
                               8px
                             </CommandItem>
                             <CommandItem
+                              value="8px"
+                              onSelect={() => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  spacing: "12px",
+                                });
+                                setSpacingOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.spacing === "12px"
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              12px
+                            </CommandItem>
+                            <CommandItem
                               value="custom"
                               onSelect={() => {
                                 setFormConfig({
@@ -981,6 +1084,26 @@ export default function FormEditor() {
                         max="100"
                       />
                     )}
+                  </div>
+
+                  {/* Show Labels Toggle */}
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="show-labels"
+                      checked={formConfig.showLabels}
+                      onCheckedChange={(checked) => {
+                        setFormConfig({
+                          ...formConfig,
+                          showLabels: !!checked,
+                        });
+                      }}
+                    />
+                    <Label
+                      htmlFor="show-labels"
+                      className="text-xs cursor-pointer"
+                    >
+                      Show Labels
+                    </Label>
                   </div>
                 </div>
 
@@ -1528,7 +1651,8 @@ export default function FormEditor() {
                                       variant="outline"
                                       style={{
                                         backgroundColor: "transparent",
-                                        borderColor: formConfig.cancelButtonColor,
+                                        borderColor:
+                                          formConfig.cancelButtonColor,
                                         color: formConfig.cancelButtonColor,
                                       }}
                                       className="px-6 pointer-events-none"
@@ -1540,7 +1664,8 @@ export default function FormEditor() {
                                 <Button
                                   type="submit"
                                   style={{
-                                    backgroundColor: formConfig.submitButtonColor,
+                                    backgroundColor:
+                                      formConfig.submitButtonColor,
                                     borderColor: formConfig.submitButtonColor,
                                     color: "#ffffff",
                                   }}

@@ -14,7 +14,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const menuItems = [
   {
@@ -49,7 +48,9 @@ export function Sidebar() {
   const { user } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [sidebarState, setSidebarState] = useState<"expanded" | "collapsed" | "hover">("collapsed");
+  const [sidebarState, setSidebarState] = useState<
+    "expanded" | "collapsed" | "hover"
+  >("collapsed");
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -61,7 +62,8 @@ export function Sidebar() {
     return "w-12"; // 48px
   };
 
-  const isShowingText = sidebarState === "expanded" || (sidebarState === "hover" && isHovered);
+  const isShowingText =
+    sidebarState === "expanded" || (sidebarState === "hover" && isHovered);
 
   return (
     <div
@@ -140,7 +142,7 @@ export function Sidebar() {
             Sidebar control
           </span>
         </div>
-        
+
         <div className="space-y-1">
           <Button
             variant={sidebarState === "expanded" ? "default" : "ghost"}
@@ -158,7 +160,7 @@ export function Sidebar() {
               Expanded
             </span>
           </Button>
-          
+
           <Button
             variant={sidebarState === "collapsed" ? "default" : "ghost"}
             size="sm"
@@ -175,7 +177,7 @@ export function Sidebar() {
               Collapsed
             </span>
           </Button>
-          
+
           <Button
             variant={sidebarState === "hover" ? "default" : "ghost"}
             size="sm"
