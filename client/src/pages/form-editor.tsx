@@ -61,6 +61,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
   DialogContent,
@@ -1026,35 +1027,43 @@ export default function FormEditor() {
                                         />
                                       ) : field.type === "checkbox" ? (
                                         <div className="flex items-center space-x-2">
-                                          <input
-                                            type="checkbox"
+                                          <Checkbox
                                             disabled={field.disabled}
-                                            className="h-4 w-4"
+                                            id={`checkbox-${field.id}`}
                                           />
-                                          <span className="text-sm">{field.placeholder || "Check this option"}</span>
+                                          <Label 
+                                            htmlFor={`checkbox-${field.id}`} 
+                                            className="text-sm font-normal cursor-pointer"
+                                          >
+                                            {field.placeholder || "Check this option"}
+                                          </Label>
                                         </div>
                                       ) : field.type === "radio" ? (
-                                        <div className={`${
-                                          field.layout === "horizontal" ? "flex flex-wrap gap-4" : "space-y-2"
-                                        }`}>
+                                        <RadioGroup 
+                                          disabled={field.disabled}
+                                          className={field.layout === "horizontal" ? "flex flex-wrap gap-4" : "space-y-2"}
+                                        >
                                           {field.options?.map((option: any, index: number) => (
                                             <div key={index} className="flex items-center space-x-2">
-                                              <input
-                                                type="radio"
-                                                name={field.name}
+                                              <RadioGroupItem
                                                 value={option.value}
+                                                id={`radio-${field.id}-${index}`}
                                                 disabled={field.disabled}
-                                                className="h-4 w-4"
                                               />
-                                              <span className="text-sm">{option.label}</span>
+                                              <Label 
+                                                htmlFor={`radio-${field.id}-${index}`}
+                                                className="text-sm font-normal cursor-pointer"
+                                              >
+                                                {option.label}
+                                              </Label>
                                             </div>
                                           )) || (
                                             <div className="flex items-center space-x-2">
-                                              <input type="radio" disabled className="h-4 w-4" />
-                                              <span className="text-sm text-gray-400">No options configured</span>
+                                              <RadioGroupItem value="no-options" disabled />
+                                              <Label className="text-sm text-gray-400">No options configured</Label>
                                             </div>
                                           )}
-                                        </div>
+                                        </RadioGroup>
                                       ) : field.type === "select" ? (
                                         <Select disabled={field.disabled}>
                                           <SelectTrigger 
@@ -1379,97 +1388,87 @@ export default function FormEditor() {
                           <div className="grid grid-cols-2 gap-2">
                             {/* Required - Show for all except file inputs (typically) */}
                             <div className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
+                              <Checkbox
                                 id="required"
                                 checked={selectedField.required || false}
-                                onChange={(e) => {
+                                onCheckedChange={(checked) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, required: e.target.checked } : f,
+                                      f.id === selectedFieldId ? { ...f, required: !!checked } : f,
                                     ),
                                   );
                                 }}
-                                className="h-3 w-3"
                               />
-                              <Label htmlFor="required" className="text-xs">Required</Label>
+                              <Label htmlFor="required" className="text-xs cursor-pointer">Required</Label>
                             </div>
                             
                             {/* Disabled - Show for all */}
                             <div className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
+                              <Checkbox
                                 id="disabled"
                                 checked={selectedField.disabled || false}
-                                onChange={(e) => {
+                                onCheckedChange={(checked) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, disabled: e.target.checked } : f,
+                                      f.id === selectedFieldId ? { ...f, disabled: !!checked } : f,
                                     ),
                                   );
                                 }}
-                                className="h-3 w-3"
                               />
-                              <Label htmlFor="disabled" className="text-xs">Disabled</Label>
+                              <Label htmlFor="disabled" className="text-xs cursor-pointer">Disabled</Label>
                             </div>
                             
                             {/* Read Only - Only for text inputs */}
                             {isTextInput && (
                               <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
+                                <Checkbox
                                   id="readonly"
                                   checked={selectedField.readonly || false}
-                                  onChange={(e) => {
+                                  onCheckedChange={(checked) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, readonly: e.target.checked } : f,
+                                        f.id === selectedFieldId ? { ...f, readonly: !!checked } : f,
                                       ),
                                     );
                                   }}
-                                  className="h-3 w-3"
                                 />
-                                <Label htmlFor="readonly" className="text-xs">Read Only</Label>
+                                <Label htmlFor="readonly" className="text-xs cursor-pointer">Read Only</Label>
                               </div>
                             )}
                             
                             {/* Auto Focus - Show for text inputs and selects */}
                             {(isTextInput || fieldType === "select") && (
                               <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
+                                <Checkbox
                                   id="autofocus"
                                   checked={selectedField.autofocus || false}
-                                  onChange={(e) => {
+                                  onCheckedChange={(checked) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, autofocus: e.target.checked } : f,
+                                        f.id === selectedFieldId ? { ...f, autofocus: !!checked } : f,
                                       ),
                                     );
                                   }}
-                                  className="h-3 w-3"
                                 />
-                                <Label htmlFor="autofocus" className="text-xs">Auto Focus</Label>
+                                <Label htmlFor="autofocus" className="text-xs cursor-pointer">Auto Focus</Label>
                               </div>
                             )}
                             
                             {/* Multiple - Only for select and file inputs */}
                             {(fieldType === "select" || isFileInput) && (
                               <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
+                                <Checkbox
                                   id="multiple"
                                   checked={selectedField.multiple || false}
-                                  onChange={(e) => {
+                                  onCheckedChange={(checked) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, multiple: e.target.checked } : f,
+                                        f.id === selectedFieldId ? { ...f, multiple: !!checked } : f,
                                       ),
                                     );
                                   }}
-                                  className="h-3 w-3"
                                 />
-                                <Label htmlFor="multiple" className="text-xs">Multiple</Label>
+                                <Label htmlFor="multiple" className="text-xs cursor-pointer">Multiple</Label>
                               </div>
                             )}
                           </div>
