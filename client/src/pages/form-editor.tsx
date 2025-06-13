@@ -941,69 +941,192 @@ export default function FormEditor() {
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
                 <div className="w-full">
                   <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
-                    {formFields.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-center py-16">
-                        <div>
-                          <Grip className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            Start building your form
-                          </h3>
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Click on field icons from the left sidebar to add
-                            them to your form
-                          </p>
+                    {isPreviewMode ? (
+                      /* Preview Mode */
+                      <div className="max-w-2xl mx-auto">
+                        <div className="space-y-6">
+                          <div className="text-center border-b pb-4">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                              {formName || "Form Preview"}
+                            </h2>
+                            {formDescription && (
+                              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                                {formDescription}
+                              </p>
+                            )}
+                          </div>
+                          
+                          <form className="space-y-4">
+                            {formFields.map((field) => (
+                              <div key={field.id} className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {field.label}
+                                    {field.required && <span className="text-red-500">*</span>}
+                                  </Label>
+                                </div>
+                                
+                                {field.hint && (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {field.hint}
+                                  </p>
+                                )}
+                                
+                                <div className="relative">
+                                  {field.prefix && (
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                                      {field.prefix}
+                                    </span>
+                                  )}
+                                  
+                                  {field.type === "text" || field.type === "email" || field.type === "number" ? (
+                                    <Input
+                                      type={field.type}
+                                      placeholder={field.placeholder}
+                                      disabled={field.disabled}
+                                      readOnly={field.readonly}
+                                      autoFocus={field.autofocus}
+                                      autoComplete={field.autocomplete}
+                                      className={`${field.prefix ? 'pl-8' : ''} ${field.suffix ? 'pr-8' : ''} ${field.class}`}
+                                      style={{ width: field.width }}
+                                    />
+                                  ) : field.type === "checkbox" ? (
+                                    <div className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        disabled={field.disabled}
+                                        className="h-4 w-4"
+                                      />
+                                      <span className="text-sm">{field.placeholder || "Check this option"}</span>
+                                    </div>
+                                  ) : field.type === "radio" ? (
+                                    <div className="space-y-2">
+                                      {field.options?.map((option, index) => (
+                                        <div key={index} className="flex items-center space-x-2">
+                                          <input
+                                            type="radio"
+                                            name={field.name}
+                                            value={option.value}
+                                            disabled={field.disabled}
+                                            className="h-4 w-4"
+                                          />
+                                          <span className="text-sm">{option.label}</span>
+                                        </div>
+                                      )) || (
+                                        <div className="flex items-center space-x-2">
+                                          <input type="radio" disabled className="h-4 w-4" />
+                                          <span className="text-sm text-gray-400">No options configured</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : field.type === "select" ? (
+                                    <Select disabled={field.disabled}>
+                                      <SelectTrigger className={field.class} style={{ width: field.width }}>
+                                        <SelectValue placeholder={field.placeholder} />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {field.options?.map((option, index) => (
+                                          <SelectItem key={index} value={option.value}>
+                                            {option.label}
+                                          </SelectItem>
+                                        )) || (
+                                          <SelectItem value="no-options">No options configured</SelectItem>
+                                        )}
+                                      </SelectContent>
+                                    </Select>
+                                  ) : null}
+                                  
+                                  {field.suffix && (
+                                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                                      {field.suffix}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            
+                            {formFields.length === 0 && (
+                              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                No form fields to preview. Switch to edit mode to add fields.
+                              </div>
+                            )}
+                            
+                            {formFields.length > 0 && (
+                              <div className="pt-4">
+                                <Button type="button" className="w-full">
+                                  Submit Form
+                                </Button>
+                              </div>
+                            )}
+                          </form>
                         </div>
                       </div>
                     ) : (
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                      >
-                        <SortableContext
-                          items={formFields.map((f) => f.id)}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          <div
-                            className={`${
-                              formConfig.layout === "two-column"
-                                ? "grid grid-cols-2"
-                                : formConfig.layout === "grid"
-                                  ? "grid"
-                                  : formConfig.layout === "mixed"
-                                    ? "space-y-4"
-                                    : "flex flex-col"
-                            }`}
-                            style={{
-                              gap:
-                                formConfig.layout !== "mixed"
-                                  ? getSpacingValue()
-                                  : undefined,
-                              ...(formConfig.layout === "grid" && {
-                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
-                              }),
-                            }}
-                          >
-                            {formFields.map((field) => (
-                              <SortableField
-                                key={field.id}
-                                field={field}
-                                isSelected={selectedFieldId === field.id}
-                                onSelect={() => handleFieldSelect(field.id)}
-                                onUpdate={(updates) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === field.id
-                                        ? { ...f, ...updates }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                              />
-                            ))}
+                      /* Edit Mode */
+                      formFields.length === 0 ? (
+                        <div className="flex items-center justify-center h-full text-center py-16">
+                          <div>
+                            <Grip className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                              Start building your form
+                            </h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">
+                              Click on field icons from the left sidebar to add
+                              them to your form
+                            </p>
                           </div>
-                        </SortableContext>
-                      </DndContext>
+                        </div>
+                      ) : (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={formFields.map((f) => f.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div
+                              className={`${
+                                formConfig.layout === "two-column"
+                                  ? "grid grid-cols-2"
+                                  : formConfig.layout === "grid"
+                                    ? "grid"
+                                    : formConfig.layout === "mixed"
+                                      ? "space-y-4"
+                                      : "flex flex-col"
+                              }`}
+                              style={{
+                                gap:
+                                  formConfig.layout !== "mixed"
+                                    ? getSpacingValue()
+                                    : undefined,
+                                ...(formConfig.layout === "grid" && {
+                                  gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
+                                }),
+                              }}
+                            >
+                              {formFields.map((field) => (
+                                <SortableField
+                                  key={field.id}
+                                  field={field}
+                                  isSelected={selectedFieldId === field.id}
+                                  onSelect={() => handleFieldSelect(field.id)}
+                                  onUpdate={(updates) => {
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === field.id
+                                          ? { ...f, ...updates }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      )
                     )}
                   </div>
                 </div>
@@ -1524,6 +1647,427 @@ export default function FormEditor() {
                           className="mt-1 h-8 text-xs"
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Options Management (for select, radio, checkbox) */}
+                  {(formFields.find((f) => f.id === selectedFieldId)?.type === "select" || 
+                    formFields.find((f) => f.id === selectedFieldId)?.type === "radio") && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Options</h4>
+                      
+                      <div>
+                        <Label className="text-xs font-medium">Option Source</Label>
+                        <Input
+                          value={formFields.find((f) => f.id === selectedFieldId)?.optionSource || ""}
+                          onChange={(e) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, optionSource: e.target.value } : f,
+                              ),
+                            );
+                          }}
+                          className="mt-1 h-8 text-xs"
+                          placeholder="API endpoint or function name"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-xs font-medium">Static Options</Label>
+                        {(formFields.find((f) => f.id === selectedFieldId)?.options || []).map((option, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={option.label}
+                              onChange={(e) => {
+                                setFormFields((fields) =>
+                                  fields.map((f) =>
+                                    f.id === selectedFieldId 
+                                      ? { 
+                                          ...f, 
+                                          options: f.options?.map((opt, i) => 
+                                            i === index ? { ...opt, label: e.target.value } : opt
+                                          ) || []
+                                        } 
+                                      : f,
+                                  ),
+                                );
+                              }}
+                              className="h-8 text-xs flex-1"
+                              placeholder="Label"
+                            />
+                            <Input
+                              value={option.value}
+                              onChange={(e) => {
+                                setFormFields((fields) =>
+                                  fields.map((f) =>
+                                    f.id === selectedFieldId 
+                                      ? { 
+                                          ...f, 
+                                          options: f.options?.map((opt, i) => 
+                                            i === index ? { ...opt, value: e.target.value } : opt
+                                          ) || []
+                                        } 
+                                      : f,
+                                  ),
+                                );
+                              }}
+                              className="h-8 text-xs flex-1"
+                              placeholder="Value"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setFormFields((fields) =>
+                                  fields.map((f) =>
+                                    f.id === selectedFieldId 
+                                      ? { 
+                                          ...f, 
+                                          options: f.options?.filter((_, i) => i !== index) || []
+                                        } 
+                                      : f,
+                                  ),
+                                );
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { 
+                                      ...f, 
+                                      options: [...(f.options || []), { label: "", value: "" }]
+                                    } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                          className="h-8 text-xs w-full"
+                        >
+                          + Add Option
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Date Configuration */}
+                  {formFields.find((f) => f.id === selectedFieldId)?.type === "date" && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Date Settings</h4>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs font-medium">Min Date</Label>
+                          <Input
+                            type="date"
+                            value={formFields.find((f) => f.id === selectedFieldId)?.minDate || ""}
+                            onChange={(e) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId ? { ...f, minDate: e.target.value } : f,
+                                ),
+                              );
+                            }}
+                            className="mt-1 h-8 text-xs"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs font-medium">Max Date</Label>
+                          <Input
+                            type="date"
+                            value={formFields.find((f) => f.id === selectedFieldId)?.maxDate || ""}
+                            onChange={(e) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId ? { ...f, maxDate: e.target.value } : f,
+                                ),
+                              );
+                            }}
+                            className="mt-1 h-8 text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs font-medium">Date Format</Label>
+                        <Select
+                          value={formFields.find((f) => f.id === selectedFieldId)?.dateFormat || "YYYY-MM-DD"}
+                          onValueChange={(value) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId ? { ...f, dateFormat: value } : f,
+                              ),
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="mt-1 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                            <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                            <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                            <SelectItem value="DD-MM-YYYY">DD-MM-YYYY</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conditional Logic */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Conditional Logic</h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">Condition Type</Label>
+                        <Select
+                          value={formFields.find((f) => f.id === selectedFieldId)?.condition?.type || "visibility"}
+                          onValueChange={(value) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { 
+                                      ...f, 
+                                      condition: { 
+                                        ...f.condition, 
+                                        type: value as "visibility" | "enable" | "value" 
+                                      } 
+                                    } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="mt-1 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="visibility">Visibility</SelectItem>
+                            <SelectItem value="enable">Enable/Disable</SelectItem>
+                            <SelectItem value="value">Auto Value</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs font-medium">Logic</Label>
+                        <Select
+                          value={formFields.find((f) => f.id === selectedFieldId)?.condition?.logic || "AND"}
+                          onValueChange={(value) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId 
+                                  ? { 
+                                      ...f, 
+                                      condition: { 
+                                        ...f.condition, 
+                                        logic: value as "AND" | "OR" 
+                                      } 
+                                    } 
+                                  : f,
+                              ),
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="mt-1 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AND">AND</SelectItem>
+                            <SelectItem value="OR">OR</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Condition Rules</Label>
+                      {(formFields.find((f) => f.id === selectedFieldId)?.condition?.rules || []).map((rule, index) => (
+                        <div key={index} className="grid grid-cols-4 gap-2">
+                          <Select
+                            value={rule.field}
+                            onValueChange={(value) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId 
+                                    ? { 
+                                        ...f, 
+                                        condition: {
+                                          ...f.condition,
+                                          rules: f.condition?.rules?.map((r, i) => 
+                                            i === index ? { ...r, field: value } : r
+                                          ) || []
+                                        }
+                                      } 
+                                    : f,
+                                ),
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {formFields
+                                .filter(f => f.id !== selectedFieldId)
+                                .map(field => (
+                                  <SelectItem key={field.id} value={field.name}>
+                                    {field.label}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                          
+                          <Select
+                            value={rule.operator}
+                            onValueChange={(value) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId 
+                                    ? { 
+                                        ...f, 
+                                        condition: {
+                                          ...f.condition,
+                                          rules: f.condition?.rules?.map((r, i) => 
+                                            i === index ? { ...r, operator: value as any } : r
+                                          ) || []
+                                        }
+                                      } 
+                                    : f,
+                                ),
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Op" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="==">=</SelectItem>
+                              <SelectItem value="!=">!=</SelectItem>
+                              <SelectItem value=">">&gt;</SelectItem>
+                              <SelectItem value=">=">&gt;=</SelectItem>
+                              <SelectItem value="<">&lt;</SelectItem>
+                              <SelectItem value="<=">&lt;=</SelectItem>
+                              <SelectItem value="in">in</SelectItem>
+                              <SelectItem value="not-in">not in</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          
+                          <Input
+                            value={rule.value}
+                            onChange={(e) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId 
+                                    ? { 
+                                        ...f, 
+                                        condition: {
+                                          ...f.condition,
+                                          rules: f.condition?.rules?.map((r, i) => 
+                                            i === index ? { ...r, value: e.target.value } : r
+                                          ) || []
+                                        }
+                                      } 
+                                    : f,
+                                ),
+                              );
+                            }}
+                            className="h-8 text-xs"
+                            placeholder="Value"
+                          />
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId 
+                                    ? { 
+                                        ...f, 
+                                        condition: {
+                                          ...f.condition,
+                                          rules: f.condition?.rules?.filter((_, i) => i !== index) || []
+                                        }
+                                      } 
+                                    : f,
+                                ),
+                              );
+                            }}
+                            className="h-8 w-8 p-0"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId 
+                                ? { 
+                                    ...f, 
+                                    condition: {
+                                      ...f.condition,
+                                      rules: [...(f.condition?.rules || []), { 
+                                        field: "", 
+                                        operator: "==" as const, 
+                                        value: "" 
+                                      }]
+                                    }
+                                  } 
+                                : f,
+                            ),
+                          );
+                        }}
+                        className="h-8 text-xs w-full"
+                      >
+                        + Add Rule
+                      </Button>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Watch Fields</Label>
+                      <Input
+                        value={(formFields.find((f) => f.id === selectedFieldId)?.watch || []).join(", ")}
+                        onChange={(e) => {
+                          const watchFields = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId ? { ...f, watch: watchFields } : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                        placeholder="field1, field2, field3"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-medium">Calculated Value</Label>
+                      <Input
+                        value={formFields.find((f) => f.id === selectedFieldId)?.calculatedValue || ""}
+                        onChange={(e) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId ? { ...f, calculatedValue: e.target.value } : f,
+                            ),
+                          );
+                        }}
+                        className="mt-1 h-8 text-xs"
+                        placeholder="Expression or function"
+                      />
                     </div>
                   </div>
                 </div>
