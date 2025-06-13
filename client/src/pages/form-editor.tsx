@@ -301,10 +301,10 @@ export default function FormEditor() {
       setFormDescription("");
       setFormFields([]);
       setSelectedFieldId(null);
-      
+
       // Generate public form URL
-      const publicUrl = `${window.location.origin}/form/${currentProjectId}/${formName.trim().toLowerCase().replace(/\s+/g, '-')}`;
-      
+      const publicUrl = `${window.location.origin}/form/${currentProjectId}/${formName.trim().toLowerCase().replace(/\s+/g, "-")}`;
+
       toast({
         title: "Form created successfully",
         description: "Click to copy the public form URL",
@@ -432,13 +432,13 @@ export default function FormEditor() {
           maxLength: "Value is too long",
           pattern: "Invalid format",
           min: "Value is too small",
-          max: "Value is too large"
-        }
+          max: "Value is too large",
+        },
       },
       condition: {
         type: "visibility",
         logic: "AND",
-        rules: []
+        rules: [],
       },
       order: formFields.length,
     };
@@ -566,13 +566,13 @@ export default function FormEditor() {
                 </Card>
               </div>
             ) : (
-              <div className="p-2 space-y-1">
+              <div className="p-4 space-y-1">
                 {filteredForms.map((form) => (
                   <div
                     key={form.id}
-                    className={`p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer group border ${
+                    className={`p-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer group border ${
                       selectedFormId === form.id
-                        ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950"
+                        ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950"
                         : "border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                     }`}
                     onClick={() => handleFormSelect(form.id)}
@@ -585,19 +585,6 @@ export default function FormEditor() {
                             {form.name}
                           </h3>
                         </div>
-                        <div className="flex items-center gap-2 mb-2">
-                          {getFormStatusBadge(form)}
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatDistanceToNow(new Date(form.createdAt!), {
-                              addSuffix: true,
-                            })}
-                          </span>
-                        </div>
-                        {form.description && (
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {form.description}
-                          </p>
-                        )}
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -616,7 +603,7 @@ export default function FormEditor() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              const publicUrl = `${window.location.origin}/form/${currentProjectId}/${form.name.toLowerCase().replace(/\s+/g, '-')}`;
+                              const publicUrl = `${window.location.origin}/form/${currentProjectId}/${form.name.toLowerCase().replace(/\s+/g, "-")}`;
                               navigator.clipboard.writeText(publicUrl);
                               toast({
                                 title: "URL copied",
@@ -861,7 +848,10 @@ export default function FormEditor() {
                         });
                       }}
                     />
-                    <Label htmlFor="show-labels" className="text-xs cursor-pointer">
+                    <Label
+                      htmlFor="show-labels"
+                      className="text-xs cursor-pointer"
+                    >
                       Show Labels
                     </Label>
                   </div>
@@ -1005,8 +995,10 @@ export default function FormEditor() {
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4">
                       <div className="space-y-4">
-                        <h4 className="font-medium text-sm">Button Configuration</h4>
-                        
+                        <h4 className="font-medium text-sm">
+                          Button Configuration
+                        </h4>
+
                         <div className="space-y-3">
                           <div>
                             <Label className="text-xs">Button Layout</Label>
@@ -1043,7 +1035,10 @@ export default function FormEditor() {
                                 });
                               }}
                             />
-                            <Label htmlFor="show-cancel" className="text-xs cursor-pointer">
+                            <Label
+                              htmlFor="show-cancel"
+                              className="text-xs cursor-pointer"
+                            >
                               Show Cancel Button
                             </Label>
                           </div>
@@ -1114,8 +1109,8 @@ export default function FormEditor() {
                     </PopoverContent>
                   </Popover>
 
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsPreviewMode(!isPreviewMode)}
                   >
@@ -1147,7 +1142,7 @@ export default function FormEditor() {
                               </p>
                             )}
                           </div>
-                          
+
                           <form className="w-full">
                             <div
                               className={`w-full ${
@@ -1170,41 +1165,59 @@ export default function FormEditor() {
                               }}
                             >
                               {formFields.map((field) => (
-                                <div key={field.id} className={`${
-                                  field.layout === "horizontal" 
-                                    ? "flex items-center gap-4" 
-                                    : field.layout === "inline"
-                                      ? "flex items-center gap-2"
-                                      : "space-y-2"
-                                }`}>
+                                <div
+                                  key={field.id}
+                                  className={`${
+                                    field.layout === "horizontal"
+                                      ? "flex items-center gap-4"
+                                      : field.layout === "inline"
+                                        ? "flex items-center gap-2"
+                                        : "space-y-2"
+                                  }`}
+                                >
                                   {formConfig.showLabels && (
-                                    <div className={`${
-                                      field.layout === "horizontal" ? "min-w-[120px]" : ""
-                                    }`}>
+                                    <div
+                                      className={`${
+                                        field.layout === "horizontal"
+                                          ? "min-w-[120px]"
+                                          : ""
+                                      }`}
+                                    >
                                       <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {field.label}
-                                        {field.required && <span className="text-red-500">*</span>}
+                                        {field.required && (
+                                          <span className="text-red-500">
+                                            *
+                                          </span>
+                                        )}
                                       </Label>
                                     </div>
                                   )}
-                                  
-                                  <div className={`${
-                                    field.layout === "horizontal" || field.layout === "inline" ? "flex-1" : ""
-                                  }`}>
+
+                                  <div
+                                    className={`${
+                                      field.layout === "horizontal" ||
+                                      field.layout === "inline"
+                                        ? "flex-1"
+                                        : ""
+                                    }`}
+                                  >
                                     {field.hint && (
                                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                                         {field.hint}
                                       </p>
                                     )}
-                                    
+
                                     <div className="relative">
                                       {field.prefix && (
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
                                           {field.prefix}
                                         </span>
                                       )}
-                                      
-                                      {field.type === "text" || field.type === "email" || field.type === "number" ? (
+
+                                      {field.type === "text" ||
+                                      field.type === "email" ||
+                                      field.type === "number" ? (
                                         <Input
                                           type={field.type}
                                           placeholder={field.placeholder}
@@ -1212,10 +1225,12 @@ export default function FormEditor() {
                                           readOnly={field.readonly}
                                           autoFocus={field.autofocus}
                                           autoComplete={field.autocomplete}
-                                          className={`${field.prefix ? 'pl-8' : ''} ${field.suffix ? 'pr-8' : ''} ${field.class || ''}`}
-                                          style={{ 
+                                          className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
+                                          style={{
                                             width: field.width || "100%",
-                                            ...(field.layout === "inline" && { minWidth: "120px" })
+                                            ...(field.layout === "inline" && {
+                                              minWidth: "120px",
+                                            }),
                                           }}
                                         />
                                       ) : field.type === "checkbox" ? (
@@ -1224,62 +1239,88 @@ export default function FormEditor() {
                                             disabled={field.disabled}
                                             id={`checkbox-${field.id}`}
                                           />
-                                          <Label 
-                                            htmlFor={`checkbox-${field.id}`} 
+                                          <Label
+                                            htmlFor={`checkbox-${field.id}`}
                                             className="text-sm font-normal cursor-pointer"
                                           >
-                                            {field.placeholder || "Check this option"}
+                                            {field.placeholder ||
+                                              "Check this option"}
                                           </Label>
                                         </div>
                                       ) : field.type === "radio" ? (
-                                        <RadioGroup 
+                                        <RadioGroup
                                           disabled={field.disabled}
-                                          className={field.layout === "horizontal" ? "flex flex-wrap gap-4" : "space-y-2"}
+                                          className={
+                                            field.layout === "horizontal"
+                                              ? "flex flex-wrap gap-4"
+                                              : "space-y-2"
+                                          }
                                         >
-                                          {field.options?.map((option: any, index: number) => (
-                                            <div key={index} className="flex items-center space-x-2">
-                                              <RadioGroupItem
-                                                value={option.value}
-                                                id={`radio-${field.id}-${index}`}
-                                                disabled={field.disabled}
-                                              />
-                                              <Label 
-                                                htmlFor={`radio-${field.id}-${index}`}
-                                                className="text-sm font-normal cursor-pointer"
+                                          {field.options?.map(
+                                            (option: any, index: number) => (
+                                              <div
+                                                key={index}
+                                                className="flex items-center space-x-2"
                                               >
-                                                {option.label}
-                                              </Label>
-                                            </div>
-                                          )) || (
+                                                <RadioGroupItem
+                                                  value={option.value}
+                                                  id={`radio-${field.id}-${index}`}
+                                                  disabled={field.disabled}
+                                                />
+                                                <Label
+                                                  htmlFor={`radio-${field.id}-${index}`}
+                                                  className="text-sm font-normal cursor-pointer"
+                                                >
+                                                  {option.label}
+                                                </Label>
+                                              </div>
+                                            ),
+                                          ) || (
                                             <div className="flex items-center space-x-2">
-                                              <RadioGroupItem value="no-options" disabled />
-                                              <Label className="text-sm text-gray-400">No options configured</Label>
+                                              <RadioGroupItem
+                                                value="no-options"
+                                                disabled
+                                              />
+                                              <Label className="text-sm text-gray-400">
+                                                No options configured
+                                              </Label>
                                             </div>
                                           )}
                                         </RadioGroup>
                                       ) : field.type === "select" ? (
                                         <Select disabled={field.disabled}>
-                                          <SelectTrigger 
-                                            className={field.class || ''}
-                                            style={{ 
+                                          <SelectTrigger
+                                            className={field.class || ""}
+                                            style={{
                                               width: field.width || "100%",
-                                              ...(field.layout === "inline" && { minWidth: "120px" })
+                                              ...(field.layout === "inline" && {
+                                                minWidth: "120px",
+                                              }),
                                             }}
                                           >
-                                            <SelectValue placeholder={field.placeholder} />
+                                            <SelectValue
+                                              placeholder={field.placeholder}
+                                            />
                                           </SelectTrigger>
                                           <SelectContent>
-                                            {field.options?.map((option: any, index: number) => (
-                                              <SelectItem key={index} value={option.value}>
-                                                {option.label}
+                                            {field.options?.map(
+                                              (option: any, index: number) => (
+                                                <SelectItem
+                                                  key={index}
+                                                  value={option.value}
+                                                >
+                                                  {option.label}
+                                                </SelectItem>
+                                              ),
+                                            ) || (
+                                              <SelectItem value="no-options">
+                                                No options configured
                                               </SelectItem>
-                                            )) || (
-                                              <SelectItem value="no-options">No options configured</SelectItem>
                                             )}
                                           </SelectContent>
                                         </Select>
                                       ) : null}
-                                      
+
                                       {field.suffix && (
                                         <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
                                           {field.suffix}
@@ -1290,62 +1331,80 @@ export default function FormEditor() {
                                 </div>
                               ))}
                             </div>
-                            
+
                             {formFields.length === 0 && (
                               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                No form fields to preview. Switch to edit mode to add fields.
+                                No form fields to preview. Switch to edit mode
+                                to add fields.
                               </div>
                             )}
-                            
+
                             {formFields.length > 0 && (
-                              <div className={`pt-6 ${
-                                formConfig.buttonLayout === "left" ? "flex justify-start" :
-                                formConfig.buttonLayout === "center" ? "flex justify-center" :
-                                formConfig.buttonLayout === "right" ? "flex justify-end" :
-                                formConfig.buttonLayout === "justify" ? "flex justify-between" :
-                                formConfig.buttonLayout === "split" ? "flex justify-between" :
-                                "flex justify-center"
-                              }`}>
-                                {formConfig.buttonLayout === "split" && formConfig.showCancelButton && (
-                                  <Button 
-                                    type="button"
-                                    variant="outline"
-                                    style={{
-                                      backgroundColor: "transparent",
-                                      borderColor: formConfig.cancelButtonColor,
-                                      color: formConfig.cancelButtonColor
-                                    }}
-                                    className="px-6"
-                                  >
-                                    {formConfig.cancelButtonText}
-                                  </Button>
-                                )}
-                                
-                                <div className={`${
-                                  formConfig.buttonLayout === "split" ? "" : 
-                                  formConfig.showCancelButton ? "flex gap-3" : ""
-                                }`}>
-                                  {formConfig.showCancelButton && formConfig.buttonLayout !== "split" && (
-                                    <Button 
+                              <div
+                                className={`pt-6 ${
+                                  formConfig.buttonLayout === "left"
+                                    ? "flex justify-start"
+                                    : formConfig.buttonLayout === "center"
+                                      ? "flex justify-center"
+                                      : formConfig.buttonLayout === "right"
+                                        ? "flex justify-end"
+                                        : formConfig.buttonLayout === "justify"
+                                          ? "flex justify-between"
+                                          : formConfig.buttonLayout === "split"
+                                            ? "flex justify-between"
+                                            : "flex justify-center"
+                                }`}
+                              >
+                                {formConfig.buttonLayout === "split" &&
+                                  formConfig.showCancelButton && (
+                                    <Button
                                       type="button"
                                       variant="outline"
                                       style={{
                                         backgroundColor: "transparent",
-                                        borderColor: formConfig.cancelButtonColor,
-                                        color: formConfig.cancelButtonColor
+                                        borderColor:
+                                          formConfig.cancelButtonColor,
+                                        color: formConfig.cancelButtonColor,
                                       }}
                                       className="px-6"
                                     >
                                       {formConfig.cancelButtonText}
                                     </Button>
                                   )}
-                                  
-                                  <Button 
+
+                                <div
+                                  className={`${
+                                    formConfig.buttonLayout === "split"
+                                      ? ""
+                                      : formConfig.showCancelButton
+                                        ? "flex gap-3"
+                                        : ""
+                                  }`}
+                                >
+                                  {formConfig.showCancelButton &&
+                                    formConfig.buttonLayout !== "split" && (
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        style={{
+                                          backgroundColor: "transparent",
+                                          borderColor:
+                                            formConfig.cancelButtonColor,
+                                          color: formConfig.cancelButtonColor,
+                                        }}
+                                        className="px-6"
+                                      >
+                                        {formConfig.cancelButtonText}
+                                      </Button>
+                                    )}
+
+                                  <Button
                                     type="submit"
                                     style={{
-                                      backgroundColor: formConfig.submitButtonColor,
+                                      backgroundColor:
+                                        formConfig.submitButtonColor,
                                       borderColor: formConfig.submitButtonColor,
-                                      color: "#ffffff"
+                                      color: "#ffffff",
                                     }}
                                     className="px-6"
                                   >
@@ -1357,72 +1416,70 @@ export default function FormEditor() {
                           </form>
                         </div>
                       </div>
-                    ) : (
-                      /* Edit Mode */
-                      formFields.length === 0 ? (
-                        <div className="flex items-center justify-center h-full text-center py-16">
-                          <div>
-                            <Grip className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                              Start building your form
-                            </h3>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm">
-                              Click on field icons from the left sidebar to add
-                              them to your form
-                            </p>
-                          </div>
+                    ) : /* Edit Mode */
+                    formFields.length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-center py-16">
+                        <div>
+                          <Grip className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                            Start building your form
+                          </h3>
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">
+                            Click on field icons from the left sidebar to add
+                            them to your form
+                          </p>
                         </div>
-                      ) : (
-                        <DndContext
-                          sensors={sensors}
-                          collisionDetection={closestCenter}
-                          onDragEnd={handleDragEnd}
+                      </div>
+                    ) : (
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext
+                          items={formFields.map((f) => f.id)}
+                          strategy={verticalListSortingStrategy}
                         >
-                          <SortableContext
-                            items={formFields.map((f) => f.id)}
-                            strategy={verticalListSortingStrategy}
+                          <div
+                            className={`${
+                              formConfig.layout === "two-column"
+                                ? "grid grid-cols-2"
+                                : formConfig.layout === "grid"
+                                  ? "grid"
+                                  : formConfig.layout === "mixed"
+                                    ? "space-y-4"
+                                    : "flex flex-col"
+                            }`}
+                            style={{
+                              gap:
+                                formConfig.layout !== "mixed"
+                                  ? getSpacingValue()
+                                  : undefined,
+                              ...(formConfig.layout === "grid" && {
+                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
+                              }),
+                            }}
                           >
-                            <div
-                              className={`${
-                                formConfig.layout === "two-column"
-                                  ? "grid grid-cols-2"
-                                  : formConfig.layout === "grid"
-                                    ? "grid"
-                                    : formConfig.layout === "mixed"
-                                      ? "space-y-4"
-                                      : "flex flex-col"
-                              }`}
-                              style={{
-                                gap:
-                                  formConfig.layout !== "mixed"
-                                    ? getSpacingValue()
-                                    : undefined,
-                                ...(formConfig.layout === "grid" && {
-                                  gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
-                                }),
-                              }}
-                            >
-                              {formFields.map((field) => (
-                                <SortableField
-                                  key={field.id}
-                                  field={field}
-                                  isSelected={selectedFieldId === field.id}
-                                  onSelect={() => handleFieldSelect(field.id)}
-                                  onUpdate={(updates) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === field.id
-                                          ? { ...f, ...updates }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </SortableContext>
-                        </DndContext>
-                      )
+                            {formFields.map((field) => (
+                              <SortableField
+                                key={field.id}
+                                field={field}
+                                isSelected={selectedFieldId === field.id}
+                                onSelect={() => handleFieldSelect(field.id)}
+                                onUpdate={(updates) => {
+                                  setFormFields((fields) =>
+                                    fields.map((f) =>
+                                      f.id === field.id
+                                        ? { ...f, ...updates }
+                                        : f,
+                                    ),
+                                  );
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     )}
                   </div>
                 </div>
@@ -1447,31 +1504,46 @@ export default function FormEditor() {
 
                 <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
                   {(() => {
-                    const selectedField = formFields.find((f) => f.id === selectedFieldId);
+                    const selectedField = formFields.find(
+                      (f) => f.id === selectedFieldId,
+                    );
                     if (!selectedField) return null;
-                    
+
                     const fieldType = selectedField.type;
-                    const isTextInput = ["text", "email", "number", "password"].includes(fieldType);
-                    const isSelectInput = ["select", "radio"].includes(fieldType);
+                    const isTextInput = [
+                      "text",
+                      "email",
+                      "number",
+                      "password",
+                    ].includes(fieldType);
+                    const isSelectInput = ["select", "radio"].includes(
+                      fieldType,
+                    );
                     const isFileInput = fieldType === "file";
                     const isDateInput = fieldType === "date";
                     const isCheckboxInput = fieldType === "checkbox";
-                    
+
                     return (
                       <>
                         {/* Basic Properties */}
                         <div className="space-y-4">
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Basic Properties</h4>
-                          
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                            Basic Properties
+                          </h4>
+
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <Label className="text-xs font-medium">Field Name</Label>
+                              <Label className="text-xs font-medium">
+                                Field Name
+                              </Label>
                               <Input
                                 value={selectedField.name || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, name: e.target.value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, name: e.target.value }
+                                        : f,
                                     ),
                                   );
                                 }}
@@ -1479,13 +1551,17 @@ export default function FormEditor() {
                               />
                             </div>
                             <div>
-                              <Label className="text-xs font-medium">Test ID</Label>
+                              <Label className="text-xs font-medium">
+                                Test ID
+                              </Label>
                               <Input
                                 value={selectedField.testId || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, testId: e.target.value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, testId: e.target.value }
+                                        : f,
                                     ),
                                   );
                                 }}
@@ -1501,7 +1577,9 @@ export default function FormEditor() {
                               onChange={(e) => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
-                                    f.id === selectedFieldId ? { ...f, label: e.target.value } : f,
+                                    f.id === selectedFieldId
+                                      ? { ...f, label: e.target.value }
+                                      : f,
                                   ),
                                 );
                               }}
@@ -1513,19 +1591,27 @@ export default function FormEditor() {
                           {fieldType !== "radio" && (
                             <div>
                               <Label className="text-xs font-medium">
-                                {isCheckboxInput ? "Checkbox Text" : "Placeholder"}
+                                {isCheckboxInput
+                                  ? "Checkbox Text"
+                                  : "Placeholder"}
                               </Label>
                               <Input
                                 value={selectedField.placeholder || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, placeholder: e.target.value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, placeholder: e.target.value }
+                                        : f,
                                     ),
                                   );
                                 }}
                                 className="mt-1 h-8 text-xs"
-                                placeholder={isCheckboxInput ? "Text next to checkbox" : "Placeholder text"}
+                                placeholder={
+                                  isCheckboxInput
+                                    ? "Text next to checkbox"
+                                    : "Placeholder text"
+                                }
                               />
                             </div>
                           )}
@@ -1537,7 +1623,9 @@ export default function FormEditor() {
                               onChange={(e) => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
-                                    f.id === selectedFieldId ? { ...f, hint: e.target.value } : f,
+                                    f.id === selectedFieldId
+                                      ? { ...f, hint: e.target.value }
+                                      : f,
                                   ),
                                 );
                               }}
@@ -1549,13 +1637,17 @@ export default function FormEditor() {
                           {/* Icon and CSS - Show for all */}
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <Label className="text-xs font-medium">Icon</Label>
+                              <Label className="text-xs font-medium">
+                                Icon
+                              </Label>
                               <Input
                                 value={selectedField.icon || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, icon: e.target.value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, icon: e.target.value }
+                                        : f,
                                     ),
                                   );
                                 }}
@@ -1564,13 +1656,17 @@ export default function FormEditor() {
                               />
                             </div>
                             <div>
-                              <Label className="text-xs font-medium">CSS Class</Label>
+                              <Label className="text-xs font-medium">
+                                CSS Class
+                              </Label>
                               <Input
                                 value={selectedField.class || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, class: e.target.value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, class: e.target.value }
+                                        : f,
                                     ),
                                   );
                                 }}
@@ -1584,13 +1680,17 @@ export default function FormEditor() {
                           {isTextInput && (
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <Label className="text-xs font-medium">Prefix</Label>
+                                <Label className="text-xs font-medium">
+                                  Prefix
+                                </Label>
                                 <Input
                                   value={selectedField.prefix || ""}
                                   onChange={(e) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, prefix: e.target.value } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, prefix: e.target.value }
+                                          : f,
                                       ),
                                     );
                                   }}
@@ -1599,13 +1699,17 @@ export default function FormEditor() {
                                 />
                               </div>
                               <div>
-                                <Label className="text-xs font-medium">Suffix</Label>
+                                <Label className="text-xs font-medium">
+                                  Suffix
+                                </Label>
                                 <Input
                                   value={selectedField.suffix || ""}
                                   onChange={(e) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, suffix: e.target.value } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, suffix: e.target.value }
+                                          : f,
                                       ),
                                     );
                                   }}
@@ -1619,8 +1723,10 @@ export default function FormEditor() {
 
                         {/* Field States */}
                         <div className="space-y-3">
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Field States</h4>
-                          
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                            Field States
+                          </h4>
+
                           <div className="grid grid-cols-2 gap-2">
                             {/* Required - Show for all except file inputs (typically) */}
                             <div className="flex items-center space-x-2">
@@ -1630,14 +1736,21 @@ export default function FormEditor() {
                                 onCheckedChange={(checked) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, required: !!checked } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, required: !!checked }
+                                        : f,
                                     ),
                                   );
                                 }}
                               />
-                              <Label htmlFor="required" className="text-xs cursor-pointer">Required</Label>
+                              <Label
+                                htmlFor="required"
+                                className="text-xs cursor-pointer"
+                              >
+                                Required
+                              </Label>
                             </div>
-                            
+
                             {/* Disabled - Show for all */}
                             <div className="flex items-center space-x-2">
                               <Checkbox
@@ -1646,14 +1759,21 @@ export default function FormEditor() {
                                 onCheckedChange={(checked) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, disabled: !!checked } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, disabled: !!checked }
+                                        : f,
                                     ),
                                   );
                                 }}
                               />
-                              <Label htmlFor="disabled" className="text-xs cursor-pointer">Disabled</Label>
+                              <Label
+                                htmlFor="disabled"
+                                className="text-xs cursor-pointer"
+                              >
+                                Disabled
+                              </Label>
                             </div>
-                            
+
                             {/* Read Only - Only for text inputs */}
                             {isTextInput && (
                               <div className="flex items-center space-x-2">
@@ -1663,15 +1783,22 @@ export default function FormEditor() {
                                   onCheckedChange={(checked) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, readonly: !!checked } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, readonly: !!checked }
+                                          : f,
                                       ),
                                     );
                                   }}
                                 />
-                                <Label htmlFor="readonly" className="text-xs cursor-pointer">Read Only</Label>
+                                <Label
+                                  htmlFor="readonly"
+                                  className="text-xs cursor-pointer"
+                                >
+                                  Read Only
+                                </Label>
                               </div>
                             )}
-                            
+
                             {/* Auto Focus - Show for text inputs and selects */}
                             {(isTextInput || fieldType === "select") && (
                               <div className="flex items-center space-x-2">
@@ -1681,15 +1808,22 @@ export default function FormEditor() {
                                   onCheckedChange={(checked) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, autofocus: !!checked } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, autofocus: !!checked }
+                                          : f,
                                       ),
                                     );
                                   }}
                                 />
-                                <Label htmlFor="autofocus" className="text-xs cursor-pointer">Auto Focus</Label>
+                                <Label
+                                  htmlFor="autofocus"
+                                  className="text-xs cursor-pointer"
+                                >
+                                  Auto Focus
+                                </Label>
                               </div>
                             )}
-                            
+
                             {/* Multiple - Only for select and file inputs */}
                             {(fieldType === "select" || isFileInput) && (
                               <div className="flex items-center space-x-2">
@@ -1699,12 +1833,19 @@ export default function FormEditor() {
                                   onCheckedChange={(checked) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, multiple: !!checked } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, multiple: !!checked }
+                                          : f,
                                       ),
                                     );
                                   }}
                                 />
-                                <Label htmlFor="multiple" className="text-xs cursor-pointer">Multiple</Label>
+                                <Label
+                                  htmlFor="multiple"
+                                  className="text-xs cursor-pointer"
+                                >
+                                  Multiple
+                                </Label>
                               </div>
                             )}
                           </div>
@@ -1712,22 +1853,36 @@ export default function FormEditor() {
 
                         {/* Validation Rules - Only show relevant validations per field type */}
                         <div className="space-y-3">
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Validation</h4>
-                          
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                            Validation
+                          </h4>
+
                           {/* Text length validation - Only for text inputs */}
                           {isTextInput && (
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <Label className="text-xs font-medium">Min Length</Label>
+                                <Label className="text-xs font-medium">
+                                  Min Length
+                                </Label>
                                 <Input
                                   type="number"
-                                  value={selectedField.validation?.minLength || ""}
+                                  value={
+                                    selectedField.validation?.minLength || ""
+                                  }
                                   onChange={(e) => {
-                                    const value = e.target.value ? parseInt(e.target.value) : null;
+                                    const value = e.target.value
+                                      ? parseInt(e.target.value)
+                                      : null;
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId 
-                                          ? { ...f, validation: { ...f.validation, minLength: value } } 
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              validation: {
+                                                ...f.validation,
+                                                minLength: value,
+                                              },
+                                            }
                                           : f,
                                       ),
                                     );
@@ -1736,16 +1891,28 @@ export default function FormEditor() {
                                 />
                               </div>
                               <div>
-                                <Label className="text-xs font-medium">Max Length</Label>
+                                <Label className="text-xs font-medium">
+                                  Max Length
+                                </Label>
                                 <Input
                                   type="number"
-                                  value={selectedField.validation?.maxLength || ""}
+                                  value={
+                                    selectedField.validation?.maxLength || ""
+                                  }
                                   onChange={(e) => {
-                                    const value = e.target.value ? parseInt(e.target.value) : null;
+                                    const value = e.target.value
+                                      ? parseInt(e.target.value)
+                                      : null;
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId 
-                                          ? { ...f, validation: { ...f.validation, maxLength: value } } 
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              validation: {
+                                                ...f.validation,
+                                                maxLength: value,
+                                              },
+                                            }
                                           : f,
                                       ),
                                     );
@@ -1760,16 +1927,26 @@ export default function FormEditor() {
                           {fieldType === "number" && (
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <Label className="text-xs font-medium">Min Value</Label>
+                                <Label className="text-xs font-medium">
+                                  Min Value
+                                </Label>
                                 <Input
                                   type="number"
                                   value={selectedField.validation?.min || ""}
                                   onChange={(e) => {
-                                    const value = e.target.value ? parseFloat(e.target.value) : null;
+                                    const value = e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : null;
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId 
-                                          ? { ...f, validation: { ...f.validation, min: value } } 
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              validation: {
+                                                ...f.validation,
+                                                min: value,
+                                              },
+                                            }
                                           : f,
                                       ),
                                     );
@@ -1778,16 +1955,26 @@ export default function FormEditor() {
                                 />
                               </div>
                               <div>
-                                <Label className="text-xs font-medium">Max Value</Label>
+                                <Label className="text-xs font-medium">
+                                  Max Value
+                                </Label>
                                 <Input
                                   type="number"
                                   value={selectedField.validation?.max || ""}
                                   onChange={(e) => {
-                                    const value = e.target.value ? parseFloat(e.target.value) : null;
+                                    const value = e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : null;
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId 
-                                          ? { ...f, validation: { ...f.validation, max: value } } 
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              validation: {
+                                                ...f.validation,
+                                                max: value,
+                                              },
+                                            }
                                           : f,
                                       ),
                                     );
@@ -1801,14 +1988,22 @@ export default function FormEditor() {
                           {/* Pattern validation - For text inputs */}
                           {isTextInput && (
                             <div>
-                              <Label className="text-xs font-medium">Pattern (Regex)</Label>
+                              <Label className="text-xs font-medium">
+                                Pattern (Regex)
+                              </Label>
                               <Input
                                 value={selectedField.validation?.pattern || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId 
-                                        ? { ...f, validation: { ...f.validation, pattern: e.target.value } } 
+                                      f.id === selectedFieldId
+                                        ? {
+                                            ...f,
+                                            validation: {
+                                              ...f.validation,
+                                              pattern: e.target.value,
+                                            },
+                                          }
                                         : f,
                                     ),
                                   );
@@ -1821,14 +2016,24 @@ export default function FormEditor() {
 
                           {/* Custom validator - Show for all field types */}
                           <div>
-                            <Label className="text-xs font-medium">Custom Validator</Label>
+                            <Label className="text-xs font-medium">
+                              Custom Validator
+                            </Label>
                             <Input
-                              value={selectedField.validation?.customValidator || ""}
+                              value={
+                                selectedField.validation?.customValidator || ""
+                              }
                               onChange={(e) => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
-                                    f.id === selectedFieldId 
-                                      ? { ...f, validation: { ...f.validation, customValidator: e.target.value } } 
+                                    f.id === selectedFieldId
+                                      ? {
+                                          ...f,
+                                          validation: {
+                                            ...f.validation,
+                                            customValidator: e.target.value,
+                                          },
+                                        }
                                       : f,
                                   ),
                                 );
@@ -1842,16 +2047,22 @@ export default function FormEditor() {
                         {/* Options Management - Only for select and radio */}
                         {isSelectInput && (
                           <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Options</h4>
-                            
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                              Options
+                            </h4>
+
                             <div>
-                              <Label className="text-xs font-medium">Option Source</Label>
+                              <Label className="text-xs font-medium">
+                                Option Source
+                              </Label>
                               <Input
                                 value={selectedField.optionSource || ""}
                                 onChange={(e) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, optionSource: e.target.value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, optionSource: e.target.value }
+                                        : f,
                                     ),
                                   );
                                 }}
@@ -1861,79 +2072,106 @@ export default function FormEditor() {
                             </div>
 
                             <div className="space-y-2">
-                              <Label className="text-xs font-medium">Static Options</Label>
-                              {(selectedField.options || []).map((option: any, index: number) => (
-                                <div key={index} className="flex gap-2">
-                                  <Input
-                                    value={option.label}
-                                    onChange={(e) => {
-                                      setFormFields((fields) =>
-                                        fields.map((f) =>
-                                          f.id === selectedFieldId 
-                                            ? { 
-                                                ...f, 
-                                                options: f.options?.map((opt: any, i: number) => 
-                                                  i === index ? { ...opt, label: e.target.value } : opt
-                                                ) || []
-                                              } 
-                                            : f,
-                                        ),
-                                      );
-                                    }}
-                                    className="h-8 text-xs flex-1"
-                                    placeholder="Label"
-                                  />
-                                  <Input
-                                    value={option.value}
-                                    onChange={(e) => {
-                                      setFormFields((fields) =>
-                                        fields.map((f) =>
-                                          f.id === selectedFieldId 
-                                            ? { 
-                                                ...f, 
-                                                options: f.options?.map((opt: any, i: number) => 
-                                                  i === index ? { ...opt, value: e.target.value } : opt
-                                                ) || []
-                                              } 
-                                            : f,
-                                        ),
-                                      );
-                                    }}
-                                    className="h-8 text-xs flex-1"
-                                    placeholder="Value"
-                                  />
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setFormFields((fields) =>
-                                        fields.map((f) =>
-                                          f.id === selectedFieldId 
-                                            ? { 
-                                                ...f, 
-                                                options: f.options?.filter((_: any, i: number) => i !== index) || []
-                                              } 
-                                            : f,
-                                        ),
-                                      );
-                                    }}
-                                    className="h-8 w-8 p-0"
-                                  >
-                                    ×
-                                  </Button>
-                                </div>
-                              ))}
+                              <Label className="text-xs font-medium">
+                                Static Options
+                              </Label>
+                              {(selectedField.options || []).map(
+                                (option: any, index: number) => (
+                                  <div key={index} className="flex gap-2">
+                                    <Input
+                                      value={option.label}
+                                      onChange={(e) => {
+                                        setFormFields((fields) =>
+                                          fields.map((f) =>
+                                            f.id === selectedFieldId
+                                              ? {
+                                                  ...f,
+                                                  options:
+                                                    f.options?.map(
+                                                      (opt: any, i: number) =>
+                                                        i === index
+                                                          ? {
+                                                              ...opt,
+                                                              label:
+                                                                e.target.value,
+                                                            }
+                                                          : opt,
+                                                    ) || [],
+                                                }
+                                              : f,
+                                          ),
+                                        );
+                                      }}
+                                      className="h-8 text-xs flex-1"
+                                      placeholder="Label"
+                                    />
+                                    <Input
+                                      value={option.value}
+                                      onChange={(e) => {
+                                        setFormFields((fields) =>
+                                          fields.map((f) =>
+                                            f.id === selectedFieldId
+                                              ? {
+                                                  ...f,
+                                                  options:
+                                                    f.options?.map(
+                                                      (opt: any, i: number) =>
+                                                        i === index
+                                                          ? {
+                                                              ...opt,
+                                                              value:
+                                                                e.target.value,
+                                                            }
+                                                          : opt,
+                                                    ) || [],
+                                                }
+                                              : f,
+                                          ),
+                                        );
+                                      }}
+                                      className="h-8 text-xs flex-1"
+                                      placeholder="Value"
+                                    />
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setFormFields((fields) =>
+                                          fields.map((f) =>
+                                            f.id === selectedFieldId
+                                              ? {
+                                                  ...f,
+                                                  options:
+                                                    f.options?.filter(
+                                                      (_: any, i: number) =>
+                                                        i !== index,
+                                                    ) || [],
+                                                }
+                                              : f,
+                                          ),
+                                        );
+                                      }}
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                ),
+                              )}
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId 
-                                        ? { 
-                                            ...f, 
-                                            options: [...(f.options || []), { label: "", value: "" }]
-                                          } 
+                                      f.id === selectedFieldId
+                                        ? {
+                                            ...f,
+                                            options: [
+                                              ...(f.options || []),
+                                              { label: "", value: "" },
+                                            ],
+                                          }
                                         : f,
                                     ),
                                   );
@@ -1949,18 +2187,24 @@ export default function FormEditor() {
                         {/* Date Configuration - Only for date inputs */}
                         {isDateInput && (
                           <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Date Settings</h4>
-                            
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                              Date Settings
+                            </h4>
+
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <Label className="text-xs font-medium">Min Date</Label>
+                                <Label className="text-xs font-medium">
+                                  Min Date
+                                </Label>
                                 <Input
                                   type="date"
                                   value={selectedField.minDate || ""}
                                   onChange={(e) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, minDate: e.target.value } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, minDate: e.target.value }
+                                          : f,
                                       ),
                                     );
                                   }}
@@ -1968,14 +2212,18 @@ export default function FormEditor() {
                                 />
                               </div>
                               <div>
-                                <Label className="text-xs font-medium">Max Date</Label>
+                                <Label className="text-xs font-medium">
+                                  Max Date
+                                </Label>
                                 <Input
                                   type="date"
                                   value={selectedField.maxDate || ""}
                                   onChange={(e) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, maxDate: e.target.value } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, maxDate: e.target.value }
+                                          : f,
                                       ),
                                     );
                                   }}
@@ -1985,13 +2233,17 @@ export default function FormEditor() {
                             </div>
 
                             <div>
-                              <Label className="text-xs font-medium">Date Format</Label>
+                              <Label className="text-xs font-medium">
+                                Date Format
+                              </Label>
                               <Select
                                 value={selectedField.dateFormat || "YYYY-MM-DD"}
                                 onValueChange={(value) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
-                                      f.id === selectedFieldId ? { ...f, dateFormat: value } : f,
+                                      f.id === selectedFieldId
+                                        ? { ...f, dateFormat: value }
+                                        : f,
                                     ),
                                   );
                                 }}
@@ -2000,10 +2252,18 @@ export default function FormEditor() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                                  <SelectItem value="DD-MM-YYYY">DD-MM-YYYY</SelectItem>
+                                  <SelectItem value="YYYY-MM-DD">
+                                    YYYY-MM-DD
+                                  </SelectItem>
+                                  <SelectItem value="MM/DD/YYYY">
+                                    MM/DD/YYYY
+                                  </SelectItem>
+                                  <SelectItem value="DD/MM/YYYY">
+                                    DD/MM/YYYY
+                                  </SelectItem>
+                                  <SelectItem value="DD-MM-YYYY">
+                                    DD-MM-YYYY
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -2013,17 +2273,23 @@ export default function FormEditor() {
                         {/* Layout & Styling - Show for relevant inputs */}
                         {(isTextInput || fieldType === "select") && (
                           <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Layout & Styling</h4>
-                            
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                              Layout & Styling
+                            </h4>
+
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <Label className="text-xs font-medium">Layout</Label>
+                                <Label className="text-xs font-medium">
+                                  Layout
+                                </Label>
                                 <Select
                                   value={selectedField.layout || "vertical"}
                                   onValueChange={(value) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, layout: value } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, layout: value }
+                                          : f,
                                       ),
                                     );
                                   }}
@@ -2032,21 +2298,31 @@ export default function FormEditor() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="vertical">Vertical</SelectItem>
-                                    <SelectItem value="horizontal">Horizontal</SelectItem>
-                                    <SelectItem value="inline">Inline</SelectItem>
+                                    <SelectItem value="vertical">
+                                      Vertical
+                                    </SelectItem>
+                                    <SelectItem value="horizontal">
+                                      Horizontal
+                                    </SelectItem>
+                                    <SelectItem value="inline">
+                                      Inline
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
-                              
+
                               <div>
-                                <Label className="text-xs font-medium">Width</Label>
+                                <Label className="text-xs font-medium">
+                                  Width
+                                </Label>
                                 <Input
                                   value={selectedField.width || "100%"}
                                   onChange={(e) => {
                                     setFormFields((fields) =>
                                       fields.map((f) =>
-                                        f.id === selectedFieldId ? { ...f, width: e.target.value } : f,
+                                        f.id === selectedFieldId
+                                          ? { ...f, width: e.target.value }
+                                          : f,
                                       ),
                                     );
                                   }}
@@ -2059,13 +2335,20 @@ export default function FormEditor() {
                             {isTextInput && (
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <Label className="text-xs font-medium">Autocomplete</Label>
+                                  <Label className="text-xs font-medium">
+                                    Autocomplete
+                                  </Label>
                                   <Input
                                     value={selectedField.autocomplete || ""}
                                     onChange={(e) => {
                                       setFormFields((fields) =>
                                         fields.map((f) =>
-                                          f.id === selectedFieldId ? { ...f, autocomplete: e.target.value } : f,
+                                          f.id === selectedFieldId
+                                            ? {
+                                                ...f,
+                                                autocomplete: e.target.value,
+                                              }
+                                            : f,
                                         ),
                                       );
                                     }}
@@ -2073,16 +2356,24 @@ export default function FormEditor() {
                                     placeholder="email, name, etc."
                                   />
                                 </div>
-                                
+
                                 <div>
-                                  <Label className="text-xs font-medium">Debounce (ms)</Label>
+                                  <Label className="text-xs font-medium">
+                                    Debounce (ms)
+                                  </Label>
                                   <Input
                                     type="number"
                                     value={selectedField.debounce || 0}
                                     onChange={(e) => {
                                       setFormFields((fields) =>
                                         fields.map((f) =>
-                                          f.id === selectedFieldId ? { ...f, debounce: parseInt(e.target.value) || 0 } : f,
+                                          f.id === selectedFieldId
+                                            ? {
+                                                ...f,
+                                                debounce:
+                                                  parseInt(e.target.value) || 0,
+                                              }
+                                            : f,
                                         ),
                                       );
                                     }}
@@ -2099,27 +2390,34 @@ export default function FormEditor() {
 
                   {/* Error Messages */}
                   <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Error Messages</h4>
-                    
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                      Error Messages
+                    </h4>
+
                     <div className="space-y-2">
                       <div>
-                        <Label className="text-xs font-medium">Required Message</Label>
+                        <Label className="text-xs font-medium">
+                          Required Message
+                        </Label>
                         <Input
-                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.errorMessages?.required || ""}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.validation?.errorMessages?.required || ""
+                          }
                           onChange={(e) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId 
-                                  ? { 
-                                      ...f, 
-                                      validation: { 
-                                        ...f.validation, 
-                                        errorMessages: { 
-                                          ...f.validation?.errorMessages, 
-                                          required: e.target.value 
-                                        } 
-                                      } 
-                                    } 
+                                f.id === selectedFieldId
+                                  ? {
+                                      ...f,
+                                      validation: {
+                                        ...f.validation,
+                                        errorMessages: {
+                                          ...f.validation?.errorMessages,
+                                          required: e.target.value,
+                                        },
+                                      },
+                                    }
                                   : f,
                               ),
                             );
@@ -2128,25 +2426,30 @@ export default function FormEditor() {
                           placeholder="This field is required"
                         />
                       </div>
-                      
+
                       <div>
-                        <Label className="text-xs font-medium">Pattern Message</Label>
+                        <Label className="text-xs font-medium">
+                          Pattern Message
+                        </Label>
                         <Input
-                          value={formFields.find((f) => f.id === selectedFieldId)?.validation?.errorMessages?.pattern || ""}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.validation?.errorMessages?.pattern || ""
+                          }
                           onChange={(e) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId 
-                                  ? { 
-                                      ...f, 
-                                      validation: { 
-                                        ...f.validation, 
-                                        errorMessages: { 
-                                          ...f.validation?.errorMessages, 
-                                          pattern: e.target.value 
-                                        } 
-                                      } 
-                                    } 
+                                f.id === selectedFieldId
+                                  ? {
+                                      ...f,
+                                      validation: {
+                                        ...f.validation,
+                                        errorMessages: {
+                                          ...f.validation?.errorMessages,
+                                          pattern: e.target.value,
+                                        },
+                                      },
+                                    }
                                   : f,
                               ),
                             );
@@ -2160,17 +2463,24 @@ export default function FormEditor() {
 
                   {/* Layout & Styling */}
                   <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Layout & Styling</h4>
-                    
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                      Layout & Styling
+                    </h4>
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label className="text-xs font-medium">Layout</Label>
                         <Select
-                          value={formFields.find((f) => f.id === selectedFieldId)?.layout || "vertical"}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.layout || "vertical"
+                          }
                           onValueChange={(value) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId ? { ...f, layout: value } : f,
+                                f.id === selectedFieldId
+                                  ? { ...f, layout: value }
+                                  : f,
                               ),
                             );
                           }}
@@ -2180,20 +2490,27 @@ export default function FormEditor() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="vertical">Vertical</SelectItem>
-                            <SelectItem value="horizontal">Horizontal</SelectItem>
+                            <SelectItem value="horizontal">
+                              Horizontal
+                            </SelectItem>
                             <SelectItem value="inline">Inline</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <Label className="text-xs font-medium">Width</Label>
                         <Input
-                          value={formFields.find((f) => f.id === selectedFieldId)?.width || "100%"}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.width || "100%"
+                          }
                           onChange={(e) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId ? { ...f, width: e.target.value } : f,
+                                f.id === selectedFieldId
+                                  ? { ...f, width: e.target.value }
+                                  : f,
                               ),
                             );
                           }}
@@ -2205,13 +2522,20 @@ export default function FormEditor() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-xs font-medium">Autocomplete</Label>
+                        <Label className="text-xs font-medium">
+                          Autocomplete
+                        </Label>
                         <Input
-                          value={formFields.find((f) => f.id === selectedFieldId)?.autocomplete || ""}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.autocomplete || ""
+                          }
                           onChange={(e) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId ? { ...f, autocomplete: e.target.value } : f,
+                                f.id === selectedFieldId
+                                  ? { ...f, autocomplete: e.target.value }
+                                  : f,
                               ),
                             );
                           }}
@@ -2219,16 +2543,26 @@ export default function FormEditor() {
                           placeholder="email, name, etc."
                         />
                       </div>
-                      
+
                       <div>
-                        <Label className="text-xs font-medium">Debounce (ms)</Label>
+                        <Label className="text-xs font-medium">
+                          Debounce (ms)
+                        </Label>
                         <Input
                           type="number"
-                          value={formFields.find((f) => f.id === selectedFieldId)?.debounce || 0}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.debounce || 0
+                          }
                           onChange={(e) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId ? { ...f, debounce: parseInt(e.target.value) || 0 } : f,
+                                f.id === selectedFieldId
+                                  ? {
+                                      ...f,
+                                      debounce: parseInt(e.target.value) || 0,
+                                    }
+                                  : f,
                               ),
                             );
                           }}
@@ -2239,19 +2573,30 @@ export default function FormEditor() {
                   </div>
 
                   {/* Options Management (for select, radio, checkbox) */}
-                  {(formFields.find((f) => f.id === selectedFieldId)?.type === "select" || 
-                    formFields.find((f) => f.id === selectedFieldId)?.type === "radio") && (
+                  {(formFields.find((f) => f.id === selectedFieldId)?.type ===
+                    "select" ||
+                    formFields.find((f) => f.id === selectedFieldId)?.type ===
+                      "radio") && (
                     <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Options</h4>
-                      
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                        Options
+                      </h4>
+
                       <div>
-                        <Label className="text-xs font-medium">Option Source</Label>
+                        <Label className="text-xs font-medium">
+                          Option Source
+                        </Label>
                         <Input
-                          value={formFields.find((f) => f.id === selectedFieldId)?.optionSource || ""}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.optionSource || ""
+                          }
                           onChange={(e) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId ? { ...f, optionSource: e.target.value } : f,
+                                f.id === selectedFieldId
+                                  ? { ...f, optionSource: e.target.value }
+                                  : f,
                               ),
                             );
                           }}
@@ -2261,21 +2606,32 @@ export default function FormEditor() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs font-medium">Static Options</Label>
-                        {(formFields.find((f) => f.id === selectedFieldId)?.options || []).map((option, index) => (
+                        <Label className="text-xs font-medium">
+                          Static Options
+                        </Label>
+                        {(
+                          formFields.find((f) => f.id === selectedFieldId)
+                            ?.options || []
+                        ).map((option, index) => (
                           <div key={index} className="flex gap-2">
                             <Input
                               value={option.label}
                               onChange={(e) => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
-                                    f.id === selectedFieldId 
-                                      ? { 
-                                          ...f, 
-                                          options: f.options?.map((opt, i) => 
-                                            i === index ? { ...opt, label: e.target.value } : opt
-                                          ) || []
-                                        } 
+                                    f.id === selectedFieldId
+                                      ? {
+                                          ...f,
+                                          options:
+                                            f.options?.map((opt, i) =>
+                                              i === index
+                                                ? {
+                                                    ...opt,
+                                                    label: e.target.value,
+                                                  }
+                                                : opt,
+                                            ) || [],
+                                        }
                                       : f,
                                   ),
                                 );
@@ -2288,13 +2644,19 @@ export default function FormEditor() {
                               onChange={(e) => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
-                                    f.id === selectedFieldId 
-                                      ? { 
-                                          ...f, 
-                                          options: f.options?.map((opt, i) => 
-                                            i === index ? { ...opt, value: e.target.value } : opt
-                                          ) || []
-                                        } 
+                                    f.id === selectedFieldId
+                                      ? {
+                                          ...f,
+                                          options:
+                                            f.options?.map((opt, i) =>
+                                              i === index
+                                                ? {
+                                                    ...opt,
+                                                    value: e.target.value,
+                                                  }
+                                                : opt,
+                                            ) || [],
+                                        }
                                       : f,
                                   ),
                                 );
@@ -2308,11 +2670,14 @@ export default function FormEditor() {
                               onClick={() => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
-                                    f.id === selectedFieldId 
-                                      ? { 
-                                          ...f, 
-                                          options: f.options?.filter((_, i) => i !== index) || []
-                                        } 
+                                    f.id === selectedFieldId
+                                      ? {
+                                          ...f,
+                                          options:
+                                            f.options?.filter(
+                                              (_, i) => i !== index,
+                                            ) || [],
+                                        }
                                       : f,
                                   ),
                                 );
@@ -2329,11 +2694,14 @@ export default function FormEditor() {
                           onClick={() => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId 
-                                  ? { 
-                                      ...f, 
-                                      options: [...(f.options || []), { label: "", value: "" }]
-                                    } 
+                                f.id === selectedFieldId
+                                  ? {
+                                      ...f,
+                                      options: [
+                                        ...(f.options || []),
+                                        { label: "", value: "" },
+                                      ],
+                                    }
                                   : f,
                               ),
                             );
@@ -2347,20 +2715,30 @@ export default function FormEditor() {
                   )}
 
                   {/* Date Configuration */}
-                  {formFields.find((f) => f.id === selectedFieldId)?.type === "date" && (
+                  {formFields.find((f) => f.id === selectedFieldId)?.type ===
+                    "date" && (
                     <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Date Settings</h4>
-                      
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                        Date Settings
+                      </h4>
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs font-medium">Min Date</Label>
+                          <Label className="text-xs font-medium">
+                            Min Date
+                          </Label>
                           <Input
                             type="date"
-                            value={formFields.find((f) => f.id === selectedFieldId)?.minDate || ""}
+                            value={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.minDate || ""
+                            }
                             onChange={(e) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId ? { ...f, minDate: e.target.value } : f,
+                                  f.id === selectedFieldId
+                                    ? { ...f, minDate: e.target.value }
+                                    : f,
                                 ),
                               );
                             }}
@@ -2368,14 +2746,21 @@ export default function FormEditor() {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-medium">Max Date</Label>
+                          <Label className="text-xs font-medium">
+                            Max Date
+                          </Label>
                           <Input
                             type="date"
-                            value={formFields.find((f) => f.id === selectedFieldId)?.maxDate || ""}
+                            value={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.maxDate || ""
+                            }
                             onChange={(e) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId ? { ...f, maxDate: e.target.value } : f,
+                                  f.id === selectedFieldId
+                                    ? { ...f, maxDate: e.target.value }
+                                    : f,
                                 ),
                               );
                             }}
@@ -2385,51 +2770,19 @@ export default function FormEditor() {
                       </div>
 
                       <div>
-                        <Label className="text-xs font-medium">Date Format</Label>
+                        <Label className="text-xs font-medium">
+                          Date Format
+                        </Label>
                         <Select
-                          value={formFields.find((f) => f.id === selectedFieldId)?.dateFormat || "YYYY-MM-DD"}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.dateFormat || "YYYY-MM-DD"
+                          }
                           onValueChange={(value) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId ? { ...f, dateFormat: value } : f,
-                              ),
-                            );
-                          }}
-                        >
-                          <SelectTrigger className="mt-1 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                            <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                            <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                            <SelectItem value="DD-MM-YYYY">DD-MM-YYYY</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Conditional Logic */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">Conditional Logic</h4>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs font-medium">Condition Type</Label>
-                        <Select
-                          value={formFields.find((f) => f.id === selectedFieldId)?.condition?.type || "visibility"}
-                          onValueChange={(value) => {
-                            setFormFields((fields) =>
-                              fields.map((f) =>
-                                f.id === selectedFieldId 
-                                  ? { 
-                                      ...f, 
-                                      condition: { 
-                                        ...f.condition, 
-                                        type: value as "visibility" | "enable" | "value" 
-                                      } 
-                                    } 
+                                f.id === selectedFieldId
+                                  ? { ...f, dateFormat: value }
                                   : f,
                               ),
                             );
@@ -2439,28 +2792,92 @@ export default function FormEditor() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="visibility">Visibility</SelectItem>
-                            <SelectItem value="enable">Enable/Disable</SelectItem>
+                            <SelectItem value="YYYY-MM-DD">
+                              YYYY-MM-DD
+                            </SelectItem>
+                            <SelectItem value="MM/DD/YYYY">
+                              MM/DD/YYYY
+                            </SelectItem>
+                            <SelectItem value="DD/MM/YYYY">
+                              DD/MM/YYYY
+                            </SelectItem>
+                            <SelectItem value="DD-MM-YYYY">
+                              DD-MM-YYYY
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conditional Logic */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                      Conditional Logic
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs font-medium">
+                          Condition Type
+                        </Label>
+                        <Select
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.condition?.type || "visibility"
+                          }
+                          onValueChange={(value) => {
+                            setFormFields((fields) =>
+                              fields.map((f) =>
+                                f.id === selectedFieldId
+                                  ? {
+                                      ...f,
+                                      condition: {
+                                        ...f.condition,
+                                        type: value as
+                                          | "visibility"
+                                          | "enable"
+                                          | "value",
+                                      },
+                                    }
+                                  : f,
+                              ),
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="mt-1 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="visibility">
+                              Visibility
+                            </SelectItem>
+                            <SelectItem value="enable">
+                              Enable/Disable
+                            </SelectItem>
                             <SelectItem value="value">Auto Value</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <Label className="text-xs font-medium">Logic</Label>
                         <Select
-                          value={formFields.find((f) => f.id === selectedFieldId)?.condition?.logic || "AND"}
+                          value={
+                            formFields.find((f) => f.id === selectedFieldId)
+                              ?.condition?.logic || "AND"
+                          }
                           onValueChange={(value) => {
                             setFormFields((fields) =>
                               fields.map((f) =>
-                                f.id === selectedFieldId 
-                                  ? { 
-                                      ...f, 
-                                      condition: { 
-                                        ...f.condition, 
-                                        logic: value as "AND" | "OR" 
-                                      } 
-                                    } 
+                                f.id === selectedFieldId
+                                  ? {
+                                      ...f,
+                                      condition: {
+                                        ...f.condition,
+                                        logic: value as "AND" | "OR",
+                                      },
+                                    }
                                   : f,
                               ),
                             );
@@ -2478,24 +2895,32 @@ export default function FormEditor() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-medium">Condition Rules</Label>
-                      {(formFields.find((f) => f.id === selectedFieldId)?.condition?.rules || []).map((rule, index) => (
+                      <Label className="text-xs font-medium">
+                        Condition Rules
+                      </Label>
+                      {(
+                        formFields.find((f) => f.id === selectedFieldId)
+                          ?.condition?.rules || []
+                      ).map((rule, index) => (
                         <div key={index} className="grid grid-cols-4 gap-2">
                           <Select
                             value={rule.field}
                             onValueChange={(value) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId 
-                                    ? { 
-                                        ...f, 
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
                                         condition: {
                                           ...f.condition,
-                                          rules: f.condition?.rules?.map((r, i) => 
-                                            i === index ? { ...r, field: value } : r
-                                          ) || []
-                                        }
-                                      } 
+                                          rules:
+                                            f.condition?.rules?.map((r, i) =>
+                                              i === index
+                                                ? { ...r, field: value }
+                                                : r,
+                                            ) || [],
+                                        },
+                                      }
                                     : f,
                                 ),
                               );
@@ -2506,30 +2931,36 @@ export default function FormEditor() {
                             </SelectTrigger>
                             <SelectContent>
                               {formFields
-                                .filter(f => f.id !== selectedFieldId)
-                                .map(field => (
+                                .filter((f) => f.id !== selectedFieldId)
+                                .map((field) => (
                                   <SelectItem key={field.id} value={field.name}>
                                     {field.label}
                                   </SelectItem>
                                 ))}
                             </SelectContent>
                           </Select>
-                          
+
                           <Select
                             value={rule.operator}
                             onValueChange={(value) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId 
-                                    ? { 
-                                        ...f, 
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
                                         condition: {
                                           ...f.condition,
-                                          rules: f.condition?.rules?.map((r, i) => 
-                                            i === index ? { ...r, operator: value as any } : r
-                                          ) || []
-                                        }
-                                      } 
+                                          rules:
+                                            f.condition?.rules?.map((r, i) =>
+                                              i === index
+                                                ? {
+                                                    ...r,
+                                                    operator: value as any,
+                                                  }
+                                                : r,
+                                            ) || [],
+                                        },
+                                      }
                                     : f,
                                 ),
                               );
@@ -2549,22 +2980,28 @@ export default function FormEditor() {
                               <SelectItem value="not-in">not in</SelectItem>
                             </SelectContent>
                           </Select>
-                          
+
                           <Input
                             value={rule.value}
                             onChange={(e) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId 
-                                    ? { 
-                                        ...f, 
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
                                         condition: {
                                           ...f.condition,
-                                          rules: f.condition?.rules?.map((r, i) => 
-                                            i === index ? { ...r, value: e.target.value } : r
-                                          ) || []
-                                        }
-                                      } 
+                                          rules:
+                                            f.condition?.rules?.map((r, i) =>
+                                              i === index
+                                                ? {
+                                                    ...r,
+                                                    value: e.target.value,
+                                                  }
+                                                : r,
+                                            ) || [],
+                                        },
+                                      }
                                     : f,
                                 ),
                               );
@@ -2572,21 +3009,24 @@ export default function FormEditor() {
                             className="h-8 text-xs"
                             placeholder="Value"
                           />
-                          
+
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId 
-                                    ? { 
-                                        ...f, 
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
                                         condition: {
                                           ...f.condition,
-                                          rules: f.condition?.rules?.filter((_, i) => i !== index) || []
-                                        }
-                                      } 
+                                          rules:
+                                            f.condition?.rules?.filter(
+                                              (_, i) => i !== index,
+                                            ) || [],
+                                        },
+                                      }
                                     : f,
                                 ),
                               );
@@ -2603,18 +3043,21 @@ export default function FormEditor() {
                         onClick={() => {
                           setFormFields((fields) =>
                             fields.map((f) =>
-                              f.id === selectedFieldId 
-                                ? { 
-                                    ...f, 
+                              f.id === selectedFieldId
+                                ? {
+                                    ...f,
                                     condition: {
                                       ...f.condition,
-                                      rules: [...(f.condition?.rules || []), { 
-                                        field: "", 
-                                        operator: "==" as const, 
-                                        value: "" 
-                                      }]
-                                    }
-                                  } 
+                                      rules: [
+                                        ...(f.condition?.rules || []),
+                                        {
+                                          field: "",
+                                          operator: "==" as const,
+                                          value: "",
+                                        },
+                                      ],
+                                    },
+                                  }
                                 : f,
                             ),
                           );
@@ -2626,14 +3069,24 @@ export default function FormEditor() {
                     </div>
 
                     <div>
-                      <Label className="text-xs font-medium">Watch Fields</Label>
+                      <Label className="text-xs font-medium">
+                        Watch Fields
+                      </Label>
                       <Input
-                        value={(formFields.find((f) => f.id === selectedFieldId)?.watch || []).join(", ")}
+                        value={(
+                          formFields.find((f) => f.id === selectedFieldId)
+                            ?.watch || []
+                        ).join(", ")}
                         onChange={(e) => {
-                          const watchFields = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                          const watchFields = e.target.value
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean);
                           setFormFields((fields) =>
                             fields.map((f) =>
-                              f.id === selectedFieldId ? { ...f, watch: watchFields } : f,
+                              f.id === selectedFieldId
+                                ? { ...f, watch: watchFields }
+                                : f,
                             ),
                           );
                         }}
@@ -2643,13 +3096,20 @@ export default function FormEditor() {
                     </div>
 
                     <div>
-                      <Label className="text-xs font-medium">Calculated Value</Label>
+                      <Label className="text-xs font-medium">
+                        Calculated Value
+                      </Label>
                       <Input
-                        value={formFields.find((f) => f.id === selectedFieldId)?.calculatedValue || ""}
+                        value={
+                          formFields.find((f) => f.id === selectedFieldId)
+                            ?.calculatedValue || ""
+                        }
                         onChange={(e) => {
                           setFormFields((fields) =>
                             fields.map((f) =>
-                              f.id === selectedFieldId ? { ...f, calculatedValue: e.target.value } : f,
+                              f.id === selectedFieldId
+                                ? { ...f, calculatedValue: e.target.value }
+                                : f,
                             ),
                           );
                         }}
