@@ -342,22 +342,18 @@ export default function FormEditor() {
       description?: string;
       projectId: string;
     }) => {
-      return await apiRequest(
-        `/api/forms/${formData.id}`,
-        "PUT",
-        {
-          name: formData.name,
-          description: formData.description,
-          schema: {
-            fields: formFields,
-            settings: {
-              ...formConfig,
-              title: formData.name,
-              description: formData.description,
-            },
+      return await apiRequest(`/api/forms/${formData.id}`, "PUT", {
+        name: formData.name,
+        description: formData.description,
+        schema: {
+          fields: formFields,
+          settings: {
+            ...formConfig,
+            title: formData.name,
+            description: formData.description,
           },
         },
-      );
+      });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
@@ -443,9 +439,9 @@ export default function FormEditor() {
   const handleFormSelect = (formId: string) => {
     setSelectedFormId(formId);
     setIsCreatingForm(false);
-    
+
     // Load and edit the selected form
-    const selectedForm = forms?.find(f => f.id === formId);
+    const selectedForm = forms?.find((f) => f.id === formId);
     if (selectedForm) {
       handleEditForm(selectedForm);
     }
@@ -456,12 +452,12 @@ export default function FormEditor() {
     setEditingFormId(form.id);
     setFormName(form.name);
     setFormDescription(form.description || "");
-    
+
     // Load form schema and fields
     if (form.schema) {
       const fields = form.schema.fields || [];
       const settings = form.schema.settings || {};
-      
+
       setFormFields(fields);
       setFormConfig({
         layout: settings.layout || "single",
@@ -477,7 +473,7 @@ export default function FormEditor() {
         showCancelButton: settings.showCancelButton || false,
       });
     }
-    
+
     setSelectedFieldId(null);
     setShowPropertiesPanel(false);
   };
@@ -1725,10 +1721,6 @@ export default function FormEditor() {
                       <>
                         {/* Basic Properties */}
                         <div className="space-y-4">
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
-                            Basic Properties
-                          </h4>
-
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <Label className="text-xs font-medium">
@@ -3361,12 +3353,13 @@ export default function FormEditor() {
         <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{editingFormId ? "Update Form" : "Save Form"}</DialogTitle>
+              <DialogTitle>
+                {editingFormId ? "Update Form" : "Save Form"}
+              </DialogTitle>
               <DialogDescription>
-                {editingFormId 
+                {editingFormId
                   ? "Update your form name and description."
-                  : "Give your form a name and description to save it to your project."
-                }
+                  : "Give your form a name and description to save it to your project."}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -3403,14 +3396,17 @@ export default function FormEditor() {
               </Button>
               <Button
                 onClick={handleCreateForm}
-                disabled={!formName.trim() || createFormMutation.isPending || updateFormMutation.isPending}
-              >
-                {(createFormMutation.isPending || updateFormMutation.isPending) 
-                  ? "Saving..." 
-                  : editingFormId 
-                    ? "Update Form" 
-                    : "Save Form"
+                disabled={
+                  !formName.trim() ||
+                  createFormMutation.isPending ||
+                  updateFormMutation.isPending
                 }
+              >
+                {createFormMutation.isPending || updateFormMutation.isPending
+                  ? "Saving..."
+                  : editingFormId
+                    ? "Update Form"
+                    : "Save Form"}
               </Button>
             </DialogFooter>
           </DialogContent>

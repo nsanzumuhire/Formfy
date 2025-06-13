@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/command";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { Project } from "@shared/schema";
 
 interface HeaderProps {
@@ -175,8 +176,9 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
           </div>
         </div>
 
-        {/* Right: User Avatar */}
-        <div className="flex items-center">
+        {/* Right: Theme Toggle & User Avatar */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
