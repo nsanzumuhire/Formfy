@@ -719,9 +719,27 @@ export default function FormEditor() {
         
         if (!draggedField || !targetField) return fields;
         
-        // If both fields are in the same row, reorder within that row
+        // If both fields are in the same row, reorder within that row using imported function
         if (draggedField.rowId && targetField.rowId && draggedField.rowId === targetField.rowId) {
-          return reorderFieldsInRow(fields, draggedField.rowId, draggedFieldId, targetFieldId);
+          const fieldsInRow = fields.filter(f => f.rowId === draggedField.rowId);
+          const otherFields = fields.filter(f => f.rowId !== draggedField.rowId);
+          
+          const draggedIndex = fieldsInRow.findIndex(f => f.id === draggedFieldId);
+          const targetIndex = fieldsInRow.findIndex(f => f.id === targetFieldId);
+          
+          if (draggedIndex === -1 || targetIndex === -1) return fields;
+          
+          // Reorder fields within the row
+          const reorderedFields = [...fieldsInRow];
+          const [movedField] = reorderedFields.splice(draggedIndex, 1);
+          reorderedFields.splice(targetIndex, 0, movedField);
+          
+          // Update order values to maintain position
+          reorderedFields.forEach((field, index) => {
+            field.order = Math.min(...fieldsInRow.map(f => f.order)) + index;
+          });
+          
+          return [...otherFields, ...reorderedFields];
         }
         
         // Remove dragged field from its current row/position
@@ -1992,7 +2010,25 @@ export default function FormEditor() {
                                       <button
                                         onClick={() => {
                                           if (canMoveUp) {
-                                            setFormFields(fields => moveRowUp(fields, rowId));
+                                            setFormFields(fields => {
+                                              const rows = organizeFieldsIntoRows(fields);
+                                              const currentRowFields = rows[rowIndex];
+                                              const targetRowFields = rows[rowIndex - 1];
+                                              
+                                              // Swap the order values of the two rows
+                                              const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
+                                              const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
+                                              
+                                              return fields.map(field => {
+                                                if (targetRowFields.some(f => f.id === field.id)) {
+                                                  return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
+                                                }
+                                                if (currentRowFields.some(f => f.id === field.id)) {
+                                                  return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
+                                                }
+                                                return field;
+                                              });
+                                            });
                                           }
                                         }}
                                         disabled={!canMoveUp}
@@ -2008,7 +2044,25 @@ export default function FormEditor() {
                                       <button
                                         onClick={() => {
                                           if (canMoveDown) {
-                                            setFormFields(fields => moveRowDown(fields, rowId));
+                                            setFormFields(fields => {
+                                              const rows = organizeFieldsIntoRows(fields);
+                                              const currentRowFields = rows[rowIndex];
+                                              const targetRowFields = rows[rowIndex + 1];
+                                              
+                                              // Swap the order values of the two rows
+                                              const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
+                                              const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
+                                              
+                                              return fields.map(field => {
+                                                if (currentRowFields.some(f => f.id === field.id)) {
+                                                  return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
+                                                }
+                                                if (targetRowFields.some(f => f.id === field.id)) {
+                                                  return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
+                                                }
+                                                return field;
+                                              });
+                                            });
                                           }
                                         }}
                                         disabled={!canMoveDown}
