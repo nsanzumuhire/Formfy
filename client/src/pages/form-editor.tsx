@@ -128,11 +128,13 @@ function SortableField({
   isSelected,
   onSelect,
   onUpdate,
+  onDelete,
 }: {
   field: any;
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (updates: any) => void;
+  onDelete?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: field.id });
@@ -165,8 +167,16 @@ function SortableField({
           <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
             <Edit className="w-3 h-3 text-gray-400" />
           </button>
-          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-            <Trash2 className="w-3 h-3 text-gray-400" />
+          <button 
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded hover:text-red-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onDelete) {
+                onDelete();
+              }
+            }}
+          >
+            <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-600" />
           </button>
           <button
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab"
@@ -2126,6 +2136,37 @@ export default function FormEditor() {
                                             ),
                                           );
                                         }}
+                                        onDelete={() => {
+                                          setFormFields((fields) => {
+                                            const updatedFields = fields.filter(f => f.id !== field.id);
+                                            
+                                            // If this was the only field in a row, remove the row
+                                            const remainingFieldsInRow = updatedFields.filter(f => f.rowId === field.rowId);
+                                            if (field.rowId && remainingFieldsInRow.length === 0) {
+                                              // Row is empty, nothing more to do
+                                              return updatedFields;
+                                            }
+                                            
+                                            // If there are remaining fields in the row, redistribute widths
+                                            if (field.rowId && remainingFieldsInRow.length > 0) {
+                                              const evenWidth = 100 / remainingFieldsInRow.length;
+                                              return updatedFields.map(f => {
+                                                if (f.rowId === field.rowId) {
+                                                  return { ...f, width: evenWidth };
+                                                }
+                                                return f;
+                                              });
+                                            }
+                                            
+                                            return updatedFields;
+                                          });
+                                          
+                                          // Clear selection if deleted field was selected
+                                          if (selectedFieldId === field.id) {
+                                            setSelectedFieldId(null);
+                                            setShowPropertiesPanel(false);
+                                          }
+                                        }}
                                       />
                                     </div>
                                   ))}
@@ -2185,6 +2226,15 @@ export default function FormEditor() {
                                           : f,
                                       ),
                                     );
+                                  }}
+                                  onDelete={() => {
+                                    setFormFields((fields) => fields.filter(f => f.id !== field.id));
+                                    
+                                    // Clear selection if deleted field was selected
+                                    if (selectedFieldId === field.id) {
+                                      setSelectedFieldId(null);
+                                      setShowPropertiesPanel(false);
+                                    }
                                   }}
                                 />
                               ))}
