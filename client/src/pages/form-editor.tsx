@@ -9,6 +9,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -738,20 +739,123 @@ export default function FormEditor() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+    if (!over) {
+      // If dropped outside any droppable area, create a new row for the field
+      if (formConfig.layout === "auto") {
+        const draggedFieldId = active.id as string;
+        setFormFields((fields) => {
+          const draggedField = fields.find(f => f.id === draggedFieldId);
+          if (!draggedField) return fields;
+          
+          // Create a new standalone row for this field
+          const newRowId = generateRowId();
+          return fields.map(field => {
+            if (field.id === draggedFieldId) {
+              return { ...field, rowId: newRowId, width: 100 };
+            }
+            return field;
+          });
+        });
+      }
+      return;
+    }
+    
+    if (active.id === over.id) return;
 
     // For auto layout mode, handle row-based dragging and reordering
     if (formConfig.layout === "auto") {
       const draggedFieldId = active.id as string;
-      const targetFieldId = over.id as string;
+      const overId = over.id as string;
       
+      // Handle special drop zones
+      if (overId === 'new-row-drop-zone') {
+        setFormFields((fields) => {
+          const draggedField = fields.find(f => f.id === draggedFieldId);
+          if (!draggedField) return fields;
+          
+          // Remove from current row and create new standalone row
+          const newRowId = generateRowId();
+          const updatedFields = fields.map(field => {
+            if (field.id === draggedFieldId) {
+              return { ...field, rowId: newRowId, width: 100, order: Math.max(...fields.map(f => f.order)) + 1 };
+            }
+            return field;
+          });
+          
+          // Redistribute widths in the original row if it had multiple fields
+          if (draggedField.rowId) {
+            const remainingFieldsInOriginalRow = updatedFields.filter(f => f.rowId === draggedField.rowId && f.id !== draggedFieldId);
+            if (remainingFieldsInOriginalRow.length > 0) {
+              const evenWidth = 100 / remainingFieldsInOriginalRow.length;
+              return updatedFields.map(field => {
+                if (field.rowId === draggedField.rowId && field.id !== draggedFieldId) {
+                  return { ...field, width: evenWidth };
+                }
+                return field;
+              });
+            }
+          }
+          
+          return updatedFields;
+        });
+        return;
+      }
+      
+      if (overId.startsWith('row-drop-zone-')) {
+        const targetRowId = overId.replace('row-drop-zone-', '');
+        setFormFields((fields) => {
+          const draggedField = fields.find(f => f.id === draggedFieldId);
+          if (!draggedField) return fields;
+          
+          const originalRowId = draggedField.rowId;
+          
+          // Update the dragged field's row
+          let updatedFields = fields.map(field => {
+            if (field.id === draggedFieldId) {
+              return { ...field, rowId: targetRowId };
+            }
+            return field;
+          });
+          
+          // Redistribute widths in target row
+          const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetRowId);
+          const targetEvenWidth = 100 / fieldsInTargetRow.length;
+          
+          updatedFields = updatedFields.map(field => {
+            if (field.rowId === targetRowId) {
+              return { ...field, width: targetEvenWidth };
+            }
+            return field;
+          });
+          
+          // Redistribute widths in original row if it had multiple fields
+          if (originalRowId && originalRowId !== targetRowId) {
+            const remainingFieldsInOriginalRow = updatedFields.filter(f => f.rowId === originalRowId);
+            if (remainingFieldsInOriginalRow.length > 0) {
+              const originalEvenWidth = 100 / remainingFieldsInOriginalRow.length;
+              updatedFields = updatedFields.map(field => {
+                if (field.rowId === originalRowId) {
+                  return { ...field, width: originalEvenWidth };
+                }
+                return field;
+              });
+            }
+          }
+          
+          return updatedFields;
+        });
+        return;
+      }
+      
+      // Handle field-to-field drops
+      const targetFieldId = overId;
       setFormFields((fields) => {
         const draggedField = fields.find(f => f.id === draggedFieldId);
         const targetField = fields.find(f => f.id === targetFieldId);
         
         if (!draggedField || !targetField) return fields;
         
-        // If both fields are in the same row, reorder within that row using imported function
+        // If both fields are in the same row, reorder within that row
         if (draggedField.rowId && targetField.rowId && draggedField.rowId === targetField.rowId) {
           const fieldsInRow = fields.filter(f => f.rowId === draggedField.rowId);
           const otherFields = fields.filter(f => f.rowId !== draggedField.rowId);
@@ -774,34 +878,41 @@ export default function FormEditor() {
           return [...otherFields, ...reorderedFields];
         }
         
-        // Remove dragged field from its current row/position
-        const fieldsWithoutDragged = fields.filter(f => f.id !== draggedFieldId);
+        // Moving field from one row to another
+        const originalRowId = draggedField.rowId;
+        let updatedFields = fields.map(field => {
+          if (field.id === draggedFieldId) {
+            return { ...field, rowId: targetField.rowId };
+          }
+          return field;
+        });
         
-        // If dropping on a field that has a row, add to that row
-        if (targetField.rowId) {
-          const updatedField = { ...draggedField, rowId: targetField.rowId };
-          const updatedFields = [...fieldsWithoutDragged, updatedField];
-          
-          // Get all fields in the target row and distribute widths evenly
-          const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetField.rowId);
-          const evenWidth = 100 / fieldsInTargetRow.length;
-          
-          return updatedFields.map(field => {
-            if (field.rowId === targetField.rowId) {
-              return { ...field, width: evenWidth };
-            }
-            return field;
-          });
-        } else {
-          // Create a new row with both fields
-          const newRowId = generateRowId();
-          return fields.map(field => {
-            if (field.id === draggedFieldId || field.id === targetFieldId) {
-              return { ...field, rowId: newRowId, width: 50 };
-            }
-            return field;
-          });
+        // Redistribute widths in target row
+        const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetField.rowId);
+        const targetEvenWidth = 100 / fieldsInTargetRow.length;
+        
+        updatedFields = updatedFields.map(field => {
+          if (field.rowId === targetField.rowId) {
+            return { ...field, width: targetEvenWidth };
+          }
+          return field;
+        });
+        
+        // Redistribute widths in original row if it had multiple fields
+        if (originalRowId && originalRowId !== targetField.rowId) {
+          const remainingFieldsInOriginalRow = updatedFields.filter(f => f.rowId === originalRowId);
+          if (remainingFieldsInOriginalRow.length > 0) {
+            const originalEvenWidth = 100 / remainingFieldsInOriginalRow.length;
+            updatedFields = updatedFields.map(field => {
+              if (field.rowId === originalRowId) {
+                return { ...field, width: originalEvenWidth };
+              }
+              return field;
+            });
+          }
         }
+        
+        return updatedFields;
       });
     } else {
       // Traditional layout mode - clear auto layout properties and do simple reordering
@@ -2172,28 +2283,24 @@ export default function FormEditor() {
                                   ))}
                                   
                                   {/* Drop Zone for adding fields to this row */}
-                                  <div
-                                    className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
-                                    onDragOver={(e) => e.preventDefault()}
-                                    onDrop={(e) => handleDropToRow(e, rowFields[0]?.rowId)}
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </div>
+                                  <Droppable id={`row-drop-zone-${rowFields[0]?.rowId}`}>
+                                    <div className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+                                      <Plus className="w-4 h-4" />
+                                    </div>
+                                  </Droppable>
                                 </div>
                                 );
                               })}
                               
                               {/* Empty row for new fields */}
-                              <div
-                                className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={(e) => handleDropToNewRow(e)}
-                              >
-                                <div className="text-center">
-                                  <Plus className="w-6 h-6 mx-auto mb-2" />
-                                  <p className="text-sm">Drop fields here to create a new row</p>
+                              <Droppable id="new-row-drop-zone">
+                                <div className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+                                  <div className="text-center">
+                                    <Plus className="w-6 h-6 mx-auto mb-2" />
+                                    <p className="text-sm">Drop fields here to create a new row</p>
+                                  </div>
                                 </div>
-                              </div>
+                              </Droppable>
                             </div>
                           ) : (
                             // Traditional Layout Modes
