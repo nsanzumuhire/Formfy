@@ -200,7 +200,14 @@ function SortableField({
           </span>
         </div>
       ) : field.type === "radio" ? (
-        <RadioGroup disabled className="space-y-2">
+        <RadioGroup 
+          disabled 
+          className={
+            field.layout === "horizontal"
+              ? "flex flex-wrap gap-4"
+              : "space-y-2"
+          }
+        >
           {(field.options || [{ label: "Option 1", value: "option1" }, { label: "Option 2", value: "option2" }]).map((option: any, index: number) => (
             <div key={index} className="flex items-center gap-2">
               <RadioGroupItem 
@@ -1370,9 +1377,9 @@ export default function FormEditor() {
                                 <div
                                   key={field.id}
                                   className={`${
-                                    field.layout === "horizontal"
+                                    field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
                                       ? "flex items-center gap-4"
-                                      : field.layout === "inline"
+                                      : field.layout === "inline" && field.type !== "radio" && field.type !== "checkbox"
                                         ? "flex items-center gap-2"
                                         : "space-y-2"
                                   }`}
@@ -1380,7 +1387,7 @@ export default function FormEditor() {
                                   {formConfig.showLabels && (
                                     <div
                                       className={`${
-                                        field.layout === "horizontal"
+                                        field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
                                           ? "min-w-[120px]"
                                           : ""
                                       }`}
@@ -1398,8 +1405,7 @@ export default function FormEditor() {
 
                                   <div
                                     className={`${
-                                      field.layout === "horizontal" ||
-                                      field.layout === "inline"
+                                      (field.layout === "horizontal" || field.layout === "inline") && field.type !== "radio" && field.type !== "checkbox"
                                         ? "flex-1"
                                         : ""
                                     }`}
