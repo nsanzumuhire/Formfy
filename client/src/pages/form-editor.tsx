@@ -108,6 +108,16 @@ import type { Form, Project } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  FormFieldData,
+  createFormField,
+  generateFieldId,
+  generateRowId,
+  organizeFieldsIntoRows,
+  distributeWidthsEvenly,
+  addFieldToRow,
+  createNewRow,
+} from "@/lib/form-builder";
 
 // Sortable Field Component
 function SortableField({
@@ -523,7 +533,88 @@ export default function FormEditor() {
     setShowSaveDialog(true);
   };
 
+  // Auto layout handlers
+  const handleResizeStart = (e: React.MouseEvent, fieldId: string, rowFields: FormFieldData[]) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const fieldIndex = rowFields.findIndex(f => f.id === fieldId);
+    const currentField = rowFields[fieldIndex];
+    const nextField = rowFields[fieldIndex + 1];
+    
+    if (!currentField || !nextField) return;
+    
+    const startWidthCurrent = currentField.width || 50;
+    const startWidthNext = nextField.width || 50;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      const containerWidth = 100; // Percentage based
+      const widthChange = (deltaX / window.innerWidth) * containerWidth;
+      
+      const newCurrentWidth = Math.max(10, Math.min(90, startWidthCurrent + widthChange));
+      const newNextWidth = Math.max(10, Math.min(90, startWidthNext - widthChange));
+      
+      setFormFields(fields => fields.map(field => {
+        if (field.id === currentField.id) {
+          return { ...field, width: newCurrentWidth };
+        }
+        if (field.id === nextField.id) {
+          return { ...field, width: newNextWidth };
+        }
+        return field;
+      }));
+    };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleDropToRow = (e: React.DragEvent, targetRowId?: string) => {
+    e.preventDefault();
+    const fieldId = e.dataTransfer.getData('text/plain');
+    
+    if (!fieldId || !targetRowId) return;
+    
+    setFormFields(fields => {
+      const updatedFields = addFieldToRow(fields, fieldId, targetRowId);
+      const fieldsInRow = updatedFields.filter(f => f.rowId === targetRowId);
+      return distributeWidthsEvenly(fieldsInRow).concat(
+        updatedFields.filter(f => f.rowId !== targetRowId)
+      );
+    });
+  };
+
+  const handleDropToNewRow = (e: React.DragEvent) => {
+    e.preventDefault();
+    const fieldId = e.dataTransfer.getData('text/plain');
+    
+    if (!fieldId) return;
+    
+    setFormFields(fields => createNewRow(fields, fieldId));
+  };
+
   const handleAddField = (fieldType: string) => {
+    const newField = createFormField(fieldType as any);
+    newField.id = Date.now().toString();
+    newField.order = formFields.length;
+    
+    // For auto layout, create a new row for the field
+    if (formConfig.layout === "auto") {
+      newField.rowId = generateRowId();
+      newField.width = 100;
+    }
+    
+    setFormFields([...formFields, newField]);
+    setSelectedFieldId(newField.id);
+    setShowPropertiesPanel(true);
+  };
+
+  const handleAddFieldOld = (fieldType: string) => {
     const newField = {
       id: Date.now().toString(),
       name: `field_${Date.now()}`,
@@ -1701,44 +1792,69 @@ export default function FormEditor() {
                           items={formFields.map((f) => f.id)}
                           strategy={verticalListSortingStrategy}
                         >
-                          <div
-                            className={`${
-                              formConfig.layout === "two-column"
-                                ? "grid grid-cols-2"
-                                : formConfig.layout === "grid"
-                                  ? "grid"
-                                  : formConfig.layout === "mixed"
-                                    ? "space-y-4"
-                                    : "flex flex-col"
-                            }`}
-                            style={{
-                              gap:
-                                formConfig.layout !== "mixed"
-                                  ? getSpacingValue()
-                                  : undefined,
-                              ...(formConfig.layout === "grid" && {
-                                gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
-                              }),
-                            }}
-                          >
-                            {formFields.map((field) => (
-                              <SortableField
-                                key={field.id}
-                                field={field}
-                                isSelected={selectedFieldId === field.id}
-                                onSelect={() => handleFieldSelect(field.id)}
-                                onUpdate={(updates) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === field.id
-                                        ? { ...f, ...updates }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                              />
-                            ))}
-                          </div>
+                          {formConfig.layout === "auto" ? (
+                            // Auto Layout Mode - Row-based layout with drag-and-drop (simplified version)
+                            <div className="space-y-4">
+                              {formFields.map((field) => (
+                                <div key={field.id} className="border border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-2">
+                                  <SortableField
+                                    field={field}
+                                    isSelected={selectedFieldId === field.id}
+                                    onSelect={() => handleFieldSelect(field.id)}
+                                    onUpdate={(updates) => {
+                                      setFormFields((fields) =>
+                                        fields.map((f) =>
+                                          f.id === field.id
+                                            ? { ...f, ...updates }
+                                            : f,
+                                        ),
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            // Traditional Layout Modes
+                            <div
+                              className={`${
+                                formConfig.layout === "two-column"
+                                  ? "grid grid-cols-2"
+                                  : formConfig.layout === "grid"
+                                    ? "grid"
+                                    : formConfig.layout === "mixed"
+                                      ? "space-y-4"
+                                      : "flex flex-col"
+                              }`}
+                              style={{
+                                gap:
+                                  formConfig.layout !== "mixed"
+                                    ? getSpacingValue()
+                                    : undefined,
+                                ...(formConfig.layout === "grid" && {
+                                  gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
+                                }),
+                              }}
+                            >
+                              {formFields.map((field) => (
+                                <SortableField
+                                  key={field.id}
+                                  field={field}
+                                  isSelected={selectedFieldId === field.id}
+                                  onSelect={() => handleFieldSelect(field.id)}
+                                  onUpdate={(updates) => {
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === field.id
+                                          ? { ...f, ...updates }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
 
                           {/* Submit Button Preview in Edit Mode */}
                           {formFields.length > 0 && (
