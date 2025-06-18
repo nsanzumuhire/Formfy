@@ -2898,7 +2898,7 @@ export default function FormEditor() {
                                       ? {
                                           ...f,
                                           options:
-                                            f.options?.map((opt, i) =>
+                                            f.options?.map((opt: any, i: number) =>
                                               i === index
                                                 ? {
                                                     ...opt,
@@ -2925,7 +2925,7 @@ export default function FormEditor() {
                                           ...f,
                                           options:
                                             f.options?.filter(
-                                              (_, i) => i !== index,
+                                              (_: any, i: number) => i !== index,
                                             ) || [],
                                         }
                                       : f,
@@ -3151,7 +3151,7 @@ export default function FormEditor() {
                       {(
                         formFields.find((f) => f.id === selectedFieldId)
                           ?.condition?.rules || []
-                      ).map((rule, index) => (
+                      ).map((rule: any, index: number) => (
                         <div key={index} className="grid grid-cols-4 gap-2">
                           <Select
                             value={rule.field}
@@ -3164,7 +3164,7 @@ export default function FormEditor() {
                                         condition: {
                                           ...f.condition,
                                           rules:
-                                            f.condition?.rules?.map((r, i) =>
+                                            f.condition?.rules?.map((r: any, i: number) =>
                                               i === index
                                                 ? { ...r, field: value }
                                                 : r,
@@ -3201,7 +3201,7 @@ export default function FormEditor() {
                                         condition: {
                                           ...f.condition,
                                           rules:
-                                            f.condition?.rules?.map((r, i) =>
+                                            f.condition?.rules?.map((r: any, i: number) =>
                                               i === index
                                                 ? {
                                                     ...r,
@@ -3242,7 +3242,7 @@ export default function FormEditor() {
                                         condition: {
                                           ...f.condition,
                                           rules:
-                                            f.condition?.rules?.map((r, i) =>
+                                            f.condition?.rules?.map((r: any, i: number) =>
                                               i === index
                                                 ? {
                                                     ...r,
@@ -3273,7 +3273,7 @@ export default function FormEditor() {
                                           ...f.condition,
                                           rules:
                                             f.condition?.rules?.filter(
-                                              (_, i) => i !== index,
+                                              (_: any, i: number) => i !== index,
                                             ) || [],
                                         },
                                       }
