@@ -270,7 +270,7 @@ export default function FormEditor() {
 
   // Form configuration state
   const [formConfig, setFormConfig] = useState({
-    layout: "single",
+    layout: "auto",
     gridColumns: 2,
     spacing: "8px",
     customSpacing: 8,
