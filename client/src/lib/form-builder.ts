@@ -11,6 +11,18 @@ export interface FormFieldOption {
   value: string;
 }
 
+export interface ConditionalRule {
+  field: string;
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty';
+  value: string;
+}
+
+export interface ConditionalLogic {
+  type: 'visibility' | 'enable' | 'value';
+  logic: 'AND' | 'OR';
+  rules: ConditionalRule[];
+}
+
 export interface FormFieldData {
   id: string;
   type: FieldType;
@@ -28,6 +40,8 @@ export interface FormFieldData {
   required?: boolean;
   disabled?: boolean;
   readonly?: boolean;
+  // Conditional logic
+  condition?: ConditionalLogic;
 }
 
 export interface FormSchema {
@@ -289,4 +303,61 @@ export function validateFormField(field: FormFieldData, value: any): string[] {
   }
   
   return errors;
+}
+
+// Conditional logic evaluation functions
+export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<string, any>): boolean {
+  const fieldValue = formData[rule.field];
+  const ruleValue = rule.value;
+
+  switch (rule.operator) {
+    case 'equals':
+      return fieldValue === ruleValue;
+    case 'not_equals':
+      return fieldValue !== ruleValue;
+    case 'contains':
+      return typeof fieldValue === 'string' && fieldValue.includes(ruleValue);
+    case 'not_contains':
+      return typeof fieldValue === 'string' && !fieldValue.includes(ruleValue);
+    case 'greater_than':
+      return Number(fieldValue) > Number(ruleValue);
+    case 'less_than':
+      return Number(fieldValue) < Number(ruleValue);
+    case 'is_empty':
+      return !fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '');
+    case 'is_not_empty':
+      return fieldValue && (typeof fieldValue !== 'string' || fieldValue.trim() !== '');
+    default:
+      return true;
+  }
+}
+
+export function evaluateConditionalLogic(condition: ConditionalLogic, formData: Record<string, any>): boolean {
+  if (!condition.rules || condition.rules.length === 0) {
+    return true; // No conditions means always visible/enabled
+  }
+
+  const results = condition.rules.map(rule => evaluateConditionalRule(rule, formData));
+
+  if (condition.logic === 'AND') {
+    return results.every(result => result);
+  } else {
+    return results.some(result => result);
+  }
+}
+
+export function shouldShowField(field: FormFieldData, formData: Record<string, any>): boolean {
+  if (!field.condition || field.condition.type !== 'visibility') {
+    return true; // Show field if no visibility condition
+  }
+
+  return evaluateConditionalLogic(field.condition, formData);
+}
+
+export function shouldEnableField(field: FormFieldData, formData: Record<string, any>): boolean {
+  if (!field.condition || field.condition.type !== 'enable') {
+    return true; // Enable field if no enable condition
+  }
+
+  return evaluateConditionalLogic(field.condition, formData);
 }

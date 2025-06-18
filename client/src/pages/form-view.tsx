@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FormFieldData, FormSchema } from "@/lib/form-builder";
-import { organizeFieldsIntoRows } from "@/lib/form-builder";
+import { organizeFieldsIntoRows, shouldShowField, shouldEnableField } from "@/lib/form-builder";
 
 interface PublicForm {
   id: string;
@@ -278,6 +278,7 @@ export default function FormView() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {form.schema?.fields
                 ?.sort((a, b) => a.order - b.order)
+                ?.filter((field) => shouldShowField(field, formData))
                 .map((field) => renderField(field))}
 
               <div className={`flex gap-4 ${getButtonLayoutClass()}`}>
