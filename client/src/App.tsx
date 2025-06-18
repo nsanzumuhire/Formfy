@@ -21,18 +21,16 @@ import NotFound from "@/pages/not-found";
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { selectedProject, setSelectedProject } = useProject();
-  
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
+        <Header
           selectedProject={selectedProject || undefined}
           onProjectChange={setSelectedProject}
         />
-        <div className="flex-1 overflow-y-auto">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
@@ -53,7 +51,7 @@ function Router() {
     <Switch>
       {/* Public form route - accessible without authentication */}
       <Route path="/form/:projectId/:formName" component={FormView} />
-      
+
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
