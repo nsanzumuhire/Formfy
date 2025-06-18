@@ -277,7 +277,7 @@ async function seed() {
     ];
 
     console.log("📁 Creating sample projects...");
-    const createdProjects = [];
+    const createdProjects: any[] = [];
     for (const project of sampleProjects) {
       const [created] = await db.insert(schema.projects).values(project).returning();
       createdProjects.push(created);
@@ -286,20 +286,26 @@ async function seed() {
     // Create API keys for projects
     console.log("🔑 Creating API keys...");
     for (const project of createdProjects) {
-      await db.insert(schema.apiKeys).values([
+      const apiKeys = [
         {
           name: "Production Key",
           key: "pk_live_" + nanoid(32),
           projectId: project.id,
+          environment: "production" as const,
           isActive: true
         },
         {
           name: "Development Key", 
           key: "pk_test_" + nanoid(32),
           projectId: project.id,
+          environment: "development" as const,
           isActive: true
         }
-      ]);
+      ];
+      
+      for (const apiKey of apiKeys) {
+        await db.insert(schema.apiKeys).values(apiKey);
+      }
     }
 
     // Create sample forms
