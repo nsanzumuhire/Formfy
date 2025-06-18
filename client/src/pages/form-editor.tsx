@@ -200,16 +200,24 @@ function SortableField({
           </span>
         </div>
       ) : field.type === "radio" ? (
-        <div className="space-y-2">
+        <RadioGroup disabled className="space-y-2">
           {(field.options || [{ label: "Option 1", value: "option1" }, { label: "Option 2", value: "option2" }]).map((option: any, index: number) => (
             <div key={index} className="flex items-center gap-2">
-              <input type="radio" name={field.id} disabled className="rounded-full" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <RadioGroupItem 
+                value={option.value} 
+                id={`edit-radio-${field.id}-${index}`}
+                disabled 
+                className="bg-gray-50 dark:bg-gray-900"
+              />
+              <Label 
+                htmlFor={`edit-radio-${field.id}-${index}`}
+                className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+              >
                 {option.label}
-              </span>
+              </Label>
             </div>
           ))}
-        </div>
+        </RadioGroup>
       ) : field.type === "select" ? (
         <Select disabled>
           <SelectTrigger className="bg-gray-50 dark:bg-gray-900">
@@ -529,7 +537,10 @@ export default function FormEditor() {
       width: "100%",
       layout: "vertical",
       multiple: false,
-      options: [],
+      options: (fieldType === "radio" || fieldType === "select") ? [
+        { label: "Option 1", value: "option1" },
+        { label: "Option 2", value: "option2" }
+      ] : [],
       optionSource: "",
       minDate: "",
       maxDate: "",
