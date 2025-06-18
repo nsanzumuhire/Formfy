@@ -148,11 +148,8 @@ function SortableField({
           ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
       }`}
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData('text/plain', field.id);
-        e.dataTransfer.effectAllowed = 'move';
-      }}
+      {...attributes}
+      {...listeners}
       onClick={onSelect}
     >
       <div className="flex items-center justify-between mb-2">
@@ -586,11 +583,27 @@ export default function FormEditor() {
     if (!fieldId || !targetRowId) return;
     
     setFormFields(fields => {
-      const updatedFields = addFieldToRow(fields, fieldId, targetRowId);
-      const fieldsInRow = updatedFields.filter(f => f.rowId === targetRowId);
-      return distributeWidthsEvenly(fieldsInRow).concat(
-        updatedFields.filter(f => f.rowId !== targetRowId)
-      );
+      // Find the field being dragged
+      const draggedField = fields.find(f => f.id === fieldId);
+      if (!draggedField) return fields;
+      
+      // Remove field from its current row
+      const fieldsWithoutDragged = fields.filter(f => f.id !== fieldId);
+      
+      // Add field to target row
+      const updatedField = { ...draggedField, rowId: targetRowId };
+      const updatedFields = [...fieldsWithoutDragged, updatedField];
+      
+      // Get all fields in the target row and distribute widths evenly
+      const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetRowId);
+      const evenWidth = 100 / fieldsInTargetRow.length;
+      
+      return updatedFields.map(field => {
+        if (field.rowId === targetRowId) {
+          return { ...field, width: evenWidth };
+        }
+        return field;
+      });
     });
   };
 
@@ -600,7 +613,15 @@ export default function FormEditor() {
     
     if (!fieldId) return;
     
-    setFormFields(fields => createNewRow(fields, fieldId));
+    setFormFields(fields => {
+      const newRowId = generateRowId();
+      return fields.map(field => {
+        if (field.id === fieldId) {
+          return { ...field, rowId: newRowId, width: 100 };
+        }
+        return field;
+      });
+    });
   };
 
   const handleAddField = (fieldType: string) => {
@@ -682,7 +703,48 @@ export default function FormEditor() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (!over || active.id === over.id) return;
+
+    // For auto layout mode, handle row-based dragging
+    if (formConfig.layout === "auto") {
+      const draggedFieldId = active.id as string;
+      const targetFieldId = over.id as string;
+      
+      setFormFields((fields) => {
+        const draggedField = fields.find(f => f.id === draggedFieldId);
+        const targetField = fields.find(f => f.id === targetFieldId);
+        
+        if (!draggedField || !targetField) return fields;
+        
+        // If dropping on a field that has a row, add to that row
+        if (targetField.rowId) {
+          const fieldsWithoutDragged = fields.filter(f => f.id !== draggedFieldId);
+          const updatedField = { ...draggedField, rowId: targetField.rowId };
+          const updatedFields = [...fieldsWithoutDragged, updatedField];
+          
+          // Get all fields in the target row and distribute widths evenly
+          const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetField.rowId);
+          const evenWidth = 100 / fieldsInTargetRow.length;
+          
+          return updatedFields.map(field => {
+            if (field.rowId === targetField.rowId) {
+              return { ...field, width: evenWidth };
+            }
+            return field;
+          });
+        } else {
+          // Create a new row with both fields
+          const newRowId = generateRowId();
+          return fields.map(field => {
+            if (field.id === draggedFieldId || field.id === targetFieldId) {
+              return { ...field, rowId: newRowId, width: 50 };
+            }
+            return field;
+          });
+        }
+      });
+    } else {
+      // Traditional layout mode - simple reordering
       setFormFields((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over?.id);

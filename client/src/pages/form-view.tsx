@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FormFieldData, FormSchema } from "@/lib/form-builder";
+import { organizeFieldsIntoRows } from "@/lib/form-builder";
 
 interface PublicForm {
   id: string;
