@@ -80,6 +80,7 @@ export default function FormView() {
   const renderField = (field: FormFieldData) => {
     const value = formData[field.id] || "";
     const showLabels = form?.schema?.settings?.showLabels !== false;
+    const isEnabled = shouldEnableField(field, formData);
 
     switch (field.type) {
       case "text":
@@ -94,6 +95,7 @@ export default function FormView() {
               value={value}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
               required={field.validation?.some(rule => rule.type === "required")}
+              disabled={!isEnabled}
             />
             {field.description && (
               <p className="text-sm text-muted-foreground">{field.description}</p>
@@ -112,6 +114,7 @@ export default function FormView() {
               value={value}
               onChange={(e) => handleFieldChange(field.id, parseFloat(e.target.value) || "")}
               required={field.validation?.some(rule => rule.type === "required")}
+              disabled={!isEnabled}
             />
             {field.description && (
               <p className="text-sm text-muted-foreground">{field.description}</p>
@@ -127,6 +130,7 @@ export default function FormView() {
                 id={field.id}
                 checked={value || false}
                 onCheckedChange={(checked) => handleFieldChange(field.id, checked)}
+                disabled={!isEnabled}
               />
               <Label htmlFor={field.id}>{field.label}</Label>
             </div>
@@ -144,6 +148,7 @@ export default function FormView() {
               value={value}
               onValueChange={(value) => handleFieldChange(field.id, value)}
               required={field.validation?.some(rule => rule.type === "required")}
+              disabled={!isEnabled}
             >
               {field.options?.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2">
@@ -166,6 +171,7 @@ export default function FormView() {
               value={value}
               onValueChange={(value) => handleFieldChange(field.id, value)}
               required={field.validation?.some(rule => rule.type === "required")}
+              disabled={!isEnabled}
             >
               <SelectTrigger>
                 <SelectValue placeholder={field.placeholder} />

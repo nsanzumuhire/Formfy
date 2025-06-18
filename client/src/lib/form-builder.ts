@@ -49,6 +49,13 @@ export interface FormSchema {
   settings: {
     title: string;
     description?: string;
+    showLabels?: boolean;
+    buttonLayout?: "left" | "center" | "right" | "justify" | "split";
+    submitButtonText?: string;
+    cancelButtonText?: string;
+    submitButtonColor?: string;
+    cancelButtonColor?: string;
+    showCancelButton?: boolean;
   };
 }
 
