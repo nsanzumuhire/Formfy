@@ -117,6 +117,9 @@ import {
   distributeWidthsEvenly,
   addFieldToRow,
   createNewRow,
+  reorderFieldsInRow,
+  moveRowUp,
+  moveRowDown,
 } from "@/lib/form-builder";
 
 // Sortable Field Component
@@ -716,7 +719,12 @@ export default function FormEditor() {
         
         if (!draggedField || !targetField) return fields;
         
-        // Clear any existing row assignment from dragged field when switching layouts
+        // If both fields are in the same row, reorder within that row
+        if (draggedField.rowId && targetField.rowId && draggedField.rowId === targetField.rowId) {
+          return reorderFieldsInRow(fields, draggedField.rowId, draggedFieldId, targetFieldId);
+        }
+        
+        // Remove dragged field from its current row/position
         const fieldsWithoutDragged = fields.filter(f => f.id !== draggedFieldId);
         
         // If dropping on a field that has a row, add to that row
@@ -1966,12 +1974,55 @@ export default function FormEditor() {
                           {formConfig.layout === "auto" ? (
                             // Auto Layout Mode - Row-based layout with drag-and-drop
                             <div className="space-y-4">
-                              {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => (
+                              {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => {
+                                const rowId = rowFields[0]?.rowId;
+                                const rows = organizeFieldsIntoRows(formFields);
+                                const canMoveUp = rowIndex > 0;
+                                const canMoveDown = rowIndex < rows.length - 1;
+                                
+                                return (
                                 <div
                                   key={rowFields[0]?.rowId || `row-${rowIndex}`}
-                                  className="flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                                  className="group relative flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
                                   style={{ gap: getSpacingValue() }}
                                 >
+                                  {/* Row Controls */}
+                                  {rowId && (
+                                    <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+                                      <button
+                                        onClick={() => {
+                                          if (canMoveUp) {
+                                            setFormFields(fields => moveRowUp(fields, rowId));
+                                          }
+                                        }}
+                                        disabled={!canMoveUp}
+                                        className={`p-1 rounded text-xs ${
+                                          canMoveUp 
+                                            ? 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400' 
+                                            : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                                        }`}
+                                        title="Move row up"
+                                      >
+                                        ↑
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (canMoveDown) {
+                                            setFormFields(fields => moveRowDown(fields, rowId));
+                                          }
+                                        }}
+                                        disabled={!canMoveDown}
+                                        className={`p-1 rounded text-xs ${
+                                          canMoveDown 
+                                            ? 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400' 
+                                            : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                                        }`}
+                                        title="Move row down"
+                                      >
+                                        ↓
+                                      </button>
+                                    </div>
+                                  )}
                                   {rowFields.map((field) => (
                                     <div
                                       key={field.id}
@@ -2012,7 +2063,8 @@ export default function FormEditor() {
                                     <Plus className="w-4 h-4" />
                                   </div>
                                 </div>
-                              ))}
+                                );
+                              })}
                               
                               {/* Empty row for new fields */}
                               <div
