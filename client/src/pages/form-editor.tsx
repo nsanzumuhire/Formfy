@@ -705,7 +705,7 @@ export default function FormEditor() {
 
     if (!over || active.id === over.id) return;
 
-    // For auto layout mode, handle row-based dragging
+    // For auto layout mode, handle row-based dragging and reordering
     if (formConfig.layout === "auto") {
       const draggedFieldId = active.id as string;
       const targetFieldId = over.id as string;
@@ -716,9 +716,11 @@ export default function FormEditor() {
         
         if (!draggedField || !targetField) return fields;
         
+        // Clear any existing row assignment from dragged field when switching layouts
+        const fieldsWithoutDragged = fields.filter(f => f.id !== draggedFieldId);
+        
         // If dropping on a field that has a row, add to that row
         if (targetField.rowId) {
-          const fieldsWithoutDragged = fields.filter(f => f.id !== draggedFieldId);
           const updatedField = { ...draggedField, rowId: targetField.rowId };
           const updatedFields = [...fieldsWithoutDragged, updatedField];
           
@@ -744,12 +746,18 @@ export default function FormEditor() {
         }
       });
     } else {
-      // Traditional layout mode - simple reordering
+      // Traditional layout mode - clear auto layout properties and do simple reordering
       setFormFields((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
+        const clearedItems = items.map(item => ({
+          ...item,
+          rowId: undefined,
+          width: 100
+        }));
+        
+        const oldIndex = clearedItems.findIndex((item) => item.id === active.id);
+        const newIndex = clearedItems.findIndex((item) => item.id === over?.id);
 
-        return arrayMove(items, oldIndex, newIndex);
+        return arrayMove(clearedItems, oldIndex, newIndex);
       });
     }
   };
@@ -1071,11 +1079,9 @@ export default function FormEditor() {
                               ? "Two Col"
                               : formConfig.layout === "grid"
                                 ? "Grid"
-                                : formConfig.layout === "mixed"
-                                  ? "Mixed"
-                                  : formConfig.layout === "auto"
-                                    ? "Auto"
-                                    : "Form layout"}
+                                : formConfig.layout === "auto"
+                                  ? "Auto"
+                                  : "Form layout"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -1142,26 +1148,7 @@ export default function FormEditor() {
                               />
                               Grid
                             </CommandItem>
-                            <CommandItem
-                              value="mixed"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "mixed",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "mixed"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Mixed
-                            </CommandItem>
+
                             <CommandItem
                               value="auto"
                               onSelect={() => {
@@ -1660,15 +1647,10 @@ export default function FormEditor() {
                                     ? "grid grid-cols-2"
                                     : formConfig.layout === "grid"
                                       ? "grid"
-                                      : formConfig.layout === "mixed"
-                                        ? "space-y-4"
-                                        : "flex flex-col"
+                                      : "flex flex-col"
                                 }`}
                                 style={{
-                                  gap:
-                                    formConfig.layout !== "mixed"
-                                      ? getSpacingValue()
-                                      : undefined,
+                                  gap: getSpacingValue(),
                                   ...(formConfig.layout === "grid" && {
                                     gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
                                   }),
@@ -2052,15 +2034,10 @@ export default function FormEditor() {
                                   ? "grid grid-cols-2"
                                   : formConfig.layout === "grid"
                                     ? "grid"
-                                    : formConfig.layout === "mixed"
-                                      ? "space-y-4"
-                                      : "flex flex-col"
+                                    : "flex flex-col"
                               }`}
                               style={{
-                                gap:
-                                  formConfig.layout !== "mixed"
-                                    ? getSpacingValue()
-                                    : undefined,
+                                gap: getSpacingValue(),
                                 ...(formConfig.layout === "grid" && {
                                   gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
                                 }),

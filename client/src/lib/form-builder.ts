@@ -67,15 +67,20 @@ export function organizeFieldsIntoRows(fields: FormFieldData[]): FormFieldData[]
     rows[rowId].sort((a, b) => a.order - b.order);
   });
 
-  // Create result array with rows in order
-  const result: FormFieldData[][] = Object.values(rows);
+  // Create result array with rows in order (sorted by the minimum order of fields in each row)
+  const sortedRows = Object.values(rows).sort((a, b) => {
+    const minOrderA = Math.min(...a.map(f => f.order));
+    const minOrderB = Math.min(...b.map(f => f.order));
+    return minOrderA - minOrderB;
+  });
   
-  // Add unassigned fields as individual rows
+  // Add unassigned fields as individual rows, sorted by order
+  unassignedFields.sort((a, b) => a.order - b.order);
   unassignedFields.forEach(field => {
-    result.push([field]);
+    sortedRows.push([field]);
   });
 
-  return result;
+  return sortedRows;
 }
 
 export function distributeWidthsEvenly(fieldsInRow: FormFieldData[]): FormFieldData[] {
@@ -100,6 +105,76 @@ export function createNewRow(fields: FormFieldData[], fieldId: string): FormFiel
   return fields.map(field => {
     if (field.id === fieldId) {
       return { ...field, rowId: newRowId, width: 100 };
+    }
+    return field;
+  });
+}
+
+export function reorderFieldsInRow(fields: FormFieldData[], rowId: string, draggedFieldId: string, targetFieldId: string): FormFieldData[] {
+  const fieldsInRow = fields.filter(f => f.rowId === rowId);
+  const otherFields = fields.filter(f => f.rowId !== rowId);
+  
+  const draggedIndex = fieldsInRow.findIndex(f => f.id === draggedFieldId);
+  const targetIndex = fieldsInRow.findIndex(f => f.id === targetFieldId);
+  
+  if (draggedIndex === -1 || targetIndex === -1) return fields;
+  
+  // Reorder fields within the row
+  const reorderedFields = [...fieldsInRow];
+  const [draggedField] = reorderedFields.splice(draggedIndex, 1);
+  reorderedFields.splice(targetIndex, 0, draggedField);
+  
+  // Update order values to maintain position
+  reorderedFields.forEach((field, index) => {
+    field.order = Math.min(...fieldsInRow.map(f => f.order)) + index;
+  });
+  
+  return [...otherFields, ...reorderedFields];
+}
+
+export function moveRowUp(fields: FormFieldData[], rowId: string): FormFieldData[] {
+  const rows = organizeFieldsIntoRows(fields);
+  const rowIndex = rows.findIndex(row => row[0]?.rowId === rowId);
+  
+  if (rowIndex <= 0) return fields; // Can't move up if it's already at the top
+  
+  const targetRowFields = rows[rowIndex - 1];
+  const currentRowFields = rows[rowIndex];
+  
+  // Swap the order values of the two rows
+  const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
+  const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
+  
+  return fields.map(field => {
+    if (targetRowFields.some(f => f.id === field.id)) {
+      return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
+    }
+    if (currentRowFields.some(f => f.id === field.id)) {
+      return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
+    }
+    return field;
+  });
+}
+
+export function moveRowDown(fields: FormFieldData[], rowId: string): FormFieldData[] {
+  const rows = organizeFieldsIntoRows(fields);
+  const rowIndex = rows.findIndex(row => row[0]?.rowId === rowId);
+  
+  if (rowIndex === -1 || rowIndex >= rows.length - 1) return fields; // Can't move down if it's already at the bottom
+  
+  const currentRowFields = rows[rowIndex];
+  const targetRowFields = rows[rowIndex + 1];
+  
+  // Swap the order values of the two rows
+  const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
+  const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
+  
+  return fields.map(field => {
+    if (currentRowFields.some(f => f.id === field.id)) {
+      return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
+    }
+    if (targetRowFields.some(f => f.id === field.id)) {
+      return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
     }
     return field;
   });
