@@ -146,14 +146,15 @@ function SortableField({
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-4 border rounded-lg cursor-pointer transition-all ${
+      className={`p-4 border rounded-lg transition-all ${
         isSelected
           ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
       }`}
-      {...attributes}
-      {...listeners}
-      onClick={onSelect}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
     >
       <div className="flex items-center justify-between mb-2">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -546,7 +547,28 @@ export default function FormEditor() {
     const currentField = rowFields[fieldIndex];
     const nextField = rowFields[fieldIndex + 1];
     
-    if (!currentField || !nextField) return;
+    if (!currentField) return;
+    
+    // For single fields in a row, just allow visual feedback but maintain 100% width
+    if (rowFields.length === 1) {
+      const handleMouseMove = (e: MouseEvent) => {
+        // Visual feedback only - field stays at 100% width
+        const deltaX = e.clientX - startX;
+        // Could add visual indicator here if needed
+      };
+      
+      const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return;
+    }
+    
+    // For multiple fields in a row, allow resizing between fields
+    if (!nextField) return;
     
     const startWidthCurrent = currentField.width || 50;
     const startWidthNext = nextField.width || 50;
@@ -2084,12 +2106,12 @@ export default function FormEditor() {
                                       style={{ width: `${field.width || 100 / rowFields.length}%` }}
                                     >
                                       {/* Resize Handle */}
-                                      {rowFields.length > 1 && rowFields.indexOf(field) < rowFields.length - 1 && (
+                                      {(rowFields.length > 1 && rowFields.indexOf(field) < rowFields.length - 1) || (rowFields.length === 1) ? (
                                         <div
                                           className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
                                           onMouseDown={(e) => handleResizeStart(e, field.id, rowFields)}
                                         />
-                                      )}
+                                      ) : null}
                                       
                                       <SortableField
                                         field={field}
