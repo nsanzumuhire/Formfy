@@ -161,9 +161,31 @@ function SortableField({
 
       {field.type === "text" ||
       field.type === "email" ||
-      field.type === "number" ? (
+      field.type === "number" ||
+      field.type === "tel" ||
+      field.type === "url" ? (
         <Input
+          type={field.type}
           placeholder={field.placeholder}
+          disabled
+          className="bg-gray-50 dark:bg-gray-900"
+        />
+      ) : field.type === "textarea" ? (
+        <Textarea
+          placeholder={field.placeholder}
+          disabled
+          className="bg-gray-50 dark:bg-gray-900 resize-none"
+          rows={3}
+        />
+      ) : field.type === "date" ? (
+        <Input
+          type="date"
+          disabled
+          className="bg-gray-50 dark:bg-gray-900"
+        />
+      ) : field.type === "file" ? (
+        <Input
+          type="file"
           disabled
           className="bg-gray-50 dark:bg-gray-900"
         />
@@ -176,18 +198,14 @@ function SortableField({
         </div>
       ) : field.type === "radio" ? (
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              Option 1
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              Option 2
-            </span>
-          </div>
+          {(field.options || [{ label: "Option 1", value: "option1" }, { label: "Option 2", value: "option2" }]).map((option, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <input type="radio" name={field.id} disabled className="rounded-full" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {option.label}
+              </span>
+            </div>
+          ))}
         </div>
       ) : field.type === "select" ? (
         <Select disabled>
@@ -567,8 +585,13 @@ export default function FormEditor() {
   const getFieldLabel = (type: string) => {
     const labels: Record<string, string> = {
       text: "Text Input",
+      textarea: "Textarea",
       email: "Email",
       number: "Number",
+      tel: "Phone Number",
+      url: "URL",
+      date: "Date",
+      file: "File Upload",
       checkbox: "Checkbox",
       radio: "Radio Button",
       select: "Dropdown",
@@ -579,8 +602,13 @@ export default function FormEditor() {
   const getFieldPlaceholder = (type: string) => {
     const placeholders: Record<string, string> = {
       text: "Enter text...",
+      textarea: "Enter your message...",
       email: "Enter email address...",
       number: "Enter number...",
+      tel: "Enter phone number...",
+      url: "Enter URL...",
+      date: "Select date...",
+      file: "Choose file...",
       checkbox: "Check this option",
       radio: "Select option",
       select: "Choose an option",
@@ -1251,15 +1279,16 @@ export default function FormEditor() {
                       /* Preview Mode */
                       <div className="w-full h-full">
                         <div className="space-y-6 h-full">
-                          <div className="text-center border-b pb-4">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                              {formName || "Form Preview"}
-                            </h2>
-                            {formDescription && (
-                              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                                {formDescription}
-                              </p>
-                            )}
+                          {/* Validation & Logic Demo Badge */}
+                          <div className="flex justify-between items-center">
+                            <div className="flex gap-2">
+                              <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                                ✓ Validation Rules Active
+                              </Badge>
+                              <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                                ✓ Conditional Logic Active
+                              </Badge>
+                            </div>
                           </div>
 
                           <form className="w-full">

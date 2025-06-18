@@ -8,10 +8,15 @@ import {
   CheckSquare,
   Circle,
   ChevronDown,
+  AlignLeft,
+  Calendar,
+  Phone,
+  Link,
+  FileText,
 } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
-export type FieldType = "text" | "email" | "number" | "checkbox" | "radio" | "select";
+export type FieldType = "text" | "email" | "number" | "checkbox" | "radio" | "select" | "textarea" | "date" | "tel" | "url" | "file";
 
 interface FieldDefinition {
   type: FieldType;
@@ -26,6 +31,11 @@ const fieldTypes: FieldDefinition[] = [
     icon: Type,
   },
   {
+    type: "textarea",
+    label: "Textarea",
+    icon: AlignLeft,
+  },
+  {
     type: "email",
     label: "Email Input",
     icon: Mail,
@@ -34,6 +44,26 @@ const fieldTypes: FieldDefinition[] = [
     type: "number",
     label: "Number Input",
     icon: Hash,
+  },
+  {
+    type: "tel",
+    label: "Phone Number",
+    icon: Phone,
+  },
+  {
+    type: "url",
+    label: "URL Input",
+    icon: Link,
+  },
+  {
+    type: "date",
+    label: "Date Picker",
+    icon: Calendar,
+  },
+  {
+    type: "file",
+    label: "File Upload",
+    icon: FileText,
   },
   {
     type: "checkbox",
