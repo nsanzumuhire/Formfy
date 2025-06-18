@@ -48,6 +48,8 @@ import {
   ArrowLeftRight,
   Calendar,
   Phone,
+  ChevronUp,
+  ChevronDown as ChevronDownIcon,
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -117,6 +119,9 @@ import {
   distributeWidthsEvenly,
   addFieldToRow,
   createNewRow,
+  reorderFieldsInRow,
+  moveRowUp,
+  moveRowDown,
 } from "@/lib/form-builder";
 
 // Sortable Field Component
@@ -716,7 +721,12 @@ export default function FormEditor() {
         
         if (!draggedField || !targetField) return fields;
         
-        // Clear any existing row assignment from dragged field when switching layouts
+        // If both fields are in the same row, reorder within the row
+        if (draggedField.rowId && targetField.rowId && draggedField.rowId === targetField.rowId) {
+          return reorderFieldsInRow(fields, draggedField.rowId, draggedFieldId, targetFieldId);
+        }
+        
+        // Clear any existing row assignment from dragged field
         const fieldsWithoutDragged = fields.filter(f => f.id !== draggedFieldId);
         
         // If dropping on a field that has a row, add to that row
@@ -1969,47 +1979,79 @@ export default function FormEditor() {
                               {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => (
                                 <div
                                   key={rowFields[0]?.rowId || `row-${rowIndex}`}
-                                  className="flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
-                                  style={{ gap: getSpacingValue() }}
+                                  className="relative group"
                                 >
-                                  {rowFields.map((field) => (
-                                    <div
-                                      key={field.id}
-                                      className="relative group"
-                                      style={{ width: `${field.width || 100 / rowFields.length}%` }}
-                                    >
-                                      {/* Resize Handle */}
-                                      {rowFields.length > 1 && rowFields.indexOf(field) < rowFields.length - 1 && (
-                                        <div
-                                          className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
-                                          onMouseDown={(e) => handleResizeStart(e, field.id, rowFields)}
-                                        />
-                                      )}
-                                      
-                                      <SortableField
-                                        field={field}
-                                        isSelected={selectedFieldId === field.id}
-                                        onSelect={() => handleFieldSelect(field.id)}
-                                        onUpdate={(updates) => {
-                                          setFormFields((fields) =>
-                                            fields.map((f) =>
-                                              f.id === field.id
-                                                ? { ...f, ...updates }
-                                                : f,
-                                            ),
-                                          );
+                                  {/* Row Controls */}
+                                  {rowFields[0]?.rowId && (
+                                    <div className="absolute -left-10 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-6 w-6 p-0"
+                                        onClick={() => {
+                                          setFormFields(fields => moveRowUp(fields, rowFields[0].rowId!));
                                         }}
-                                      />
+                                        disabled={rowIndex === 0}
+                                      >
+                                        <ChevronUp className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-6 w-6 p-0"
+                                        onClick={() => {
+                                          setFormFields(fields => moveRowDown(fields, rowFields[0].rowId!));
+                                        }}
+                                        disabled={rowIndex === organizeFieldsIntoRows(formFields).length - 1}
+                                      >
+                                        <ChevronDownIcon className="h-3 w-3" />
+                                      </Button>
                                     </div>
-                                  ))}
+                                  )}
                                   
-                                  {/* Drop Zone for adding fields to this row */}
                                   <div
-                                    className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
-                                    onDragOver={(e) => e.preventDefault()}
-                                    onDrop={(e) => handleDropToRow(e, rowFields[0]?.rowId)}
+                                    className="flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                                    style={{ gap: getSpacingValue() }}
                                   >
-                                    <Plus className="w-4 h-4" />
+                                    {rowFields.map((field) => (
+                                      <div
+                                        key={field.id}
+                                        className="relative group"
+                                        style={{ width: `${field.width || 100 / rowFields.length}%` }}
+                                      >
+                                        {/* Resize Handle */}
+                                        {rowFields.length > 1 && rowFields.indexOf(field) < rowFields.length - 1 && (
+                                          <div
+                                            className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
+                                            onMouseDown={(e) => handleResizeStart(e, field.id, rowFields)}
+                                          />
+                                        )}
+                                        
+                                        <SortableField
+                                          field={field}
+                                          isSelected={selectedFieldId === field.id}
+                                          onSelect={() => handleFieldSelect(field.id)}
+                                          onUpdate={(updates) => {
+                                            setFormFields((fields) =>
+                                              fields.map((f) =>
+                                                f.id === field.id
+                                                  ? { ...f, ...updates }
+                                                  : f,
+                                              ),
+                                            );
+                                          }}
+                                        />
+                                      </div>
+                                    ))}
+                                    
+                                    {/* Drop Zone for adding fields to this row */}
+                                    <div
+                                      className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
+                                      onDragOver={(e) => e.preventDefault()}
+                                      onDrop={(e) => handleDropToRow(e, rowFields[0]?.rowId)}
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </div>
                                   </div>
                                 </div>
                               ))}
@@ -2062,8 +2104,10 @@ export default function FormEditor() {
                               ))}
                             </div>
                           )}
+                        </SortableContext>
+                      </DndContext>
 
-                          {/* Submit Button Preview in Edit Mode */}
+                      {/* Submit Button Preview in Edit Mode */}
                           {formFields.length > 0 && (
                             <div
                               className={`pt-6 ${
