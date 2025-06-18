@@ -13,7 +13,7 @@ export interface FormFieldOption {
 
 export interface ConditionalRule {
   field: string;
-  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty';
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty' | '==' | '!=';
   value: string;
 }
 
@@ -313,14 +313,26 @@ export function validateFormField(field: FormFieldData, value: any): string[] {
 }
 
 // Conditional logic evaluation functions
-export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<string, any>): boolean {
-  const fieldValue = formData[rule.field];
+export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<string, any>, fields: FormFieldData[] = []): boolean {
+  // Try to find the field value by the rule.field reference
+  let fieldValue = formData[rule.field];
+  
+  // If not found and we have field definitions, try to find by field name property
+  if (fieldValue === undefined && fields.length > 0) {
+    const referencedField = fields.find(f => (f as any).name === rule.field);
+    if (referencedField) {
+      fieldValue = formData[referencedField.id];
+    }
+  }
+  
   const ruleValue = rule.value;
 
   switch (rule.operator) {
     case 'equals':
+    case '==':
       return fieldValue === ruleValue;
     case 'not_equals':
+    case '!=':
       return fieldValue !== ruleValue;
     case 'contains':
       return typeof fieldValue === 'string' && fieldValue.includes(ruleValue);
@@ -339,12 +351,12 @@ export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<
   }
 }
 
-export function evaluateConditionalLogic(condition: ConditionalLogic, formData: Record<string, any>): boolean {
+export function evaluateConditionalLogic(condition: ConditionalLogic, formData: Record<string, any>, fields: FormFieldData[] = []): boolean {
   if (!condition.rules || condition.rules.length === 0) {
     return true; // No conditions means always visible/enabled
   }
 
-  const results = condition.rules.map(rule => evaluateConditionalRule(rule, formData));
+  const results = condition.rules.map(rule => evaluateConditionalRule(rule, formData, fields));
 
   if (condition.logic === 'AND') {
     return results.every(result => result);
@@ -353,18 +365,23 @@ export function evaluateConditionalLogic(condition: ConditionalLogic, formData: 
   }
 }
 
-export function shouldShowField(field: FormFieldData, formData: Record<string, any>): boolean {
-  if (!field.condition || field.condition.type !== 'visibility') {
-    return true; // Show field if no visibility condition
+export function shouldShowField(field: FormFieldData, formData: Record<string, any>, fields: FormFieldData[] = []): boolean {
+  if (!field.condition) {
+    return true; // Show field if no condition
   }
 
-  return evaluateConditionalLogic(field.condition, formData);
+  // If no type is specified, assume it's a visibility condition
+  if (!field.condition.type || field.condition.type === 'visibility') {
+    return evaluateConditionalLogic(field.condition, formData, fields);
+  }
+
+  return true; // Show field if it's not a visibility condition
 }
 
-export function shouldEnableField(field: FormFieldData, formData: Record<string, any>): boolean {
+export function shouldEnableField(field: FormFieldData, formData: Record<string, any>, fields: FormFieldData[] = []): boolean {
   if (!field.condition || field.condition.type !== 'enable') {
     return true; // Enable field if no enable condition
   }
 
-  return evaluateConditionalLogic(field.condition, formData);
+  return evaluateConditionalLogic(field.condition, formData, fields);
 }

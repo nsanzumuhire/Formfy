@@ -80,7 +80,7 @@ export default function FormView() {
   const renderField = (field: FormFieldData) => {
     const value = formData[field.id] || "";
     const showLabels = form?.schema?.settings?.showLabels !== false;
-    const isEnabled = shouldEnableField(field, formData);
+    const isEnabled = shouldEnableField(field, formData, form?.schema?.fields || []);
 
     switch (field.type) {
       case "text":
@@ -284,7 +284,7 @@ export default function FormView() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {form.schema?.fields
                 ?.sort((a, b) => a.order - b.order)
-                ?.filter((field) => shouldShowField(field, formData))
+                ?.filter((field) => shouldShowField(field, formData, form?.schema?.fields || []))
                 .map((field) => renderField(field))}
 
               <div className={`flex gap-4 ${getButtonLayoutClass()}`}>
