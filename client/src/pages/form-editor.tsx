@@ -2283,24 +2283,30 @@ export default function FormEditor() {
                                   ))}
                                   
                                   {/* Drop Zone for adding fields to this row */}
-                                  <Droppable id={`row-drop-zone-${rowFields[0]?.rowId}`}>
-                                    <div className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
-                                      <Plus className="w-4 h-4" />
-                                    </div>
-                                  </Droppable>
+                                  {(() => {
+                                    const { setNodeRef } = useDroppable({ id: `row-drop-zone-${rowFields[0]?.rowId}` });
+                                    return (
+                                      <div ref={setNodeRef} className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+                                        <Plus className="w-4 h-4" />
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                                 );
                               })}
                               
                               {/* Empty row for new fields */}
-                              <Droppable id="new-row-drop-zone">
-                                <div className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
-                                  <div className="text-center">
-                                    <Plus className="w-6 h-6 mx-auto mb-2" />
-                                    <p className="text-sm">Drop fields here to create a new row</p>
+                              {(() => {
+                                const { setNodeRef } = useDroppable({ id: "new-row-drop-zone" });
+                                return (
+                                  <div ref={setNodeRef} className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+                                    <div className="text-center">
+                                      <Plus className="w-6 h-6 mx-auto mb-2" />
+                                      <p className="text-sm">Drop fields here to create a new row</p>
+                                    </div>
                                   </div>
-                                </div>
-                              </Droppable>
+                                );
+                              })()}
                             </div>
                           ) : (
                             // Traditional Layout Modes
