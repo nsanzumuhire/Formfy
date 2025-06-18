@@ -23,7 +23,11 @@ export interface FormFieldData {
   // Auto layout properties
   rowId?: string;
   width?: number; // Width percentage for auto layout
-  layout?: "vertical" | "horizontal"; // For radio/checkbox options
+  layout?: "vertical" | "horizontal" | "inline"; // For radio/checkbox options and field layout
+  // Additional form properties
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
 }
 
 export interface FormSchema {

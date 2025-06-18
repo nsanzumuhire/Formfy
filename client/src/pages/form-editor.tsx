@@ -148,6 +148,11 @@ function SortableField({
           ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
       }`}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/plain', field.id);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
       onClick={onSelect}
     >
       <div className="flex items-center justify-between mb-2">
@@ -1466,27 +1471,148 @@ export default function FormEditor() {
                           </div>
 
                           <form className="w-full">
-                            <div
-                              className={`w-full ${
-                                formConfig.layout === "two-column"
-                                  ? "grid grid-cols-2"
-                                  : formConfig.layout === "grid"
-                                    ? "grid"
-                                    : formConfig.layout === "mixed"
-                                      ? "space-y-4"
-                                      : "flex flex-col"
-                              }`}
-                              style={{
-                                gap:
-                                  formConfig.layout !== "mixed"
-                                    ? getSpacingValue()
-                                    : undefined,
-                                ...(formConfig.layout === "grid" && {
-                                  gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
-                                }),
-                              }}
-                            >
-                              {formFields.map((field) => (
+                            {formConfig.layout === "auto" ? (
+                              // Auto Layout Preview Mode - Row-based layout
+                              <div className="space-y-4">
+                                {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => (
+                                  <div
+                                    key={rowFields[0]?.rowId || `preview-row-${rowIndex}`}
+                                    className="flex w-full"
+                                    style={{ gap: getSpacingValue() }}
+                                  >
+                                    {rowFields.map((field) => (
+                                      <div
+                                        key={field.id}
+                                        style={{ width: `${field.width || 100 / rowFields.length}%` }}
+                                        className={`${
+                                          field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
+                                            ? "flex items-center gap-4"
+                                            : field.layout === "inline" && field.type !== "radio" && field.type !== "checkbox"
+                                              ? "flex items-center gap-2"
+                                              : "space-y-2"
+                                        }`}
+                                      >
+                                        {formConfig.showLabels && (
+                                          <div
+                                            className={`${
+                                              field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
+                                                ? "min-w-[120px]"
+                                                : ""
+                                            }`}
+                                          >
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                              {field.label}
+                                              {field.required && <span className="text-red-500 ml-1">*</span>}
+                                            </label>
+                                          </div>
+                                        )}
+
+                                        <div className="relative flex-1">
+                                          {/* Render form field based on type */}
+                                          {field.type === "text" ||
+                                          field.type === "email" ||
+                                          field.type === "number" ||
+                                          field.type === "tel" ||
+                                          field.type === "url" ? (
+                                            <Input
+                                              type={field.type}
+                                              placeholder={field.placeholder}
+                                              disabled={field.disabled}
+                                              readOnly={field.readonly}
+                                              className="w-full"
+                                            />
+                                          ) : field.type === "textarea" ? (
+                                            <Textarea
+                                              placeholder={field.placeholder}
+                                              disabled={field.disabled}
+                                              readOnly={field.readonly}
+                                              className="w-full resize-none"
+                                              rows={3}
+                                            />
+                                          ) : field.type === "radio" ? (
+                                            <RadioGroup 
+                                              className={
+                                                field.layout === "horizontal"
+                                                  ? "flex flex-wrap gap-4"
+                                                  : "space-y-2"
+                                              }
+                                            >
+                                              {(field.options || []).map((option: any, index: number) => (
+                                                <div key={index} className="flex items-center gap-2">
+                                                  <RadioGroupItem 
+                                                    value={option.value} 
+                                                    id={`preview-radio-${field.id}-${index}`}
+                                                  />
+                                                  <Label htmlFor={`preview-radio-${field.id}-${index}`}>
+                                                    {option.label}
+                                                  </Label>
+                                                </div>
+                                              ))}
+                                            </RadioGroup>
+                                          ) : field.type === "checkbox" ? (
+                                            <div className={
+                                              field.layout === "horizontal"
+                                                ? "flex flex-wrap gap-4"
+                                                : "space-y-2"
+                                            }>
+                                              {(field.options || []).map((option: any, index: number) => (
+                                                <div key={index} className="flex items-center gap-2">
+                                                  <Checkbox 
+                                                    id={`preview-checkbox-${field.id}-${index}`}
+                                                  />
+                                                  <Label htmlFor={`preview-checkbox-${field.id}-${index}`}>
+                                                    {option.label}
+                                                  </Label>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          ) : field.type === "select" ? (
+                                            <Select>
+                                              <SelectTrigger className="w-full">
+                                                <SelectValue placeholder={field.placeholder} />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {(field.options || []).map((option: any, index: number) => (
+                                                  <SelectItem key={index} value={option.value}>
+                                                    {option.label}
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          ) : field.type === "date" ? (
+                                            <Input type="date" className="w-full" />
+                                          ) : field.type === "file" ? (
+                                            <Input type="file" className="w-full" />
+                                          ) : null}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              // Traditional Layout Preview Mode
+                              <div
+                                className={`w-full ${
+                                  formConfig.layout === "two-column"
+                                    ? "grid grid-cols-2"
+                                    : formConfig.layout === "grid"
+                                      ? "grid"
+                                      : formConfig.layout === "mixed"
+                                        ? "space-y-4"
+                                        : "flex flex-col"
+                                }`}
+                                style={{
+                                  gap:
+                                    formConfig.layout !== "mixed"
+                                      ? getSpacingValue()
+                                      : undefined,
+                                  ...(formConfig.layout === "grid" && {
+                                    gridTemplateColumns: `repeat(${formConfig.gridColumns}, 1fr)`,
+                                  }),
+                                }}
+                              >
+                                {formFields.map((field) => (
                                 <div
                                   key={field.id}
                                   className={`${
@@ -1682,7 +1808,8 @@ export default function FormEditor() {
                                   </div>
                                 </div>
                               ))}
-                            </div>
+                              </div>
+                            )}
 
                             {formFields.length === 0 && (
                               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -1793,26 +1920,67 @@ export default function FormEditor() {
                           strategy={verticalListSortingStrategy}
                         >
                           {formConfig.layout === "auto" ? (
-                            // Auto Layout Mode - Row-based layout with drag-and-drop (simplified version)
+                            // Auto Layout Mode - Row-based layout with drag-and-drop
                             <div className="space-y-4">
-                              {formFields.map((field) => (
-                                <div key={field.id} className="border border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-2">
-                                  <SortableField
-                                    field={field}
-                                    isSelected={selectedFieldId === field.id}
-                                    onSelect={() => handleFieldSelect(field.id)}
-                                    onUpdate={(updates) => {
-                                      setFormFields((fields) =>
-                                        fields.map((f) =>
-                                          f.id === field.id
-                                            ? { ...f, ...updates }
-                                            : f,
-                                        ),
-                                      );
-                                    }}
-                                  />
+                              {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => (
+                                <div
+                                  key={rowFields[0]?.rowId || `row-${rowIndex}`}
+                                  className="flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                                  style={{ gap: getSpacingValue() }}
+                                >
+                                  {rowFields.map((field) => (
+                                    <div
+                                      key={field.id}
+                                      className="relative group"
+                                      style={{ width: `${field.width || 100 / rowFields.length}%` }}
+                                    >
+                                      {/* Resize Handle */}
+                                      {rowFields.length > 1 && rowFields.indexOf(field) < rowFields.length - 1 && (
+                                        <div
+                                          className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
+                                          onMouseDown={(e) => handleResizeStart(e, field.id, rowFields)}
+                                        />
+                                      )}
+                                      
+                                      <SortableField
+                                        field={field}
+                                        isSelected={selectedFieldId === field.id}
+                                        onSelect={() => handleFieldSelect(field.id)}
+                                        onUpdate={(updates) => {
+                                          setFormFields((fields) =>
+                                            fields.map((f) =>
+                                              f.id === field.id
+                                                ? { ...f, ...updates }
+                                                : f,
+                                            ),
+                                          );
+                                        }}
+                                      />
+                                    </div>
+                                  ))}
+                                  
+                                  {/* Drop Zone for adding fields to this row */}
+                                  <div
+                                    className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => handleDropToRow(e, rowFields[0]?.rowId)}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </div>
                                 </div>
                               ))}
+                              
+                              {/* Empty row for new fields */}
+                              <div
+                                className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => handleDropToNewRow(e)}
+                              >
+                                <div className="text-center">
+                                  <Plus className="w-6 h-6 mx-auto mb-2" />
+                                  <p className="text-sm">Drop fields here to create a new row</p>
+                                </div>
+                              </div>
                             </div>
                           ) : (
                             // Traditional Layout Modes
