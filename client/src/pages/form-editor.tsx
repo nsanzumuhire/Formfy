@@ -46,6 +46,9 @@ import {
   Layout,
   Maximize,
   ArrowLeftRight,
+  Calendar,
+  Phone,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -827,6 +830,46 @@ export default function FormEditor() {
                   title="Dropdown"
                 >
                   <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  onClick={() => handleAddField("textarea")}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Textarea"
+                >
+                  <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  onClick={() => handleAddField("date")}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Date Picker"
+                >
+                  <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  onClick={() => handleAddField("file")}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="File Upload"
+                >
+                  <Upload className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  onClick={() => handleAddField("tel")}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="Phone Number"
+                >
+                  <Phone className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  onClick={() => handleAddField("url")}
+                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  title="URL Input"
+                >
+                  <LinkIcon className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
               </div>
             </div>
