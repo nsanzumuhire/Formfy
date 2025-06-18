@@ -1766,8 +1766,11 @@ export default function FormEditor() {
                     const fieldType = selectedField.type;
                     const isTextInput = [
                       "text",
+                      "textarea", 
                       "email",
                       "number",
+                      "tel",
+                      "url",
                       "password",
                     ].includes(fieldType);
                     const isSelectInput = ["select", "radio"].includes(
