@@ -59,8 +59,13 @@ export function createFormField(type: FieldType): FormFieldData {
 function getDefaultLabel(type: FieldType): string {
   const labels: Record<FieldType, string> = {
     text: 'Text Field',
+    textarea: 'Textarea',
     email: 'Email Address',
     number: 'Number',
+    tel: 'Phone Number',
+    url: 'Website URL',
+    date: 'Date',
+    file: 'File Upload',
     checkbox: 'Checkbox Option',
     radio: 'Radio Options',
     select: 'Select Option',
@@ -72,8 +77,13 @@ function getDefaultLabel(type: FieldType): string {
 function getDefaultPlaceholder(type: FieldType): string {
   const placeholders: Record<FieldType, string> = {
     text: 'Enter text here...',
+    textarea: 'Enter your message...',
     email: 'Enter your email...',
     number: 'Enter a number...',
+    tel: 'Enter phone number...',
+    url: 'Enter website URL...',
+    date: 'Select date...',
+    file: 'Choose file...',
     checkbox: '',
     radio: '',
     select: 'Choose an option...',

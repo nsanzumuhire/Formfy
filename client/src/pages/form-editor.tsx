@@ -198,7 +198,7 @@ function SortableField({
         </div>
       ) : field.type === "radio" ? (
         <div className="space-y-2">
-          {(field.options || [{ label: "Option 1", value: "option1" }, { label: "Option 2", value: "option2" }]).map((option, index) => (
+          {(field.options || [{ label: "Option 1", value: "option1" }, { label: "Option 2", value: "option2" }]).map((option: any, index: number) => (
             <div key={index} className="flex items-center gap-2">
               <input type="radio" name={field.id} disabled className="rounded-full" />
               <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -1365,7 +1365,9 @@ export default function FormEditor() {
 
                                       {field.type === "text" ||
                                       field.type === "email" ||
-                                      field.type === "number" ? (
+                                      field.type === "number" ||
+                                      field.type === "tel" ||
+                                      field.type === "url" ? (
                                         <Input
                                           type={field.type}
                                           placeholder={field.placeholder}
@@ -1379,6 +1381,35 @@ export default function FormEditor() {
                                             ...(field.layout === "inline" && {
                                               minWidth: "120px",
                                             }),
+                                          }}
+                                        />
+                                      ) : field.type === "textarea" ? (
+                                        <Textarea
+                                          placeholder={field.placeholder}
+                                          disabled={field.disabled}
+                                          readOnly={field.readonly}
+                                          className={`${field.class || ""} resize-none`}
+                                          style={{
+                                            width: field.width || "100%",
+                                          }}
+                                          rows={3}
+                                        />
+                                      ) : field.type === "date" ? (
+                                        <Input
+                                          type="date"
+                                          disabled={field.disabled}
+                                          className={field.class || ""}
+                                          style={{
+                                            width: field.width || "100%",
+                                          }}
+                                        />
+                                      ) : field.type === "file" ? (
+                                        <Input
+                                          type="file"
+                                          disabled={field.disabled}
+                                          className={field.class || ""}
+                                          style={{
+                                            width: field.width || "100%",
                                           }}
                                         />
                                       ) : field.type === "checkbox" ? (
@@ -2831,7 +2862,7 @@ export default function FormEditor() {
                         {(
                           formFields.find((f) => f.id === selectedFieldId)
                             ?.options || []
-                        ).map((option, index) => (
+                        ).map((option: any, index: number) => (
                           <div key={index} className="flex gap-2">
                             <Input
                               value={option.label}
@@ -2842,7 +2873,7 @@ export default function FormEditor() {
                                       ? {
                                           ...f,
                                           options:
-                                            f.options?.map((opt, i) =>
+                                            f.options?.map((opt: any, i: number) =>
                                               i === index
                                                 ? {
                                                     ...opt,
