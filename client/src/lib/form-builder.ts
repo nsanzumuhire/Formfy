@@ -20,6 +20,10 @@ export interface FormFieldData {
   validation?: ValidationRule[];
   options?: FormFieldOption[];
   order: number;
+  // Auto layout properties
+  rowId?: string;
+  width?: number; // Width percentage for auto layout
+  layout?: "vertical" | "horizontal"; // For radio/checkbox options
 }
 
 export interface FormSchema {
@@ -34,6 +38,69 @@ export function generateFieldId(): string {
   return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+export function generateRowId(): string {
+  return `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Auto layout helper functions
+export function organizeFieldsIntoRows(fields: FormFieldData[]): FormFieldData[][] {
+  const rows: { [rowId: string]: FormFieldData[] } = {};
+  const unassignedFields: FormFieldData[] = [];
+
+  fields.forEach(field => {
+    if (field.rowId) {
+      if (!rows[field.rowId]) {
+        rows[field.rowId] = [];
+      }
+      rows[field.rowId].push(field);
+    } else {
+      unassignedFields.push(field);
+    }
+  });
+
+  // Sort fields within each row by order
+  Object.keys(rows).forEach(rowId => {
+    rows[rowId].sort((a, b) => a.order - b.order);
+  });
+
+  // Create result array with rows in order
+  const result: FormFieldData[][] = Object.values(rows);
+  
+  // Add unassigned fields as individual rows
+  unassignedFields.forEach(field => {
+    result.push([field]);
+  });
+
+  return result;
+}
+
+export function distributeWidthsEvenly(fieldsInRow: FormFieldData[]): FormFieldData[] {
+  const evenWidth = 100 / fieldsInRow.length;
+  return fieldsInRow.map(field => ({
+    ...field,
+    width: evenWidth
+  }));
+}
+
+export function addFieldToRow(fields: FormFieldData[], fieldId: string, targetRowId: string): FormFieldData[] {
+  return fields.map(field => {
+    if (field.id === fieldId) {
+      return { ...field, rowId: targetRowId };
+    }
+    return field;
+  });
+}
+
+export function createNewRow(fields: FormFieldData[], fieldId: string): FormFieldData[] {
+  const newRowId = generateRowId();
+  return fields.map(field => {
+    if (field.id === fieldId) {
+      return { ...field, rowId: newRowId, width: 100 };
+    }
+    return field;
+  });
+}
+
 export function createFormField(type: FieldType): FormFieldData {
   const id = generateFieldId();
   
@@ -43,6 +110,8 @@ export function createFormField(type: FieldType): FormFieldData {
     label: getDefaultLabel(type),
     placeholder: getDefaultPlaceholder(type),
     order: 0,
+    width: 100, // Default to full width
+    layout: 'vertical', // Default layout for radio/checkbox
   };
 
   // Add default options for select and radio fields

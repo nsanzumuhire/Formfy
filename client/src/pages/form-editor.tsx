@@ -915,7 +915,9 @@ export default function FormEditor() {
                                 ? "Grid"
                                 : formConfig.layout === "mixed"
                                   ? "Mixed"
-                                  : "Form layout"}
+                                  : formConfig.layout === "auto"
+                                    ? "Auto"
+                                    : "Form layout"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -1001,6 +1003,26 @@ export default function FormEditor() {
                                 )}
                               />
                               Mixed
+                            </CommandItem>
+                            <CommandItem
+                              value="auto"
+                              onSelect={() => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "auto",
+                                });
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "auto"
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              Auto
                             </CommandItem>
                           </CommandGroup>
                         </Command>
