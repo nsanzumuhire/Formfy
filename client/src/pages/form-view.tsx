@@ -66,10 +66,12 @@ export default function FormView() {
   });
 
   const handleFieldChange = (fieldId: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [fieldId]: value,
-    }));
+    };
+    console.log('Form data updated:', newFormData);
+    setFormData(newFormData);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

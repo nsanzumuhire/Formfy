@@ -314,18 +314,38 @@ export function validateFormField(field: FormFieldData, value: any): string[] {
 
 // Conditional logic evaluation functions
 export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<string, any>, fields: FormFieldData[] = []): boolean {
-  // Try to find the field value by the rule.field reference
+  // Try multiple ways to find the field value
   let fieldValue = formData[rule.field];
+  let foundFieldId = rule.field;
   
-  // If not found and we have field definitions, try to find by field name property
+  // If not found by direct field reference, try other methods
   if (fieldValue === undefined && fields.length > 0) {
+    // Try to find by field name property
     const referencedField = fields.find(f => (f as any).name === rule.field);
     if (referencedField) {
       fieldValue = formData[referencedField.id];
+      foundFieldId = referencedField.id;
+    } else {
+      // Try to find by label (case insensitive)
+      const fieldByLabel = fields.find(f => f.label.toLowerCase().includes(rule.field.toLowerCase()));
+      if (fieldByLabel) {
+        fieldValue = formData[fieldByLabel.id];
+        foundFieldId = fieldByLabel.id;
+      }
     }
   }
   
   const ruleValue = rule.value;
+  
+  // Debug logging
+  console.log('Evaluating conditional rule:', {
+    rule,
+    fieldValue,
+    ruleValue,
+    foundFieldId,
+    formData,
+    fields: fields.map(f => ({ id: f.id, name: (f as any).name, label: f.label }))
+  });
 
   switch (rule.operator) {
     case 'equals':
@@ -366,15 +386,26 @@ export function evaluateConditionalLogic(condition: ConditionalLogic, formData: 
 }
 
 export function shouldShowField(field: FormFieldData, formData: Record<string, any>, fields: FormFieldData[] = []): boolean {
+  console.log('Checking field visibility:', {
+    fieldId: field.id,
+    fieldLabel: field.label,
+    condition: field.condition,
+    formData
+  });
+
   if (!field.condition) {
+    console.log('No condition found, showing field');
     return true; // Show field if no condition
   }
 
   // If no type is specified, assume it's a visibility condition
   if (!field.condition.type || field.condition.type === 'visibility') {
-    return evaluateConditionalLogic(field.condition, formData, fields);
+    const result = evaluateConditionalLogic(field.condition, formData, fields);
+    console.log('Visibility evaluation result:', result);
+    return result;
   }
 
+  console.log('Not a visibility condition, showing field');
   return true; // Show field if it's not a visibility condition
 }
 
