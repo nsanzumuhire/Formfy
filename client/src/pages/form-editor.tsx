@@ -347,7 +347,11 @@ export default function FormEditor() {
   });
 
   // Fetch forms
-  const { data: forms = [], refetch: refetchForms, isLoading: formsLoading } = useQuery<Form[]>({
+  const {
+    data: forms = [],
+    refetch: refetchForms,
+    isLoading: formsLoading,
+  } = useQuery<Form[]>({
     queryKey: [`/api/projects/${currentProjectId}/forms`],
     enabled: !!currentProjectId,
   });
@@ -371,7 +375,7 @@ export default function FormEditor() {
 
     const handleStorageChange = () => {
       // React to localStorage changes from other components
-      const storedProject = localStorage.getItem('formfy_selected_project');
+      const storedProject = localStorage.getItem("formfy_selected_project");
       if (storedProject !== currentProjectId) {
         // Reset forms state when project changes
         setSelectedFormId(null);
@@ -384,11 +388,17 @@ export default function FormEditor() {
       }
     };
 
-    window.addEventListener("projectChanged", handleProjectChange as EventListener);
+    window.addEventListener(
+      "projectChanged",
+      handleProjectChange as EventListener,
+    );
     window.addEventListener("localStorageChange", handleStorageChange);
-    
+
     return () => {
-      window.removeEventListener("projectChanged", handleProjectChange as EventListener);
+      window.removeEventListener(
+        "projectChanged",
+        handleProjectChange as EventListener,
+      );
       window.removeEventListener("localStorageChange", handleStorageChange);
     };
   }, [currentProjectId]);
@@ -1145,7 +1155,10 @@ export default function FormEditor() {
             {formsLoading ? (
               <div className="p-4 space-y-2">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div
+                    key={i}
+                    className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -1259,16 +1272,15 @@ export default function FormEditor() {
           /* Form Builder Interface */
           <div className="h-full flex">
             {/* Toolbox Sidebar */}
-            <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col" onSubmit={(e) => e.preventDefault()}>
+            <div
+              className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col relative z-10"
+              onSubmit={(e) => e.preventDefault()}
+            >
               {/* Tools Header */}
               <div className="p-3 border-b border-gray-200 dark:border-gray-800">
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowFormsList(!showFormsList);
-                  }}
+                  onClick={() => setShowFormsList(!showFormsList)}
                   className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto hover:text-gray-800 dark:hover:text-gray-200 transition-colors flex items-center justify-center"
                   title="Toggle Forms List"
                 >
@@ -1277,16 +1289,18 @@ export default function FormEditor() {
               </div>
 
               {/* Field Tools */}
-              <div className="flex-1 p-2 space-y-2" onSubmit={(e) => e.preventDefault()}>
+              <div
+                className="flex-1 p-2 space-y-2 relative z-20"
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <button
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log("Text button clicked");
                     handleAddField("text");
                   }}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Text Input"
                 >
                   <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1299,7 +1313,7 @@ export default function FormEditor() {
                     e.stopPropagation();
                     handleAddField("email");
                   }}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Email Input"
                 >
                   <Type className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1312,7 +1326,7 @@ export default function FormEditor() {
                     e.stopPropagation();
                     handleAddField("number");
                   }}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Number Input"
                 >
                   <Hash className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1320,11 +1334,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("checkbox");
-                  }}
+                  onClick={() => handleAddField("checkbox")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Checkbox"
                 >
@@ -1333,11 +1343,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("radio");
-                  }}
+                  onClick={() => handleAddField("radio")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Radio Button"
                 >
@@ -1346,11 +1352,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("select");
-                  }}
+                  onClick={() => handleAddField("select")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Dropdown"
                 >
@@ -1359,11 +1361,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("textarea");
-                  }}
+                  onClick={() => handleAddField("textarea")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Textarea"
                 >
@@ -1372,11 +1370,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("date");
-                  }}
+                  onClick={() => handleAddField("date")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Date Picker"
                 >
@@ -1385,11 +1379,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("file");
-                  }}
+                  onClick={() => handleAddField("file")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="File Upload"
                 >
@@ -1398,11 +1388,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("tel");
-                  }}
+                  onClick={() => handleAddField("tel")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Phone Number"
                 >
@@ -1411,11 +1397,7 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("url");
-                  }}
+                  onClick={() => handleAddField("url")}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="URL Input"
                 >
