@@ -1273,7 +1273,11 @@ export default function FormEditor() {
               {/* Field Tools */}
               <div className="flex-1 p-2 space-y-2">
                 <button
-                  onClick={() => handleAddField("text")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("text");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Text Input"
                 >
@@ -1281,7 +1285,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("email")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("email");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Email Input"
                 >
@@ -1289,7 +1297,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("number")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("number");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Number Input"
                 >
@@ -1297,7 +1309,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("checkbox")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("checkbox");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Checkbox"
                 >
@@ -1305,7 +1321,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("radio")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("radio");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Radio Button"
                 >
@@ -1313,7 +1333,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("select")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("select");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Dropdown"
                 >
@@ -1321,7 +1345,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("textarea")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("textarea");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Textarea"
                 >
@@ -1329,7 +1357,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("date")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("date");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Date Picker"
                 >
@@ -1337,7 +1369,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("file")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("file");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="File Upload"
                 >
@@ -1345,7 +1381,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("tel")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("tel");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="Phone Number"
                 >
@@ -1353,7 +1393,11 @@ export default function FormEditor() {
                 </button>
 
                 <button
-                  onClick={() => handleAddField("url")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("url");
+                  }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                   title="URL Input"
                 >
