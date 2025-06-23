@@ -742,6 +742,7 @@ export default function FormEditor() {
   };
 
   const handleAddField = (fieldType: string) => {
+    console.log("Adding field:", fieldType);
     const newField = createFormField(fieldType as any);
     newField.id = Date.now().toString();
     newField.order = formFields.length;
@@ -1273,9 +1274,11 @@ export default function FormEditor() {
               {/* Field Tools */}
               <div className="flex-1 p-2 space-y-2">
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log("Text button clicked");
                     handleAddField("text");
                   }}
                   className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
