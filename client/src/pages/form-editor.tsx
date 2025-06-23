@@ -506,6 +506,7 @@ export default function FormEditor() {
     setShowPropertiesPanel(false);
     setFormName("");
     setFormDescription("");
+    setShowFormsList(false); // Collapse forms sidebar when creating
     // Reset form config to defaults
     setFormConfig({
       layout: "single",
@@ -538,6 +539,7 @@ export default function FormEditor() {
     setEditingFormId(form.id);
     setFormName(form.name);
     setFormDescription(form.description || "");
+    setShowFormsList(false); // Collapse forms sidebar when editing
 
     // Load form schema and fields
     if (form.schema) {
