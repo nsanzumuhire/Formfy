@@ -752,7 +752,6 @@ export default function FormEditor() {
   };
 
   const handleAddField = (fieldType: string) => {
-    console.log("Adding field:", fieldType);
     const newField = createFormField(fieldType as any);
     newField.id = Date.now().toString();
     newField.order = formFields.length;
@@ -1334,8 +1333,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("checkbox")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("checkbox");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Checkbox"
                 >
                   <CheckSquare className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1343,8 +1346,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("radio")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("radio");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Radio Button"
                 >
                   <Circle className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1352,8 +1359,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("select")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("select");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Dropdown"
                 >
                   <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1361,8 +1372,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("textarea")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("textarea");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Textarea"
                 >
                   <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1370,8 +1385,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("date")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("date");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Date Picker"
                 >
                   <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1379,8 +1398,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("file")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("file");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="File Upload"
                 >
                   <Upload className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1388,8 +1411,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("tel")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("tel");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Phone Number"
                 >
                   <Phone className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
@@ -1397,8 +1424,12 @@ export default function FormEditor() {
 
                 <button
                   type="button"
-                  onClick={() => handleAddField("url")}
-                  className="w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("url");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="URL Input"
                 >
                   <LinkIcon className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
