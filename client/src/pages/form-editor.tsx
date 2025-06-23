@@ -1046,22 +1046,25 @@ export default function FormEditor() {
                 </Button>
               )}
             </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="search"
-                placeholder="Search forms..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
-              />
-            </div>
+            {!isCreatingForm && (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Search forms..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
+                />
+              </div>
+            )}
           </div>
 
           {/* Forms List */}
-          <div className="flex-1 overflow-y-auto">
-            {filteredForms.length === 0 ? (
-              <div className="p-4 text-center">
+          {!isCreatingForm && (
+            <div className="flex-1 overflow-y-auto">
+              {filteredForms.length === 0 ? (
+                <div className="p-4 text-center">
                 <Card className="border-dashed">
                   <CardContent className="pt-6">
                     <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -1151,7 +1154,8 @@ export default function FormEditor() {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
