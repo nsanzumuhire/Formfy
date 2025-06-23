@@ -223,7 +223,7 @@ export default function ApiKeys() {
           {projects.map((project) => (
             <Button
               key={project.id}
-              variant={selectedProject === project.id ? "default" : "outline"}
+              variant={currentProject?.id === project.id ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedProject(project.id)}
             >
@@ -238,15 +238,15 @@ export default function ApiKeys() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Project API Keys</span>
-            {selectedProject && (
+            {currentProject && (
               <Badge variant="outline">
-                {projects?.find(p => p.id === selectedProject)?.name}
+                {currentProject.name}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!selectedProject ? (
+          {!currentProject ? (
             <div className="text-center py-8">
               <Key className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-medium mb-2">Select a project</h3>
@@ -348,7 +348,7 @@ export default function ApiKeys() {
               <code className="block p-3 bg-muted rounded text-sm">
                 {`<FormBuilder 
   formName="your-form-name" 
-  projectId="${selectedProject}" 
+  projectId="${currentProject?.id}" 
   apiKey="your-api-key" 
 />`}
               </code>
@@ -358,7 +358,7 @@ export default function ApiKeys() {
               <code className="block p-3 bg-muted rounded text-sm">
                 {`<form-builder 
   [formName]="'your-form-name'" 
-  [projectId]="'${selectedProject}'" 
+  [projectId]="'${currentProject?.id}'" 
   [apiKey]="'your-api-key'">
 </form-builder>`}
               </code>
