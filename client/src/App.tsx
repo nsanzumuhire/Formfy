@@ -20,16 +20,11 @@ import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const { selectedProject, setSelectedProject } = useProject();
-
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header
-          selectedProject={selectedProject || undefined}
-          onProjectChange={setSelectedProject}
-        />
+        <Header />
         <div className="flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>
