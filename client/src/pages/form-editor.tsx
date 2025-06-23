@@ -1024,12 +1024,27 @@ export default function FormEditor() {
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100">
-                Forms
+                {isCreatingForm ? (editingFormId ? "Editing Form" : "Creating Form") : "Forms"}
               </h2>
-              <Button size="sm" className="h-7" onClick={handleNewFormClick}>
-                <Plus className="w-3 h-3 mr-1" />
-                New
-              </Button>
+              {isCreatingForm ? (
+                <Button size="sm" className="h-7" variant="outline" onClick={() => {
+                  setIsCreatingForm(false);
+                  setEditingFormId(null);
+                  setFormFields([]);
+                  setSelectedFieldId(null);
+                  setShowPropertiesPanel(false);
+                  setFormName("");
+                  setFormDescription("");
+                  setSelectedFormId(null);
+                }}>
+                  Cancel
+                </Button>
+              ) : (
+                <Button size="sm" className="h-7" onClick={handleNewFormClick}>
+                  <Plus className="w-3 h-3 mr-1" />
+                  New
+                </Button>
+              )}
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

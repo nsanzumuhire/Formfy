@@ -79,6 +79,9 @@ export function useProject() {
       queryClient.invalidateQueries({ 
         queryKey: ["/api/dashboard/stats"] 
       });
+
+      // Trigger custom storage change event for immediate UI updates
+      window.dispatchEvent(new CustomEvent('projectChanged', { detail: { projectId } }));
     }
   };
 
