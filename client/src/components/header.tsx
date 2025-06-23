@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/command";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
+import { ProjectCreateDialog } from "@/components/project-create-dialog";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -42,6 +43,7 @@ export function Header() {
   const { user } = useAuth();
   const [mode, setMode] = useState<"testing" | "production">("testing");
   const [projectOpen, setProjectOpen] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
   
   const { 
     projects, 
@@ -131,8 +133,8 @@ export function Header() {
                   <CommandGroup>
                     <CommandItem
                       onSelect={() => {
-                        window.location.href = "/projects";
                         setProjectOpen(false);
+                        setCreateProjectOpen(true);
                       }}
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -241,6 +243,12 @@ export function Header() {
           </DropdownMenu>
         </div>
       </div>
+      
+      {/* Project Creation Dialog */}
+      <ProjectCreateDialog 
+        open={createProjectOpen}
+        onOpenChange={setCreateProjectOpen}
+      />
     </header>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import type { Project } from "@shared/schema";
 
 const PROJECT_STORAGE_KEY = "formfy_selected_project";
@@ -17,15 +18,46 @@ export function useProject() {
     queryKey: ["/api/projects"],
   });
 
-  // Persist project selection to localStorage
+  // Persist project selection to localStorage and invalidate related caches
   const selectProject = (projectId: string | null) => {
+    const previousProject = selectedProject;
     setSelectedProject(projectId);
+    
     if (typeof window !== "undefined") {
       if (projectId) {
         localStorage.setItem(PROJECT_STORAGE_KEY, projectId);
       } else {
         localStorage.removeItem(PROJECT_STORAGE_KEY);
       }
+    }
+
+    // Invalidate project-specific caches when project changes
+    if (previousProject !== projectId) {
+      // Invalidate forms cache for both old and new projects
+      if (previousProject) {
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/projects/${previousProject}/forms`] 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/projects/${previousProject}/api-keys`] 
+        });
+      }
+      if (projectId) {
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/projects/${projectId}/forms`] 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/projects/${projectId}/api-keys`] 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/projects/${projectId}`] 
+        });
+      }
+      
+      // Also invalidate dashboard stats to reflect the new project
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/dashboard/stats"] 
+      });
     }
   };
 

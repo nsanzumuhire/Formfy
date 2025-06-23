@@ -4,26 +4,12 @@ import { Plus, ExternalLink, MoreVertical, Pause, Play, Archive, Trash2 } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { createProjectSchema, type Project } from "@shared/schema";
+import { ProjectCreateDialog } from "@/components/project-create-dialog";
+import { type Project } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-
-const formSchema = createProjectSchema.extend({
-  name: z.string().min(1, "Project name is required").max(50, "Name must be less than 50 characters"),
-  description: z.string().optional(),
-});
-
-type CreateProjectForm = z.infer<typeof formSchema>;
 
 export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -31,36 +17,6 @@ export default function Projects() {
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
-  });
-
-  const form = useForm<CreateProjectForm>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-    },
-  });
-
-  const createProjectMutation = useMutation({
-    mutationFn: async (data: CreateProjectForm) => {
-      return await apiRequest("POST", "/api/projects", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      setIsDialogOpen(false);
-      form.reset();
-      toast({
-        title: "Project created",
-        description: "Your new project has been created successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
   });
 
   const updateProjectMutation = useMutation({
