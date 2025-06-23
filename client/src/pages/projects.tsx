@@ -47,7 +47,7 @@ export default function Projects() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Project deleted",
-        description: "Project has been permanently deleted.",
+        description: "Project has been deleted successfully.",
       });
     },
     onError: (error) => {
@@ -64,7 +64,7 @@ export default function Projects() {
   };
 
   const handleDeleteProject = (project: Project) => {
-    if (confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
+    if (window.confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
       deleteProjectMutation.mutate(project.id);
     }
   };
@@ -73,30 +73,38 @@ export default function Projects() {
     switch (status) {
       case "active":
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">Active</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              Active
+            </Badge>
           </div>
         );
       case "paused":
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">Paused</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+              Paused
+            </Badge>
           </div>
         );
       case "archived":
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-            <span className="text-sm text-gray-600">Archived</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-gray-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300">
+              Archived
+            </Badge>
           </div>
         );
       default:
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-            <span className="text-sm text-gray-600">{status}</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              Active
+            </Badge>
           </div>
         );
     }
@@ -188,27 +196,36 @@ export default function Projects() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {project.status === "active" ? (
-                        <DropdownMenuItem onClick={() => handleStatusChange(project, "paused")}>
+                        <DropdownMenuItem 
+                          onClick={() => handleStatusChange(project, "paused")}
+                          className="flex items-center cursor-pointer"
+                        >
                           <Pause className="w-4 h-4 mr-2" />
                           Pause project
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem onClick={() => handleStatusChange(project, "active")}>
+                        <DropdownMenuItem 
+                          onClick={() => handleStatusChange(project, "active")}
+                          className="flex items-center cursor-pointer"
+                        >
                           <Play className="w-4 h-4 mr-2" />
                           Resume project
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => handleStatusChange(project, "archived")}>
+                      <DropdownMenuItem 
+                        onClick={() => handleStatusChange(project, "archived")}
+                        className="flex items-center cursor-pointer"
+                      >
                         <Archive className="w-4 h-4 mr-2" />
-                        Archive project
+                        Archive
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         onClick={() => handleDeleteProject(project)}
-                        className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                        className="flex items-center cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Delete project
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
