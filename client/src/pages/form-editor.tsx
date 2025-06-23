@@ -1283,7 +1283,7 @@ export default function FormEditor() {
                   className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto hover:text-gray-800 dark:hover:text-gray-200 transition-colors flex items-center justify-center"
                   title="Toggle Forms List"
                 >
-                  <PanelRightOpen className="w-5 h-5" />
+                  <PanelRightOpen className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1302,7 +1302,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Text Input"
                 >
-                  <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <AlignLeft className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1315,7 +1315,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Email Input"
                 >
-                  <Type className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Type className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1328,7 +1328,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Number Input"
                 >
-                  <Hash className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Hash className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1341,7 +1341,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Checkbox"
                 >
-                  <CheckSquare className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <CheckSquare className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1354,7 +1354,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Radio Button"
                 >
-                  <Circle className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Circle className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1367,7 +1367,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Dropdown"
                 >
-                  <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1380,7 +1380,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Textarea"
                 >
-                  <AlignLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <AlignLeft className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1393,7 +1393,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Date Picker"
                 >
-                  <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1406,7 +1406,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="File Upload"
                 >
-                  <Upload className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Upload className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1419,7 +1419,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Phone Number"
                 >
-                  <Phone className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Phone className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1432,7 +1432,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="URL Input"
                 >
-                  <LinkIcon className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <LinkIcon className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
               </div>
             </div>
