@@ -4,63 +4,21 @@ import { Plus, ExternalLink, MoreVertical, Pause, Play, Archive, Trash2 } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { createProjectSchema, type Project } from "@shared/schema";
+import { ProjectCreateDialog } from "@/components/project-create-dialog";
+import { type Project } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-
-const formSchema = createProjectSchema.extend({
-  name: z.string().min(1, "Project name is required").max(50, "Name must be less than 50 characters"),
-  description: z.string().optional(),
-});
-
-type CreateProjectForm = z.infer<typeof formSchema>;
+import { useLocation } from "wouter";
 
 export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
-  });
-
-  const form = useForm<CreateProjectForm>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-    },
-  });
-
-  const createProjectMutation = useMutation({
-    mutationFn: async (data: CreateProjectForm) => {
-      return await apiRequest("POST", "/api/projects", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      setIsDialogOpen(false);
-      form.reset();
-      toast({
-        title: "Project created",
-        description: "Your new project has been created successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
   });
 
   const updateProjectMutation = useMutation({
@@ -91,7 +49,7 @@ export default function Projects() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Project deleted",
-        description: "Project has been permanently deleted.",
+        description: "Project has been deleted successfully.",
       });
     },
     onError: (error) => {
@@ -108,39 +66,69 @@ export default function Projects() {
   };
 
   const handleDeleteProject = (project: Project) => {
-    if (confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
+    if (window.confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
       deleteProjectMutation.mutate(project.id);
     }
+  };
+
+  const handleProjectClick = (project: Project) => {
+    // Store the selected project in localStorage for persistence
+    localStorage.setItem('formfy_selected_project', project.id);
+    
+    // Trigger custom storage change event for same-tab synchronization
+    window.dispatchEvent(new CustomEvent('localStorageChange'));
+    
+    // Force cache invalidation for the new project
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}/forms`] 
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}/api-keys`] 
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}`] 
+    });
+    
+    // Navigate to form-editor page
+    setLocation('/form-editor');
   };
 
   const getStatusIndicator = (status: string) => {
     switch (status) {
       case "active":
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">Active</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              Active
+            </Badge>
           </div>
         );
       case "paused":
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">Paused</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+              Paused
+            </Badge>
           </div>
         );
       case "archived":
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-            <span className="text-sm text-gray-600">Archived</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-gray-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300">
+              Archived
+            </Badge>
           </div>
         );
       default:
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-            <span className="text-sm text-gray-600">{status}</span>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              Active
+            </Badge>
           </div>
         );
     }
@@ -181,75 +169,13 @@ export default function Projects() {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your form builder projects</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              New project
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create new project</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => createProjectMutation.mutate(data))} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="My awesome project" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (optional)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Brief description of your project..."
-                          className="resize-none"
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-
-
-                <div className="flex justify-end space-x-3 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setIsDialogOpen(false)}
-                    disabled={createProjectMutation.isPending}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={createProjectMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {createProjectMutation.isPending ? "Creating..." : "Create project"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          onClick={() => setIsDialogOpen(true)}
+          className="bg-green-600 hover:bg-green-700 text-white"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New project
+        </Button>
       </div>
 
       {projects.length === 0 ? (
@@ -270,7 +196,11 @@ export default function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white dark:bg-gray-900">
+            <Card 
+              key={project.id} 
+              className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white dark:bg-gray-900 cursor-pointer"
+              onClick={() => handleProjectClick(project)}
+            >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -281,11 +211,16 @@ export default function Projects() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenuItem asChild>
                         <a href={`/forms?project=${project.id}`} className="flex items-center cursor-pointer">
                           <ExternalLink className="w-4 h-4 mr-2" />
@@ -294,27 +229,36 @@ export default function Projects() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {project.status === "active" ? (
-                        <DropdownMenuItem onClick={() => handleStatusChange(project, "paused")}>
+                        <DropdownMenuItem 
+                          onClick={() => handleStatusChange(project, "paused")}
+                          className="flex items-center cursor-pointer"
+                        >
                           <Pause className="w-4 h-4 mr-2" />
                           Pause project
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem onClick={() => handleStatusChange(project, "active")}>
+                        <DropdownMenuItem 
+                          onClick={() => handleStatusChange(project, "active")}
+                          className="flex items-center cursor-pointer"
+                        >
                           <Play className="w-4 h-4 mr-2" />
                           Resume project
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => handleStatusChange(project, "archived")}>
+                      <DropdownMenuItem 
+                        onClick={() => handleStatusChange(project, "archived")}
+                        className="flex items-center cursor-pointer"
+                      >
                         <Archive className="w-4 h-4 mr-2" />
-                        Archive project
+                        Archive
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         onClick={() => handleDeleteProject(project)}
-                        className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                        className="flex items-center cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Delete project
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -335,6 +279,12 @@ export default function Projects() {
           ))}
         </div>
       )}
+      
+      {/* Project Creation Dialog */}
+      <ProjectCreateDialog 
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   );
 }

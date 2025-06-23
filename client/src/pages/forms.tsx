@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { useProject } from "@/hooks/useProject";
+import { NoProjectsState, ProjectSelector, ProjectLoadingState } from "@/components/project-state";
 import {
   FileText,
   Plus,
@@ -16,11 +17,18 @@ import {
 import type { Form } from "@shared/schema";
 
 export default function Forms() {
-  const { selectedProject, setSelectedProject, projects } = useProject();
+  const { 
+    projects, 
+    currentProject, 
+    projectsLoading, 
+    hasProjects, 
+    needsProjectSelection,
+    setSelectedProject 
+  } = useProject();
 
   const { data: forms, isLoading } = useQuery<Form[]>({
-    queryKey: selectedProject ? [`/api/projects/${selectedProject}/forms`] : [],
-    enabled: !!selectedProject,
+    queryKey: currentProject ? [`/api/projects/${currentProject.id}/forms`] : [],
+    enabled: !!currentProject,
   });
 
   const formatDate = (dateString: string) => {
@@ -31,17 +39,48 @@ export default function Forms() {
     });
   };
 
+  // Loading state
+  if (projectsLoading) {
+    return (
+      <div className="p-6">
+        <ProjectLoadingState />
+      </div>
+    );
+  }
+
+  // No projects state
+  if (!hasProjects) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <NoProjectsState />
+      </div>
+    );
+  }
+
+  // Project selection needed
+  if (needsProjectSelection) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <ProjectSelector 
+          projects={projects}
+          selectedProject={currentProject?.id || null}
+          onProjectChange={setSelectedProject}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Forms</h1>
+          <h1 className="text-3xl font-bold">Forms</h1>
           <p className="text-muted-foreground mt-1">
-            Manage and organize your form collection
+            {currentProject?.name} • Manage and organize your form collection
           </p>
         </div>
-        <Link href="/form-builder">
+        <Link href="/form-editor">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Create Form
@@ -49,44 +88,18 @@ export default function Forms() {
         </Link>
       </div>
 
-      {/* Project Selector */}
-      {projects && projects.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {projects.map((project) => (
-            <Button
-              key={project.id}
-              variant={selectedProject === project.id ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedProject(project.id)}
-            >
-              {project.name}
-            </Button>
-          ))}
-        </div>
-      )}
-
       {/* Forms List */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Forms</span>
-            {selectedProject && (
-              <Badge variant="outline">
-                {projects?.find(p => p.id === selectedProject)?.name}
-              </Badge>
-            )}
+            <Badge variant="outline">
+              {currentProject?.name}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!selectedProject ? (
-            <div className="text-center py-8">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Select a project</h3>
-              <p className="text-muted-foreground">
-                Choose a project to view its forms
-              </p>
-            </div>
-          ) : isLoading ? (
+          {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
@@ -133,7 +146,7 @@ export default function Forms() {
                     <Button variant="ghost" size="sm" title="Preview">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Link href={`/form-builder/${form.id}`}>
+                    <Link href={`/form-editor?form=${form.id}`}>
                       <Button variant="ghost" size="sm" title="Edit">
                         <Edit className="h-4 w-4" />
                       </Button>

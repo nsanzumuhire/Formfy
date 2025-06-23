@@ -13,6 +13,8 @@ import {
   Trash2,
   BarChart3,
 } from "lucide-react";
+import { useProject } from "@/hooks/useProject";
+import { NoProjectsState, ProjectSelector, ProjectLoadingState } from "@/components/project-state";
 import type { Project, Form } from "@shared/schema";
 
 interface DashboardStats {
@@ -23,12 +25,18 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
+  const { 
+    projects, 
+    currentProject, 
+    projectsLoading, 
+    hasProjects, 
+    needsProjectSelection,
+    setSelectedProject 
+  } = useProject();
+
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
-  });
-
-  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
+    enabled: hasProjects,
   });
 
   const { data: recentForms, isLoading: formsLoading } = useQuery<Form[]>({
@@ -36,17 +44,48 @@ export default function Dashboard() {
     enabled: false, // Disable for now
   });
 
+  // Loading state
+  if (projectsLoading) {
+    return (
+      <div className="p-6">
+        <ProjectLoadingState />
+      </div>
+    );
+  }
+
+  // No projects state
+  if (!hasProjects) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <NoProjectsState />
+      </div>
+    );
+  }
+
+  // Project selection needed
+  if (needsProjectSelection) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <ProjectSelector 
+          projects={projects}
+          selectedProject={currentProject?.id || null}
+          onProjectChange={setSelectedProject}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Project Overview</h1>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Manage your forms and API integrations
+            {currentProject?.name} • {currentProject?.description || "No description"}
           </p>
         </div>
-        <Link href="/form-builder">
+        <Link href="/form-editor">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             New Form

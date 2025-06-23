@@ -1,22 +1,18 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Search,
-  ChevronDown,
   Settings,
   LogOut,
   User,
   FolderOpen,
-  TestTube,
-  Globe,
   Box,
   Check,
   ChevronsUpDown,
+  Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,43 +34,42 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { useAuth } from "@/hooks/useAuth";
+import { useProject } from "@/hooks/useProject";
+import { ProjectCreateDialog } from "@/components/project-create-dialog";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import type { Project } from "@shared/schema";
 
-interface HeaderProps {
-  selectedProject?: string;
-  onProjectChange?: (projectId: string) => void;
-}
-
-export function Header({ selectedProject, onProjectChange }: HeaderProps) {
+export function Header() {
   const { user } = useAuth();
   const [mode, setMode] = useState<"testing" | "production">("testing");
   const [projectOpen, setProjectOpen] = useState(false);
-
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-  });
-
-  const currentProject =
-    projects.find((p) => p.id === selectedProject) || projects[0];
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  
+  const { 
+    projects, 
+    currentProject, 
+    hasProjects, 
+    setSelectedProject 
+  } = useProject();
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
   };
 
   const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    const userAny = user as any;
+    if (userAny?.firstName && userAny?.lastName) {
+      return `${userAny.firstName[0]}${userAny.lastName[0]}`.toUpperCase();
     }
-    return user?.email?.[0]?.toUpperCase() || "U";
+    return userAny?.email?.[0]?.toUpperCase() || "U";
   };
 
   const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+    const userAny = user as any;
+    if (userAny?.firstName && userAny?.lastName) {
+      return `${userAny.firstName} ${userAny.lastName}`;
     }
-    return user?.email || "User";
+    return userAny?.email || "User";
   };
 
   return (
@@ -83,72 +78,91 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
         {/* Left: Project Selector and Mode */}
         <div className="flex items-center gap-4">
           {/* Project Selector */}
-          <Popover open={projectOpen} onOpenChange={setProjectOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={projectOpen}
-                className="h-8 px-3 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 justify-between min-w-[200px]"
-              >
-                <div className="flex items-center">
-                  <FolderOpen className="w-4 h-4 mr-2" />
-                  <span className="truncate">
-                    {currentProject ? currentProject.name : "Select Project"}
-                  </span>
-                </div>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search projects..." />
-                <CommandEmpty>No projects found.</CommandEmpty>
-                <CommandGroup>
-                  {projects.map((project) => (
-                    <CommandItem
-                      key={project.id}
-                      value={project.name}
-                      onSelect={() => {
-                        onProjectChange?.(project.id);
-                        setProjectOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedProject === project.id
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
-                      />
-                      <div className="flex items-center justify-between w-full">
-                        <span className="truncate">{project.name}</span>
-                        {project.status === "active" && (
-                          <div className="w-2 h-2 bg-green-500 rounded-full ml-2"></div>
-                        )}
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-                {projects.length > 0 && (
-                  <>
-                    <CommandGroup>
+          {hasProjects ? (
+            <Popover open={projectOpen} onOpenChange={setProjectOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={projectOpen}
+                  className="h-8 px-3 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 justify-between min-w-[200px]"
+                >
+                  <div className="flex items-center">
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    <span className="truncate">
+                      {currentProject ? currentProject.name : "Select Project"}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[250px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search projects..." />
+                  <CommandEmpty>No projects found.</CommandEmpty>
+                  <CommandGroup>
+                    {projects.map((project) => (
                       <CommandItem
+                        key={project.id}
+                        value={project.name}
                         onSelect={() => {
-                          window.location.href = "/projects";
+                          setSelectedProject(project.id);
                           setProjectOpen(false);
                         }}
                       >
-                        <FolderOpen className="w-4 h-4 mr-2" />
-                        Manage Projects
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            currentProject?.id === project.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="truncate font-medium">{project.name}</span>
+                          {project.description && (
+                            <span className="text-xs text-muted-foreground truncate">
+                              {project.description}
+                            </span>
+                          )}
+                        </div>
+                        <div className="w-2 h-2 bg-green-500 rounded-full ml-2 flex-shrink-0"></div>
                       </CommandItem>
-                    </CommandGroup>
-                  </>
-                )}
-              </Command>
-            </PopoverContent>
-          </Popover>
+                    ))}
+                  </CommandGroup>
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => {
+                        setProjectOpen(false);
+                        setCreateProjectOpen(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create New Project
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => {
+                        window.location.href = "/projects";
+                        setProjectOpen(false);
+                      }}
+                    >
+                      <FolderOpen className="w-4 h-4 mr-2" />
+                      Manage Projects
+                    </CommandItem>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = "/projects"}
+              className="h-8 px-3 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 min-w-[200px]"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create First Project
+            </Button>
+          )}
 
           {/* Mode Selector */}
           <div className="flex items-center">
@@ -184,7 +198,7 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
               <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src={user?.profileImageUrl}
+                    src={(user as any)?.profileImageUrl}
                     alt={getUserDisplayName()}
                   />
                   <AvatarFallback className="text-xs font-medium">
@@ -200,7 +214,7 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
                     {getUserDisplayName()}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -229,6 +243,12 @@ export function Header({ selectedProject, onProjectChange }: HeaderProps) {
           </DropdownMenu>
         </div>
       </div>
+      
+      {/* Project Creation Dialog */}
+      <ProjectCreateDialog 
+        open={createProjectOpen}
+        onOpenChange={setCreateProjectOpen}
+      />
     </header>
   );
 }
