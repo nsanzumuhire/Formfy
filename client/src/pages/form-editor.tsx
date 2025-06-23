@@ -1259,11 +1259,16 @@ export default function FormEditor() {
           /* Form Builder Interface */
           <div className="h-full flex">
             {/* Toolbox Sidebar */}
-            <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
+            <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col" onSubmit={(e) => e.preventDefault()}>
               {/* Tools Header */}
               <div className="p-3 border-b border-gray-200 dark:border-gray-800">
                 <button
-                  onClick={() => setShowFormsList(!showFormsList)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowFormsList(!showFormsList);
+                  }}
                   className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto hover:text-gray-800 dark:hover:text-gray-200 transition-colors flex items-center justify-center"
                   title="Toggle Forms List"
                 >
@@ -1272,7 +1277,7 @@ export default function FormEditor() {
               </div>
 
               {/* Field Tools */}
-              <div className="flex-1 p-2 space-y-2">
+              <div className="flex-1 p-2 space-y-2" onSubmit={(e) => e.preventDefault()}>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -1288,6 +1293,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1300,6 +1306,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1312,6 +1319,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1324,6 +1332,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1336,6 +1345,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1348,6 +1358,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1360,6 +1371,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1372,6 +1384,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1384,6 +1397,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1396,6 +1410,7 @@ export default function FormEditor() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
