@@ -10,10 +10,12 @@ import { type Project } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { useLocation } from "wouter";
 
 export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -67,6 +69,13 @@ export default function Projects() {
     if (window.confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
       deleteProjectMutation.mutate(project.id);
     }
+  };
+
+  const handleProjectClick = (project: Project) => {
+    // Store the selected project in localStorage for persistence
+    localStorage.setItem('selectedProject', project.id);
+    // Navigate to form-editor page
+    setLocation('/form-editor');
   };
 
   const getStatusIndicator = (status: string) => {
@@ -172,7 +181,11 @@ export default function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white dark:bg-gray-900">
+            <Card 
+              key={project.id} 
+              className="hover:shadow-lg transition-all duration-200 border-0 shadow-sm bg-white dark:bg-gray-900 cursor-pointer"
+              onClick={() => handleProjectClick(project)}
+            >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -183,11 +196,16 @@ export default function Projects() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenuItem asChild>
                         <a href={`/forms?project=${project.id}`} className="flex items-center cursor-pointer">
                           <ExternalLink className="w-4 h-4 mr-2" />
