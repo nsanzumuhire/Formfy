@@ -73,7 +73,22 @@ export default function Projects() {
 
   const handleProjectClick = (project: Project) => {
     // Store the selected project in localStorage for persistence
-    localStorage.setItem('selectedProject', project.id);
+    localStorage.setItem('formfy_selected_project', project.id);
+    
+    // Trigger custom storage change event for same-tab synchronization
+    window.dispatchEvent(new CustomEvent('localStorageChange'));
+    
+    // Force cache invalidation for the new project
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}/forms`] 
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}/api-keys`] 
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}`] 
+    });
+    
     // Navigate to form-editor page
     setLocation('/form-editor');
   };

@@ -14,6 +14,27 @@ export function useProject() {
     return null;
   });
 
+  // Listen for localStorage changes from other components
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedProject = localStorage.getItem(PROJECT_STORAGE_KEY);
+      if (storedProject !== selectedProject) {
+        setSelectedProject(storedProject);
+      }
+    };
+
+    // Listen for storage events (changes from other tabs/windows)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-tab changes
+    window.addEventListener('localStorageChange', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('localStorageChange', handleStorageChange);
+    };
+  }, [selectedProject]);
+
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
   });
