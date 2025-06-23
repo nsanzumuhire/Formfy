@@ -346,10 +346,22 @@ export default function FormEditor() {
   });
 
   // Fetch forms
-  const { data: forms = [] } = useQuery<Form[]>({
+  const { data: forms = [], refetch: refetchForms } = useQuery<Form[]>({
     queryKey: [`/api/projects/${currentProjectId}/forms`],
     enabled: !!currentProjectId,
   });
+
+  // Listen for project changes to refresh forms
+  useEffect(() => {
+    const handleProjectChange = () => {
+      if (currentProjectId) {
+        refetchForms();
+      }
+    };
+
+    window.addEventListener('projectChanged', handleProjectChange);
+    return () => window.removeEventListener('projectChanged', handleProjectChange);
+  }, [currentProjectId, refetchForms]);
 
   const filteredForms = forms.filter((form) =>
     form.name.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -1026,22 +1038,9 @@ export default function FormEditor() {
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100">
-                {isCreatingForm ? (editingFormId ? "Editing Form" : "Creating Form") : "Forms"}
+                Forms
               </h2>
-              {isCreatingForm ? (
-                <Button size="sm" className="h-7" variant="outline" onClick={() => {
-                  setIsCreatingForm(false);
-                  setEditingFormId(null);
-                  setFormFields([]);
-                  setSelectedFieldId(null);
-                  setShowPropertiesPanel(false);
-                  setFormName("");
-                  setFormDescription("");
-                  setSelectedFormId(null);
-                }}>
-                  Cancel
-                </Button>
-              ) : (
+              {forms && forms.length > 0 && (
                 <Button size="sm" className="h-7" onClick={handleNewFormClick}>
                   <Plus className="w-3 h-3 mr-1" />
                   New
@@ -1701,6 +1700,25 @@ export default function FormEditor() {
                     <Eye className="w-4 h-4 mr-1" />
                     {isPreviewMode ? "Edit" : "Preview"}
                   </Button>
+                  {isCreatingForm && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setIsCreatingForm(false);
+                        setEditingFormId(null);
+                        setFormFields([]);
+                        setSelectedFieldId(null);
+                        setShowPropertiesPanel(false);
+                        setFormName("");
+                        setFormDescription("");
+                        setSelectedFormId(null);
+                        setShowFormsList(true); // Show forms list again
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
                   <Button size="sm" onClick={handleSaveForm}>
                     <Save className="w-4 h-4 mr-1" />
                     Save
