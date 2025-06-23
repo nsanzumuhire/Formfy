@@ -331,30 +331,6 @@ export default function FormEditor() {
 
   const currentProjectId = projectId || selectedProject;
 
-  // Listen for project change events to reset form editor state
-  useEffect(() => {
-    const handleProjectChange = (e: CustomEvent) => {
-      // Immediate UI update when project changes
-      if (e.detail?.projectId !== currentProjectId) {
-        // Clear current state when switching projects
-        setIsCreatingForm(false);
-        setEditingFormId(null);
-        setFormFields([]);
-        setSelectedFieldId(null);
-        setShowPropertiesPanel(false);
-        setFormName("");
-        setFormDescription("");
-        setSelectedFormId(null);
-        setSearchTerm("");
-      }
-    };
-
-    window.addEventListener('projectChanged', handleProjectChange as EventListener);
-    return () => {
-      window.removeEventListener('projectChanged', handleProjectChange as EventListener);
-    };
-  }, [currentProjectId]);
-
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -1070,25 +1046,22 @@ export default function FormEditor() {
                 </Button>
               )}
             </div>
-            {!isCreatingForm && (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  type="search"
-                  placeholder="Search forms..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
-                />
-              </div>
-            )}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="search"
+                placeholder="Search forms..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
+              />
+            </div>
           </div>
 
           {/* Forms List */}
-          {!isCreatingForm && (
-            <div className="flex-1 overflow-y-auto">
-              {filteredForms.length === 0 ? (
-                <div className="p-4 text-center">
+          <div className="flex-1 overflow-y-auto">
+            {filteredForms.length === 0 ? (
+              <div className="p-4 text-center">
                 <Card className="border-dashed">
                   <CardContent className="pt-6">
                     <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -1178,8 +1151,7 @@ export default function FormEditor() {
                 ))}
               </div>
             )}
-            </div>
-          )}
+          </div>
         </div>
       )}
 
