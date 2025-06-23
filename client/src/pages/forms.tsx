@@ -146,7 +146,7 @@ export default function Forms() {
                     <Button variant="ghost" size="sm" title="Preview">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Link href={`/form-builder/${form.id}`}>
+                    <Link href={`/form-editor?form=${form.id}`}>
                       <Button variant="ghost" size="sm" title="Edit">
                         <Edit className="h-4 w-4" />
                       </Button>

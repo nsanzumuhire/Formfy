@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useProject } from "@/hooks/useProject";
+import { NoProjectsState, ProjectSelector, ProjectLoadingState } from "@/components/project-state";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Key,
@@ -21,7 +22,14 @@ import {
 import type { ApiKey } from "@shared/schema";
 
 export default function ApiKeys() {
-  const { selectedProject, setSelectedProject, projects } = useProject();
+  const { 
+    projects, 
+    currentProject, 
+    projectsLoading, 
+    hasProjects, 
+    needsProjectSelection,
+    setSelectedProject 
+  } = useProject();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyEnvironment, setNewKeyEnvironment] = useState<"testing" | "production">("testing");
@@ -31,20 +39,20 @@ export default function ApiKeys() {
   const queryClient = useQueryClient();
 
   const { data: apiKeys, isLoading } = useQuery<ApiKey[]>({
-    queryKey: selectedProject ? [`/api/projects/${selectedProject}/api-keys`] : [],
-    enabled: !!selectedProject,
+    queryKey: currentProject ? [`/api/projects/${currentProject.id}/api-keys`] : [],
+    enabled: !!currentProject,
   });
 
   const createApiKeyMutation = useMutation({
     mutationFn: async (data: { name: string; environment: string }) => {
-      return await apiRequest("POST", `/api/projects/${selectedProject}/api-keys`, data);
+      return await apiRequest("POST", `/api/projects/${currentProject?.id}/api-keys`, data);
     },
     onSuccess: () => {
       toast({
         title: "API Key created",
         description: "Your new API key has been generated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${selectedProject}/api-keys`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${currentProject?.id}/api-keys`] });
       setShowCreateDialog(false);
       setNewKeyName("");
       setNewKeyEnvironment("testing");
@@ -67,7 +75,7 @@ export default function ApiKeys() {
         title: "API Key deleted",
         description: "The API key has been deleted successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${selectedProject}/api-keys`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${currentProject?.id}/api-keys`] });
     },
     onError: (error) => {
       toast({
@@ -116,6 +124,37 @@ export default function ApiKeys() {
     return `${key.substring(0, 8)}...${key.substring(key.length - 8)}`;
   };
 
+  // Loading state
+  if (projectsLoading) {
+    return (
+      <div className="p-6">
+        <ProjectLoadingState />
+      </div>
+    );
+  }
+
+  // No projects state
+  if (!hasProjects) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <NoProjectsState />
+      </div>
+    );
+  }
+
+  // Project selection needed
+  if (needsProjectSelection) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <ProjectSelector 
+          projects={projects}
+          selectedProject={currentProject?.id || null}
+          onProjectChange={setSelectedProject}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -123,12 +162,12 @@ export default function ApiKeys() {
         <div>
           <h1 className="text-3xl font-bold">API Keys</h1>
           <p className="text-muted-foreground mt-1">
-            Manage API keys for your projects
+            {currentProject?.name} • Manage API keys for secure integrations
           </p>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button disabled={!selectedProject}>
+            <Button disabled={!currentProject}>
               <Plus className="h-4 w-4 mr-2" />
               Create API Key
             </Button>
