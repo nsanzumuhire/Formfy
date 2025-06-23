@@ -331,6 +331,30 @@ export default function FormEditor() {
 
   const currentProjectId = projectId || selectedProject;
 
+  // Listen for project change events to reset form editor state
+  useEffect(() => {
+    const handleProjectChange = (e: CustomEvent) => {
+      // Immediate UI update when project changes
+      if (e.detail?.projectId !== currentProjectId) {
+        // Clear current state when switching projects
+        setIsCreatingForm(false);
+        setEditingFormId(null);
+        setFormFields([]);
+        setSelectedFieldId(null);
+        setShowPropertiesPanel(false);
+        setFormName("");
+        setFormDescription("");
+        setSelectedFormId(null);
+        setSearchTerm("");
+      }
+    };
+
+    window.addEventListener('projectChanged', handleProjectChange as EventListener);
+    return () => {
+      window.removeEventListener('projectChanged', handleProjectChange as EventListener);
+    };
+  }, [currentProjectId]);
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
