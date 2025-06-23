@@ -42,6 +42,12 @@ export function useProject() {
   // Persist project selection to localStorage and invalidate related caches
   const selectProject = (projectId: string | null) => {
     const previousProject = selectedProject;
+    
+    // Only proceed if project actually changed
+    if (previousProject === projectId) {
+      return;
+    }
+    
     setSelectedProject(projectId);
     
     if (typeof window !== "undefined") {
@@ -50,39 +56,40 @@ export function useProject() {
       } else {
         localStorage.removeItem(PROJECT_STORAGE_KEY);
       }
+      
+      // Dispatch localStorage change event for same-tab updates
+      window.dispatchEvent(new Event('localStorageChange'));
     }
 
     // Invalidate project-specific caches when project changes
-    if (previousProject !== projectId) {
-      // Invalidate forms cache for both old and new projects
-      if (previousProject) {
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/projects/${previousProject}/forms`] 
-        });
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/projects/${previousProject}/api-keys`] 
-        });
-      }
-      if (projectId) {
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/projects/${projectId}/forms`] 
-        });
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/projects/${projectId}/api-keys`] 
-        });
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/projects/${projectId}`] 
-        });
-      }
-      
-      // Also invalidate dashboard stats to reflect the new project
+    // Invalidate forms cache for both old and new projects
+    if (previousProject) {
       queryClient.invalidateQueries({ 
-        queryKey: ["/api/dashboard/stats"] 
+        queryKey: [`/api/projects/${previousProject}/forms`] 
       });
-
-      // Trigger custom storage change event for immediate UI updates
-      window.dispatchEvent(new CustomEvent('projectChanged', { detail: { projectId } }));
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/projects/${previousProject}/api-keys`] 
+      });
     }
+    if (projectId) {
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/projects/${projectId}/forms`] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/projects/${projectId}/api-keys`] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/projects/${projectId}`] 
+      });
+    }
+    
+    // Also invalidate dashboard stats to reflect the new project
+    queryClient.invalidateQueries({ 
+      queryKey: ["/api/dashboard/stats"] 
+    });
+
+    // Trigger custom storage change event for immediate UI updates
+    window.dispatchEvent(new CustomEvent('projectChanged', { detail: { projectId, previousProject } }));
   };
 
   // Validate and handle project selection

@@ -355,8 +355,8 @@ export default function FormEditor() {
   // Listen for project changes to refresh forms
   useEffect(() => {
     const handleProjectChange = (event: CustomEvent) => {
-      const newProjectId = event.detail?.projectId;
-      if (newProjectId && newProjectId !== currentProjectId) {
+      const { projectId: newProjectId, previousProject } = event.detail || {};
+      if (newProjectId !== previousProject) {
         // Reset forms state when project changes
         setSelectedFormId(null);
         setIsCreatingForm(false);
@@ -364,21 +364,34 @@ export default function FormEditor() {
         setFormFields([]);
         setSelectedFieldId(null);
         setShowPropertiesPanel(false);
-        refetchForms();
+        setShowFormsList(true); // Show forms list again
+        // Forms will be automatically refetched due to query key change
+      }
+    };
+
+    const handleStorageChange = () => {
+      // React to localStorage changes from other components
+      const storedProject = localStorage.getItem('formfy_selected_project');
+      if (storedProject !== currentProjectId) {
+        // Reset forms state when project changes
+        setSelectedFormId(null);
+        setIsCreatingForm(false);
+        setEditingFormId(null);
+        setFormFields([]);
+        setSelectedFieldId(null);
+        setShowPropertiesPanel(false);
+        setShowFormsList(true);
       }
     };
 
     window.addEventListener("projectChanged", handleProjectChange as EventListener);
-    return () =>
+    window.addEventListener("localStorageChange", handleStorageChange);
+    
+    return () => {
       window.removeEventListener("projectChanged", handleProjectChange as EventListener);
-  }, [currentProjectId, refetchForms]);
-
-  // Also trigger forms refresh when currentProjectId changes
-  useEffect(() => {
-    if (currentProjectId) {
-      refetchForms();
-    }
-  }, [currentProjectId, refetchForms]);
+      window.removeEventListener("localStorageChange", handleStorageChange);
+    };
+  }, [currentProjectId]);
 
   const filteredForms = forms.filter((form) =>
     form.name.toLowerCase().includes(searchTerm.toLowerCase()),
