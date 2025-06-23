@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import {
@@ -126,9 +126,12 @@ import {
 // Droppable components for drop zones
 function RowDropZone({ rowId }: { rowId: string }) {
   const { setNodeRef } = useDroppable({ id: `row-drop-zone-${rowId}` });
-  
+
   return (
-    <div ref={setNodeRef} className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+    <div
+      ref={setNodeRef}
+      className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
+    >
       <Plus className="w-4 h-4" />
     </div>
   );
@@ -137,7 +140,10 @@ function RowDropZone({ rowId }: { rowId: string }) {
 function NewRowDropZone() {
   const { setNodeRef } = useDroppable({ id: "new-row-drop-zone" });
   return (
-    <div ref={setNodeRef} className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+    <div
+      ref={setNodeRef}
+      className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
+    >
       <div className="text-center">
         <Plus className="w-6 h-6 mx-auto mb-2" />
         <p className="text-sm">Drop fields here to create a new row</p>
@@ -191,7 +197,7 @@ function SortableField({
           <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
             <Edit className="w-3 h-3 text-gray-400" />
           </button>
-          <button 
+          <button
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded hover:text-red-600"
             onClick={(e) => {
               e.stopPropagation();
@@ -231,17 +237,9 @@ function SortableField({
           rows={3}
         />
       ) : field.type === "date" ? (
-        <Input
-          type="date"
-          disabled
-          className="bg-gray-50 dark:bg-gray-900"
-        />
+        <Input type="date" disabled className="bg-gray-50 dark:bg-gray-900" />
       ) : field.type === "file" ? (
-        <Input
-          type="file"
-          disabled
-          className="bg-gray-50 dark:bg-gray-900"
-        />
+        <Input type="file" disabled className="bg-gray-50 dark:bg-gray-900" />
       ) : field.type === "checkbox" ? (
         <div className="flex items-center gap-2">
           <input type="checkbox" disabled className="rounded" />
@@ -250,23 +248,26 @@ function SortableField({
           </span>
         </div>
       ) : field.type === "radio" ? (
-        <RadioGroup 
-          disabled 
+        <RadioGroup
+          disabled
           className={
-            field.layout === "horizontal"
-              ? "flex flex-wrap gap-4"
-              : "space-y-2"
+            field.layout === "horizontal" ? "flex flex-wrap gap-4" : "space-y-2"
           }
         >
-          {(field.options || [{ label: "Option 1", value: "option1" }, { label: "Option 2", value: "option2" }]).map((option: any, index: number) => (
+          {(
+            field.options || [
+              { label: "Option 1", value: "option1" },
+              { label: "Option 2", value: "option2" },
+            ]
+          ).map((option: any, index: number) => (
             <div key={index} className="flex items-center gap-2">
-              <RadioGroupItem 
-                value={option.value} 
+              <RadioGroupItem
+                value={option.value}
                 id={`edit-radio-${field.id}-${index}`}
-                disabled 
+                disabled
                 className="bg-gray-50 dark:bg-gray-900"
               />
-              <Label 
+              <Label
                 htmlFor={`edit-radio-${field.id}-${index}`}
                 className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
               >
@@ -346,21 +347,37 @@ export default function FormEditor() {
   });
 
   // Fetch forms
-  const { data: forms = [], refetch: refetchForms } = useQuery<Form[]>({
+  const { data: forms = [], refetch: refetchForms, isLoading: formsLoading } = useQuery<Form[]>({
     queryKey: [`/api/projects/${currentProjectId}/forms`],
     enabled: !!currentProjectId,
   });
 
   // Listen for project changes to refresh forms
   useEffect(() => {
-    const handleProjectChange = () => {
-      if (currentProjectId) {
+    const handleProjectChange = (event: CustomEvent) => {
+      const newProjectId = event.detail?.projectId;
+      if (newProjectId && newProjectId !== currentProjectId) {
+        // Reset forms state when project changes
+        setSelectedFormId(null);
+        setIsCreatingForm(false);
+        setEditingFormId(null);
+        setFormFields([]);
+        setSelectedFieldId(null);
+        setShowPropertiesPanel(false);
         refetchForms();
       }
     };
 
-    window.addEventListener('projectChanged', handleProjectChange);
-    return () => window.removeEventListener('projectChanged', handleProjectChange);
+    window.addEventListener("projectChanged", handleProjectChange as EventListener);
+    return () =>
+      window.removeEventListener("projectChanged", handleProjectChange as EventListener);
+  }, [currentProjectId, refetchForms]);
+
+  // Also trigger forms refresh when currentProjectId changes
+  useEffect(() => {
+    if (currentProjectId) {
+      refetchForms();
+    }
   }, [currentProjectId, refetchForms]);
 
   const filteredForms = forms.filter((form) =>
@@ -588,15 +605,19 @@ export default function FormEditor() {
   };
 
   // Auto layout handlers
-  const handleResizeStart = (e: React.MouseEvent, fieldId: string, rowFields: FormFieldData[]) => {
+  const handleResizeStart = (
+    e: React.MouseEvent,
+    fieldId: string,
+    rowFields: FormFieldData[],
+  ) => {
     e.preventDefault();
     const startX = e.clientX;
-    const fieldIndex = rowFields.findIndex(f => f.id === fieldId);
+    const fieldIndex = rowFields.findIndex((f) => f.id === fieldId);
     const currentField = rowFields[fieldIndex];
     const nextField = rowFields[fieldIndex + 1];
-    
+
     if (!currentField) return;
-    
+
     // For single fields in a row, just allow visual feedback but maintain 100% width
     if (rowFields.length === 1) {
       const handleMouseMove = (e: MouseEvent) => {
@@ -604,74 +625,84 @@ export default function FormEditor() {
         const deltaX = e.clientX - startX;
         // Could add visual indicator here if needed
       };
-      
+
       const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
-      
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
       return;
     }
-    
+
     // For multiple fields in a row, allow resizing between fields
     if (!nextField) return;
-    
+
     const startWidthCurrent = currentField.width || 50;
     const startWidthNext = nextField.width || 50;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - startX;
       const containerWidth = 100; // Percentage based
       const widthChange = (deltaX / window.innerWidth) * containerWidth;
-      
-      const newCurrentWidth = Math.max(10, Math.min(90, startWidthCurrent + widthChange));
-      const newNextWidth = Math.max(10, Math.min(90, startWidthNext - widthChange));
-      
-      setFormFields(fields => fields.map(field => {
-        if (field.id === currentField.id) {
-          return { ...field, width: newCurrentWidth };
-        }
-        if (field.id === nextField.id) {
-          return { ...field, width: newNextWidth };
-        }
-        return field;
-      }));
+
+      const newCurrentWidth = Math.max(
+        10,
+        Math.min(90, startWidthCurrent + widthChange),
+      );
+      const newNextWidth = Math.max(
+        10,
+        Math.min(90, startWidthNext - widthChange),
+      );
+
+      setFormFields((fields) =>
+        fields.map((field) => {
+          if (field.id === currentField.id) {
+            return { ...field, width: newCurrentWidth };
+          }
+          if (field.id === nextField.id) {
+            return { ...field, width: newNextWidth };
+          }
+          return field;
+        }),
+      );
     };
-    
+
     const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   const handleDropToRow = (e: React.DragEvent, targetRowId?: string) => {
     e.preventDefault();
-    const fieldId = e.dataTransfer.getData('text/plain');
-    
+    const fieldId = e.dataTransfer.getData("text/plain");
+
     if (!fieldId || !targetRowId) return;
-    
-    setFormFields(fields => {
+
+    setFormFields((fields) => {
       // Find the field being dragged
-      const draggedField = fields.find(f => f.id === fieldId);
+      const draggedField = fields.find((f) => f.id === fieldId);
       if (!draggedField) return fields;
-      
+
       // Remove field from its current row
-      const fieldsWithoutDragged = fields.filter(f => f.id !== fieldId);
-      
+      const fieldsWithoutDragged = fields.filter((f) => f.id !== fieldId);
+
       // Add field to target row
       const updatedField = { ...draggedField, rowId: targetRowId };
       const updatedFields = [...fieldsWithoutDragged, updatedField];
-      
+
       // Get all fields in the target row and distribute widths evenly
-      const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetRowId);
+      const fieldsInTargetRow = updatedFields.filter(
+        (f) => f.rowId === targetRowId,
+      );
       const evenWidth = 100 / fieldsInTargetRow.length;
-      
-      return updatedFields.map(field => {
+
+      return updatedFields.map((field) => {
         if (field.rowId === targetRowId) {
           return { ...field, width: evenWidth };
         }
@@ -682,13 +713,13 @@ export default function FormEditor() {
 
   const handleDropToNewRow = (e: React.DragEvent) => {
     e.preventDefault();
-    const fieldId = e.dataTransfer.getData('text/plain');
-    
+    const fieldId = e.dataTransfer.getData("text/plain");
+
     if (!fieldId) return;
-    
-    setFormFields(fields => {
+
+    setFormFields((fields) => {
       const newRowId = generateRowId();
-      return fields.map(field => {
+      return fields.map((field) => {
         if (field.id === fieldId) {
           return { ...field, rowId: newRowId, width: 100 };
         }
@@ -701,13 +732,13 @@ export default function FormEditor() {
     const newField = createFormField(fieldType as any);
     newField.id = Date.now().toString();
     newField.order = formFields.length;
-    
+
     // For auto layout, create a new row for the field
     if (formConfig.layout === "auto") {
       newField.rowId = generateRowId();
       newField.width = 100;
     }
-    
+
     setFormFields([...formFields, newField]);
     setSelectedFieldId(newField.id);
     setShowPropertiesPanel(true);
@@ -734,10 +765,13 @@ export default function FormEditor() {
       width: "100%",
       layout: "vertical",
       multiple: false,
-      options: (fieldType === "radio" || fieldType === "select") ? [
-        { label: "Option 1", value: "option1" },
-        { label: "Option 2", value: "option2" }
-      ] : [],
+      options:
+        fieldType === "radio" || fieldType === "select"
+          ? [
+              { label: "Option 1", value: "option1" },
+              { label: "Option 2", value: "option2" },
+            ]
+          : [],
       optionSource: "",
       minDate: "",
       maxDate: "",
@@ -781,12 +815,12 @@ export default function FormEditor() {
       if (formConfig.layout === "auto") {
         const draggedFieldId = active.id as string;
         setFormFields((fields) => {
-          const draggedField = fields.find(f => f.id === draggedFieldId);
+          const draggedField = fields.find((f) => f.id === draggedFieldId);
           if (!draggedField) return fields;
-          
+
           // Create a new standalone row for this field
           const newRowId = generateRowId();
-          return fields.map(field => {
+          return fields.map((field) => {
             if (field.id === draggedFieldId) {
               return { ...field, rowId: newRowId, width: 100 };
             }
@@ -796,81 +830,96 @@ export default function FormEditor() {
       }
       return;
     }
-    
+
     if (active.id === over.id) return;
 
     // For auto layout mode, handle row-based dragging and reordering
     if (formConfig.layout === "auto") {
       const draggedFieldId = active.id as string;
       const overId = over.id as string;
-      
+
       // Handle special drop zones
-      if (overId === 'new-row-drop-zone') {
+      if (overId === "new-row-drop-zone") {
         setFormFields((fields) => {
-          const draggedField = fields.find(f => f.id === draggedFieldId);
+          const draggedField = fields.find((f) => f.id === draggedFieldId);
           if (!draggedField) return fields;
-          
+
           // Remove from current row and create new standalone row
           const newRowId = generateRowId();
-          const updatedFields = fields.map(field => {
+          const updatedFields = fields.map((field) => {
             if (field.id === draggedFieldId) {
-              return { ...field, rowId: newRowId, width: 100, order: Math.max(...fields.map(f => f.order)) + 1 };
+              return {
+                ...field,
+                rowId: newRowId,
+                width: 100,
+                order: Math.max(...fields.map((f) => f.order)) + 1,
+              };
             }
             return field;
           });
-          
+
           // Redistribute widths in the original row if it had multiple fields
           if (draggedField.rowId) {
-            const remainingFieldsInOriginalRow = updatedFields.filter(f => f.rowId === draggedField.rowId && f.id !== draggedFieldId);
+            const remainingFieldsInOriginalRow = updatedFields.filter(
+              (f) => f.rowId === draggedField.rowId && f.id !== draggedFieldId,
+            );
             if (remainingFieldsInOriginalRow.length > 0) {
               const evenWidth = 100 / remainingFieldsInOriginalRow.length;
-              return updatedFields.map(field => {
-                if (field.rowId === draggedField.rowId && field.id !== draggedFieldId) {
+              return updatedFields.map((field) => {
+                if (
+                  field.rowId === draggedField.rowId &&
+                  field.id !== draggedFieldId
+                ) {
                   return { ...field, width: evenWidth };
                 }
                 return field;
               });
             }
           }
-          
+
           return updatedFields;
         });
         return;
       }
-      
-      if (overId.startsWith('row-drop-zone-')) {
-        const targetRowId = overId.replace('row-drop-zone-', '');
+
+      if (overId.startsWith("row-drop-zone-")) {
+        const targetRowId = overId.replace("row-drop-zone-", "");
         setFormFields((fields) => {
-          const draggedField = fields.find(f => f.id === draggedFieldId);
+          const draggedField = fields.find((f) => f.id === draggedFieldId);
           if (!draggedField) return fields;
-          
+
           const originalRowId = draggedField.rowId;
-          
+
           // Update the dragged field's row
-          let updatedFields = fields.map(field => {
+          let updatedFields = fields.map((field) => {
             if (field.id === draggedFieldId) {
               return { ...field, rowId: targetRowId };
             }
             return field;
           });
-          
+
           // Redistribute widths in target row
-          const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetRowId);
+          const fieldsInTargetRow = updatedFields.filter(
+            (f) => f.rowId === targetRowId,
+          );
           const targetEvenWidth = 100 / fieldsInTargetRow.length;
-          
-          updatedFields = updatedFields.map(field => {
+
+          updatedFields = updatedFields.map((field) => {
             if (field.rowId === targetRowId) {
               return { ...field, width: targetEvenWidth };
             }
             return field;
           });
-          
+
           // Redistribute widths in original row if it had multiple fields
           if (originalRowId && originalRowId !== targetRowId) {
-            const remainingFieldsInOriginalRow = updatedFields.filter(f => f.rowId === originalRowId);
+            const remainingFieldsInOriginalRow = updatedFields.filter(
+              (f) => f.rowId === originalRowId,
+            );
             if (remainingFieldsInOriginalRow.length > 0) {
-              const originalEvenWidth = 100 / remainingFieldsInOriginalRow.length;
-              updatedFields = updatedFields.map(field => {
+              const originalEvenWidth =
+                100 / remainingFieldsInOriginalRow.length;
+              updatedFields = updatedFields.map((field) => {
                 if (field.rowId === originalRowId) {
                   return { ...field, width: originalEvenWidth };
                 }
@@ -878,69 +927,85 @@ export default function FormEditor() {
               });
             }
           }
-          
+
           return updatedFields;
         });
         return;
       }
-      
+
       // Handle field-to-field drops
       const targetFieldId = overId;
       setFormFields((fields) => {
-        const draggedField = fields.find(f => f.id === draggedFieldId);
-        const targetField = fields.find(f => f.id === targetFieldId);
-        
+        const draggedField = fields.find((f) => f.id === draggedFieldId);
+        const targetField = fields.find((f) => f.id === targetFieldId);
+
         if (!draggedField || !targetField) return fields;
-        
+
         // If both fields are in the same row, reorder within that row
-        if (draggedField.rowId && targetField.rowId && draggedField.rowId === targetField.rowId) {
-          const fieldsInRow = fields.filter(f => f.rowId === draggedField.rowId);
-          const otherFields = fields.filter(f => f.rowId !== draggedField.rowId);
-          
-          const draggedIndex = fieldsInRow.findIndex(f => f.id === draggedFieldId);
-          const targetIndex = fieldsInRow.findIndex(f => f.id === targetFieldId);
-          
+        if (
+          draggedField.rowId &&
+          targetField.rowId &&
+          draggedField.rowId === targetField.rowId
+        ) {
+          const fieldsInRow = fields.filter(
+            (f) => f.rowId === draggedField.rowId,
+          );
+          const otherFields = fields.filter(
+            (f) => f.rowId !== draggedField.rowId,
+          );
+
+          const draggedIndex = fieldsInRow.findIndex(
+            (f) => f.id === draggedFieldId,
+          );
+          const targetIndex = fieldsInRow.findIndex(
+            (f) => f.id === targetFieldId,
+          );
+
           if (draggedIndex === -1 || targetIndex === -1) return fields;
-          
+
           // Reorder fields within the row
           const reorderedFields = [...fieldsInRow];
           const [movedField] = reorderedFields.splice(draggedIndex, 1);
           reorderedFields.splice(targetIndex, 0, movedField);
-          
+
           // Update order values to maintain position
           reorderedFields.forEach((field, index) => {
-            field.order = Math.min(...fieldsInRow.map(f => f.order)) + index;
+            field.order = Math.min(...fieldsInRow.map((f) => f.order)) + index;
           });
-          
+
           return [...otherFields, ...reorderedFields];
         }
-        
+
         // Moving field from one row to another
         const originalRowId = draggedField.rowId;
-        let updatedFields = fields.map(field => {
+        let updatedFields = fields.map((field) => {
           if (field.id === draggedFieldId) {
             return { ...field, rowId: targetField.rowId };
           }
           return field;
         });
-        
+
         // Redistribute widths in target row
-        const fieldsInTargetRow = updatedFields.filter(f => f.rowId === targetField.rowId);
+        const fieldsInTargetRow = updatedFields.filter(
+          (f) => f.rowId === targetField.rowId,
+        );
         const targetEvenWidth = 100 / fieldsInTargetRow.length;
-        
-        updatedFields = updatedFields.map(field => {
+
+        updatedFields = updatedFields.map((field) => {
           if (field.rowId === targetField.rowId) {
             return { ...field, width: targetEvenWidth };
           }
           return field;
         });
-        
+
         // Redistribute widths in original row if it had multiple fields
         if (originalRowId && originalRowId !== targetField.rowId) {
-          const remainingFieldsInOriginalRow = updatedFields.filter(f => f.rowId === originalRowId);
+          const remainingFieldsInOriginalRow = updatedFields.filter(
+            (f) => f.rowId === originalRowId,
+          );
           if (remainingFieldsInOriginalRow.length > 0) {
             const originalEvenWidth = 100 / remainingFieldsInOriginalRow.length;
-            updatedFields = updatedFields.map(field => {
+            updatedFields = updatedFields.map((field) => {
               if (field.rowId === originalRowId) {
                 return { ...field, width: originalEvenWidth };
               }
@@ -948,19 +1013,21 @@ export default function FormEditor() {
             });
           }
         }
-        
+
         return updatedFields;
       });
     } else {
       // Traditional layout mode - clear auto layout properties and do simple reordering
       setFormFields((items) => {
-        const clearedItems = items.map(item => ({
+        const clearedItems = items.map((item) => ({
           ...item,
           rowId: undefined,
-          width: 100
+          width: 100,
         }));
-        
-        const oldIndex = clearedItems.findIndex((item) => item.id === active.id);
+
+        const oldIndex = clearedItems.findIndex(
+          (item) => item.id === active.id,
+        );
         const newIndex = clearedItems.findIndex((item) => item.id === over?.id);
 
         return arrayMove(clearedItems, oldIndex, newIndex);
@@ -1061,7 +1128,23 @@ export default function FormEditor() {
 
           {/* Forms List */}
           <div className="flex-1 overflow-y-auto">
-            {filteredForms.length === 0 ? (
+            {formsLoading ? (
+              <div className="p-4 space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-24" />
+                        </div>
+                      </div>
+                      <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredForms.length === 0 ? (
               <div className="p-4 text-center">
                 <Card className="border-dashed">
                   <CardContent className="pt-6">
@@ -1701,9 +1784,9 @@ export default function FormEditor() {
                     {isPreviewMode ? "Edit" : "Preview"}
                   </Button>
                   {isCreatingForm && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
                         setIsCreatingForm(false);
                         setEditingFormId(null);
@@ -1737,10 +1820,16 @@ export default function FormEditor() {
                           {/* Validation & Logic Demo Badge */}
                           <div className="flex justify-between items-center">
                             <div className="flex gap-2">
-                              <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                              <Badge
+                                variant="outline"
+                                className="text-blue-600 border-blue-200 bg-blue-50"
+                              >
                                 ✓ Validation Rules Active
                               </Badge>
-                              <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                              <Badge
+                                variant="outline"
+                                className="text-green-600 border-green-200 bg-green-50"
+                              >
                                 ✓ Conditional Logic Active
                               </Badge>
                             </div>
@@ -1750,121 +1839,178 @@ export default function FormEditor() {
                             {formConfig.layout === "auto" ? (
                               // Auto Layout Preview Mode - Row-based layout
                               <div className="space-y-4">
-                                {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => (
-                                  <div
-                                    key={rowFields[0]?.rowId || `preview-row-${rowIndex}`}
-                                    className="flex w-full"
-                                    style={{ gap: getSpacingValue() }}
-                                  >
-                                    {rowFields.map((field) => (
-                                      <div
-                                        key={field.id}
-                                        style={{ width: `${field.width || 100 / rowFields.length}%` }}
-                                        className={`${
-                                          field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
-                                            ? "flex items-center gap-4"
-                                            : field.layout === "inline" && field.type !== "radio" && field.type !== "checkbox"
-                                              ? "flex items-center gap-2"
-                                              : "space-y-2"
-                                        }`}
-                                      >
-                                        {formConfig.showLabels && (
-                                          <div
-                                            className={`${
-                                              field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
-                                                ? "min-w-[120px]"
-                                                : ""
-                                            }`}
-                                          >
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                              {field.label}
-                                              {field.required && <span className="text-red-500 ml-1">*</span>}
-                                            </label>
-                                          </div>
-                                        )}
-
-                                        <div className="relative flex-1">
-                                          {/* Render form field based on type */}
-                                          {field.type === "text" ||
-                                          field.type === "email" ||
-                                          field.type === "number" ||
-                                          field.type === "tel" ||
-                                          field.type === "url" ? (
-                                            <Input
-                                              type={field.type}
-                                              placeholder={field.placeholder}
-                                              disabled={field.disabled}
-                                              readOnly={field.readonly}
-                                              className="w-full"
-                                            />
-                                          ) : field.type === "textarea" ? (
-                                            <Textarea
-                                              placeholder={field.placeholder}
-                                              disabled={field.disabled}
-                                              readOnly={field.readonly}
-                                              className="w-full resize-none"
-                                              rows={3}
-                                            />
-                                          ) : field.type === "radio" ? (
-                                            <RadioGroup 
-                                              className={
-                                                field.layout === "horizontal"
-                                                  ? "flex flex-wrap gap-4"
-                                                  : "space-y-2"
-                                              }
-                                            >
-                                              {(field.options || []).map((option: any, index: number) => (
-                                                <div key={index} className="flex items-center gap-2">
-                                                  <RadioGroupItem 
-                                                    value={option.value} 
-                                                    id={`preview-radio-${field.id}-${index}`}
-                                                  />
-                                                  <Label htmlFor={`preview-radio-${field.id}-${index}`}>
-                                                    {option.label}
-                                                  </Label>
-                                                </div>
-                                              ))}
-                                            </RadioGroup>
-                                          ) : field.type === "checkbox" ? (
-                                            <div className={
-                                              field.layout === "horizontal"
-                                                ? "flex flex-wrap gap-4"
+                                {organizeFieldsIntoRows(formFields).map(
+                                  (rowFields, rowIndex) => (
+                                    <div
+                                      key={
+                                        rowFields[0]?.rowId ||
+                                        `preview-row-${rowIndex}`
+                                      }
+                                      className="flex w-full"
+                                      style={{ gap: getSpacingValue() }}
+                                    >
+                                      {rowFields.map((field) => (
+                                        <div
+                                          key={field.id}
+                                          style={{
+                                            width: `${field.width || 100 / rowFields.length}%`,
+                                          }}
+                                          className={`${
+                                            field.layout === "horizontal" &&
+                                            field.type !== "radio" &&
+                                            field.type !== "checkbox"
+                                              ? "flex items-center gap-4"
+                                              : field.layout === "inline" &&
+                                                  field.type !== "radio" &&
+                                                  field.type !== "checkbox"
+                                                ? "flex items-center gap-2"
                                                 : "space-y-2"
-                                            }>
-                                              {(field.options || []).map((option: any, index: number) => (
-                                                <div key={index} className="flex items-center gap-2">
-                                                  <Checkbox 
-                                                    id={`preview-checkbox-${field.id}-${index}`}
-                                                  />
-                                                  <Label htmlFor={`preview-checkbox-${field.id}-${index}`}>
-                                                    {option.label}
-                                                  </Label>
-                                                </div>
-                                              ))}
+                                          }`}
+                                        >
+                                          {formConfig.showLabels && (
+                                            <div
+                                              className={`${
+                                                field.layout === "horizontal" &&
+                                                field.type !== "radio" &&
+                                                field.type !== "checkbox"
+                                                  ? "min-w-[120px]"
+                                                  : ""
+                                              }`}
+                                            >
+                                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {field.label}
+                                                {field.required && (
+                                                  <span className="text-red-500 ml-1">
+                                                    *
+                                                  </span>
+                                                )}
+                                              </label>
                                             </div>
-                                          ) : field.type === "select" ? (
-                                            <Select>
-                                              <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={field.placeholder} />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {(field.options || []).map((option: any, index: number) => (
-                                                  <SelectItem key={index} value={option.value}>
-                                                    {option.label}
-                                                  </SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          ) : field.type === "date" ? (
-                                            <Input type="date" className="w-full" />
-                                          ) : field.type === "file" ? (
-                                            <Input type="file" className="w-full" />
-                                          ) : null}
+                                          )}
+
+                                          <div className="relative flex-1">
+                                            {/* Render form field based on type */}
+                                            {field.type === "text" ||
+                                            field.type === "email" ||
+                                            field.type === "number" ||
+                                            field.type === "tel" ||
+                                            field.type === "url" ? (
+                                              <Input
+                                                type={field.type}
+                                                placeholder={field.placeholder}
+                                                disabled={field.disabled}
+                                                readOnly={field.readonly}
+                                                className="w-full"
+                                              />
+                                            ) : field.type === "textarea" ? (
+                                              <Textarea
+                                                placeholder={field.placeholder}
+                                                disabled={field.disabled}
+                                                readOnly={field.readonly}
+                                                className="w-full resize-none"
+                                                rows={3}
+                                              />
+                                            ) : field.type === "radio" ? (
+                                              <RadioGroup
+                                                className={
+                                                  field.layout === "horizontal"
+                                                    ? "flex flex-wrap gap-4"
+                                                    : "space-y-2"
+                                                }
+                                              >
+                                                {(field.options || []).map(
+                                                  (
+                                                    option: any,
+                                                    index: number,
+                                                  ) => (
+                                                    <div
+                                                      key={index}
+                                                      className="flex items-center gap-2"
+                                                    >
+                                                      <RadioGroupItem
+                                                        value={option.value}
+                                                        id={`preview-radio-${field.id}-${index}`}
+                                                      />
+                                                      <Label
+                                                        htmlFor={`preview-radio-${field.id}-${index}`}
+                                                      >
+                                                        {option.label}
+                                                      </Label>
+                                                    </div>
+                                                  ),
+                                                )}
+                                              </RadioGroup>
+                                            ) : field.type === "checkbox" ? (
+                                              <div
+                                                className={
+                                                  field.layout === "horizontal"
+                                                    ? "flex flex-wrap gap-4"
+                                                    : "space-y-2"
+                                                }
+                                              >
+                                                {(field.options || []).map(
+                                                  (
+                                                    option: any,
+                                                    index: number,
+                                                  ) => (
+                                                    <div
+                                                      key={index}
+                                                      className="flex items-center gap-2"
+                                                    >
+                                                      <Checkbox
+                                                        id={`preview-checkbox-${field.id}-${index}`}
+                                                      />
+                                                      <Label
+                                                        htmlFor={`preview-checkbox-${field.id}-${index}`}
+                                                      >
+                                                        {option.label}
+                                                      </Label>
+                                                    </div>
+                                                  ),
+                                                )}
+                                              </div>
+                                            ) : field.type === "select" ? (
+                                              <Select>
+                                                <SelectTrigger className="w-full">
+                                                  <SelectValue
+                                                    placeholder={
+                                                      field.placeholder
+                                                    }
+                                                  />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {(field.options || []).map(
+                                                    (
+                                                      option: any,
+                                                      index: number,
+                                                    ) => (
+                                                      <SelectItem
+                                                        key={index}
+                                                        value={option.value}
+                                                      >
+                                                        {option.label}
+                                                      </SelectItem>
+                                                    ),
+                                                  )}
+                                                </SelectContent>
+                                              </Select>
+                                            ) : field.type === "date" ? (
+                                              <Input
+                                                type="date"
+                                                className="w-full"
+                                              />
+                                            ) : field.type === "file" ? (
+                                              <Input
+                                                type="file"
+                                                className="w-full"
+                                              />
+                                            ) : null}
+                                          </div>
                                         </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                ))}
+                                      ))}
+                                    </div>
+                                  ),
+                                )}
                               </div>
                             ) : (
                               // Traditional Layout Preview Mode
@@ -1884,201 +2030,214 @@ export default function FormEditor() {
                                 }}
                               >
                                 {formFields.map((field) => (
-                                <div
-                                  key={field.id}
-                                  className={`${
-                                    field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
-                                      ? "flex items-center gap-4"
-                                      : field.layout === "inline" && field.type !== "radio" && field.type !== "checkbox"
-                                        ? "flex items-center gap-2"
-                                        : "space-y-2"
-                                  }`}
-                                >
-                                  {formConfig.showLabels && (
+                                  <div
+                                    key={field.id}
+                                    className={`${
+                                      field.layout === "horizontal" &&
+                                      field.type !== "radio" &&
+                                      field.type !== "checkbox"
+                                        ? "flex items-center gap-4"
+                                        : field.layout === "inline" &&
+                                            field.type !== "radio" &&
+                                            field.type !== "checkbox"
+                                          ? "flex items-center gap-2"
+                                          : "space-y-2"
+                                    }`}
+                                  >
+                                    {formConfig.showLabels && (
+                                      <div
+                                        className={`${
+                                          field.layout === "horizontal" &&
+                                          field.type !== "radio" &&
+                                          field.type !== "checkbox"
+                                            ? "min-w-[120px]"
+                                            : ""
+                                        }`}
+                                      >
+                                        <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                          {field.label}
+                                          {field.required && (
+                                            <span className="text-red-500">
+                                              *
+                                            </span>
+                                          )}
+                                        </Label>
+                                      </div>
+                                    )}
+
                                     <div
                                       className={`${
-                                        field.layout === "horizontal" && field.type !== "radio" && field.type !== "checkbox"
-                                          ? "min-w-[120px]"
+                                        (field.layout === "horizontal" ||
+                                          field.layout === "inline") &&
+                                        field.type !== "radio" &&
+                                        field.type !== "checkbox"
+                                          ? "flex-1"
                                           : ""
                                       }`}
                                     >
-                                      <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {field.label}
-                                        {field.required && (
-                                          <span className="text-red-500">
-                                            *
-                                          </span>
-                                        )}
-                                      </Label>
-                                    </div>
-                                  )}
-
-                                  <div
-                                    className={`${
-                                      (field.layout === "horizontal" || field.layout === "inline") && field.type !== "radio" && field.type !== "checkbox"
-                                        ? "flex-1"
-                                        : ""
-                                    }`}
-                                  >
-                                    {field.hint && (
-                                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                        {field.hint}
-                                      </p>
-                                    )}
-
-                                    <div className="relative">
-                                      {field.prefix && (
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
-                                          {field.prefix}
-                                        </span>
+                                      {field.hint && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                          {field.hint}
+                                        </p>
                                       )}
 
-                                      {field.type === "text" ||
-                                      field.type === "email" ||
-                                      field.type === "number" ||
-                                      field.type === "tel" ||
-                                      field.type === "url" ? (
-                                        <Input
-                                          type={field.type}
-                                          placeholder={field.placeholder}
-                                          disabled={field.disabled}
-                                          readOnly={field.readonly}
-                                          autoFocus={field.autofocus}
-                                          autoComplete={field.autocomplete}
-                                          className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
-                                          style={{
-                                            width: field.width || "100%",
-                                            ...(field.layout === "inline" && {
-                                              minWidth: "120px",
-                                            }),
-                                          }}
-                                        />
-                                      ) : field.type === "textarea" ? (
-                                        <Textarea
-                                          placeholder={field.placeholder}
-                                          disabled={field.disabled}
-                                          readOnly={field.readonly}
-                                          className={`${field.class || ""} resize-none`}
-                                          style={{
-                                            width: field.width || "100%",
-                                          }}
-                                          rows={3}
-                                        />
-                                      ) : field.type === "date" ? (
-                                        <Input
-                                          type="date"
-                                          disabled={field.disabled}
-                                          className={field.class || ""}
-                                          style={{
-                                            width: field.width || "100%",
-                                          }}
-                                        />
-                                      ) : field.type === "file" ? (
-                                        <Input
-                                          type="file"
-                                          disabled={field.disabled}
-                                          className={field.class || ""}
-                                          style={{
-                                            width: field.width || "100%",
-                                          }}
-                                        />
-                                      ) : field.type === "checkbox" ? (
-                                        <div className="flex items-center space-x-2">
-                                          <Checkbox
+                                      <div className="relative">
+                                        {field.prefix && (
+                                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
+                                            {field.prefix}
+                                          </span>
+                                        )}
+
+                                        {field.type === "text" ||
+                                        field.type === "email" ||
+                                        field.type === "number" ||
+                                        field.type === "tel" ||
+                                        field.type === "url" ? (
+                                          <Input
+                                            type={field.type}
+                                            placeholder={field.placeholder}
                                             disabled={field.disabled}
-                                            id={`checkbox-${field.id}`}
-                                          />
-                                          <Label
-                                            htmlFor={`checkbox-${field.id}`}
-                                            className="text-sm font-normal cursor-pointer"
-                                          >
-                                            {field.placeholder ||
-                                              "Check this option"}
-                                          </Label>
-                                        </div>
-                                      ) : field.type === "radio" ? (
-                                        <RadioGroup
-                                          disabled={field.disabled}
-                                          className={
-                                            field.layout === "horizontal"
-                                              ? "flex flex-wrap gap-4"
-                                              : "space-y-2"
-                                          }
-                                        >
-                                          {field.options?.map(
-                                            (option: any, index: number) => (
-                                              <div
-                                                key={index}
-                                                className="flex items-center space-x-2"
-                                              >
-                                                <RadioGroupItem
-                                                  value={option.value}
-                                                  id={`radio-${field.id}-${index}`}
-                                                  disabled={field.disabled}
-                                                />
-                                                <Label
-                                                  htmlFor={`radio-${field.id}-${index}`}
-                                                  className="text-sm font-normal cursor-pointer"
-                                                >
-                                                  {option.label}
-                                                </Label>
-                                              </div>
-                                            ),
-                                          ) || (
-                                            <div className="flex items-center space-x-2">
-                                              <RadioGroupItem
-                                                value="no-options"
-                                                disabled
-                                              />
-                                              <Label className="text-sm text-gray-400">
-                                                No options configured
-                                              </Label>
-                                            </div>
-                                          )}
-                                        </RadioGroup>
-                                      ) : field.type === "select" ? (
-                                        <Select disabled={field.disabled}>
-                                          <SelectTrigger
-                                            className={field.class || ""}
+                                            readOnly={field.readonly}
+                                            autoFocus={field.autofocus}
+                                            autoComplete={field.autocomplete}
+                                            className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
                                             style={{
                                               width: field.width || "100%",
                                               ...(field.layout === "inline" && {
                                                 minWidth: "120px",
                                               }),
                                             }}
-                                          >
-                                            <SelectValue
-                                              placeholder={field.placeholder}
+                                          />
+                                        ) : field.type === "textarea" ? (
+                                          <Textarea
+                                            placeholder={field.placeholder}
+                                            disabled={field.disabled}
+                                            readOnly={field.readonly}
+                                            className={`${field.class || ""} resize-none`}
+                                            style={{
+                                              width: field.width || "100%",
+                                            }}
+                                            rows={3}
+                                          />
+                                        ) : field.type === "date" ? (
+                                          <Input
+                                            type="date"
+                                            disabled={field.disabled}
+                                            className={field.class || ""}
+                                            style={{
+                                              width: field.width || "100%",
+                                            }}
+                                          />
+                                        ) : field.type === "file" ? (
+                                          <Input
+                                            type="file"
+                                            disabled={field.disabled}
+                                            className={field.class || ""}
+                                            style={{
+                                              width: field.width || "100%",
+                                            }}
+                                          />
+                                        ) : field.type === "checkbox" ? (
+                                          <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                              disabled={field.disabled}
+                                              id={`checkbox-${field.id}`}
                                             />
-                                          </SelectTrigger>
-                                          <SelectContent>
+                                            <Label
+                                              htmlFor={`checkbox-${field.id}`}
+                                              className="text-sm font-normal cursor-pointer"
+                                            >
+                                              {field.placeholder ||
+                                                "Check this option"}
+                                            </Label>
+                                          </div>
+                                        ) : field.type === "radio" ? (
+                                          <RadioGroup
+                                            disabled={field.disabled}
+                                            className={
+                                              field.layout === "horizontal"
+                                                ? "flex flex-wrap gap-4"
+                                                : "space-y-2"
+                                            }
+                                          >
                                             {field.options?.map(
                                               (option: any, index: number) => (
-                                                <SelectItem
+                                                <div
                                                   key={index}
-                                                  value={option.value}
+                                                  className="flex items-center space-x-2"
                                                 >
-                                                  {option.label}
-                                                </SelectItem>
+                                                  <RadioGroupItem
+                                                    value={option.value}
+                                                    id={`radio-${field.id}-${index}`}
+                                                    disabled={field.disabled}
+                                                  />
+                                                  <Label
+                                                    htmlFor={`radio-${field.id}-${index}`}
+                                                    className="text-sm font-normal cursor-pointer"
+                                                  >
+                                                    {option.label}
+                                                  </Label>
+                                                </div>
                                               ),
                                             ) || (
-                                              <SelectItem value="no-options">
-                                                No options configured
-                                              </SelectItem>
+                                              <div className="flex items-center space-x-2">
+                                                <RadioGroupItem
+                                                  value="no-options"
+                                                  disabled
+                                                />
+                                                <Label className="text-sm text-gray-400">
+                                                  No options configured
+                                                </Label>
+                                              </div>
                                             )}
-                                          </SelectContent>
-                                        </Select>
-                                      ) : null}
+                                          </RadioGroup>
+                                        ) : field.type === "select" ? (
+                                          <Select disabled={field.disabled}>
+                                            <SelectTrigger
+                                              className={field.class || ""}
+                                              style={{
+                                                width: field.width || "100%",
+                                                ...(field.layout ===
+                                                  "inline" && {
+                                                  minWidth: "120px",
+                                                }),
+                                              }}
+                                            >
+                                              <SelectValue
+                                                placeholder={field.placeholder}
+                                              />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {field.options?.map(
+                                                (
+                                                  option: any,
+                                                  index: number,
+                                                ) => (
+                                                  <SelectItem
+                                                    key={index}
+                                                    value={option.value}
+                                                  >
+                                                    {option.label}
+                                                  </SelectItem>
+                                                ),
+                                              ) || (
+                                                <SelectItem value="no-options">
+                                                  No options configured
+                                                </SelectItem>
+                                              )}
+                                            </SelectContent>
+                                          </Select>
+                                        ) : null}
 
-                                      {field.suffix && (
-                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
-                                          {field.suffix}
-                                        </span>
-                                      )}
+                                        {field.suffix && (
+                                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
+                                            {field.suffix}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                ))}
                               </div>
                             )}
 
@@ -2193,159 +2352,284 @@ export default function FormEditor() {
                           {formConfig.layout === "auto" ? (
                             // Auto Layout Mode - Row-based layout with drag-and-drop
                             <div className="space-y-4">
-                              {organizeFieldsIntoRows(formFields).map((rowFields, rowIndex) => {
-                                const rowId = rowFields[0]?.rowId;
-                                const rows = organizeFieldsIntoRows(formFields);
-                                const canMoveUp = rowIndex > 0;
-                                const canMoveDown = rowIndex < rows.length - 1;
-                                
-                                return (
-                                <div
-                                  key={rowFields[0]?.rowId || `row-${rowIndex}`}
-                                  className="group relative flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
-                                  style={{ gap: getSpacingValue() }}
-                                >
-                                  {/* Row Controls */}
-                                  {rowId && (
-                                    <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-                                      <button
-                                        onClick={() => {
-                                          if (canMoveUp) {
-                                            setFormFields(fields => {
-                                              const rows = organizeFieldsIntoRows(fields);
-                                              const currentRowFields = rows[rowIndex];
-                                              const targetRowFields = rows[rowIndex - 1];
-                                              
-                                              // Swap the order values of the two rows
-                                              const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
-                                              const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
-                                              
-                                              return fields.map(field => {
-                                                if (targetRowFields.some(f => f.id === field.id)) {
-                                                  return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
-                                                }
-                                                if (currentRowFields.some(f => f.id === field.id)) {
-                                                  return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
-                                                }
-                                                return field;
-                                              });
-                                            });
-                                          }
-                                        }}
-                                        disabled={!canMoveUp}
-                                        className={`p-1 rounded text-xs ${
-                                          canMoveUp 
-                                            ? 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400' 
-                                            : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                                        }`}
-                                        title="Move row up"
-                                      >
-                                        ↑
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          if (canMoveDown) {
-                                            setFormFields(fields => {
-                                              const rows = organizeFieldsIntoRows(fields);
-                                              const currentRowFields = rows[rowIndex];
-                                              const targetRowFields = rows[rowIndex + 1];
-                                              
-                                              // Swap the order values of the two rows
-                                              const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
-                                              const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
-                                              
-                                              return fields.map(field => {
-                                                if (currentRowFields.some(f => f.id === field.id)) {
-                                                  return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
-                                                }
-                                                if (targetRowFields.some(f => f.id === field.id)) {
-                                                  return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
-                                                }
-                                                return field;
-                                              });
-                                            });
-                                          }
-                                        }}
-                                        disabled={!canMoveDown}
-                                        className={`p-1 rounded text-xs ${
-                                          canMoveDown 
-                                            ? 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400' 
-                                            : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                                        }`}
-                                        title="Move row down"
-                                      >
-                                        ↓
-                                      </button>
-                                    </div>
-                                  )}
-                                  {rowFields.map((field) => (
+                              {organizeFieldsIntoRows(formFields).map(
+                                (rowFields, rowIndex) => {
+                                  const rowId = rowFields[0]?.rowId;
+                                  const rows =
+                                    organizeFieldsIntoRows(formFields);
+                                  const canMoveUp = rowIndex > 0;
+                                  const canMoveDown =
+                                    rowIndex < rows.length - 1;
+
+                                  return (
                                     <div
-                                      key={field.id}
-                                      className="relative group"
-                                      style={{ width: `${field.width || 100 / rowFields.length}%` }}
+                                      key={
+                                        rowFields[0]?.rowId || `row-${rowIndex}`
+                                      }
+                                      className="group relative flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                                      style={{ gap: getSpacingValue() }}
                                     >
-                                      {/* Resize Handle */}
-                                      {(rowFields.length > 1 && rowFields.indexOf(field) < rowFields.length - 1) || (rowFields.length === 1) ? (
+                                      {/* Row Controls */}
+                                      {rowId && (
+                                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+                                          <button
+                                            onClick={() => {
+                                              if (canMoveUp) {
+                                                setFormFields((fields) => {
+                                                  const rows =
+                                                    organizeFieldsIntoRows(
+                                                      fields,
+                                                    );
+                                                  const currentRowFields =
+                                                    rows[rowIndex];
+                                                  const targetRowFields =
+                                                    rows[rowIndex - 1];
+
+                                                  // Swap the order values of the two rows
+                                                  const targetMinOrder =
+                                                    Math.min(
+                                                      ...targetRowFields.map(
+                                                        (f) => f.order,
+                                                      ),
+                                                    );
+                                                  const currentMinOrder =
+                                                    Math.min(
+                                                      ...currentRowFields.map(
+                                                        (f) => f.order,
+                                                      ),
+                                                    );
+
+                                                  return fields.map((field) => {
+                                                    if (
+                                                      targetRowFields.some(
+                                                        (f) =>
+                                                          f.id === field.id,
+                                                      )
+                                                    ) {
+                                                      return {
+                                                        ...field,
+                                                        order:
+                                                          currentMinOrder +
+                                                          (field.order -
+                                                            targetMinOrder),
+                                                      };
+                                                    }
+                                                    if (
+                                                      currentRowFields.some(
+                                                        (f) =>
+                                                          f.id === field.id,
+                                                      )
+                                                    ) {
+                                                      return {
+                                                        ...field,
+                                                        order:
+                                                          targetMinOrder +
+                                                          (field.order -
+                                                            currentMinOrder),
+                                                      };
+                                                    }
+                                                    return field;
+                                                  });
+                                                });
+                                              }
+                                            }}
+                                            disabled={!canMoveUp}
+                                            className={`p-1 rounded text-xs ${
+                                              canMoveUp
+                                                ? "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                                : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                                            }`}
+                                            title="Move row up"
+                                          >
+                                            ↑
+                                          </button>
+                                          <button
+                                            onClick={() => {
+                                              if (canMoveDown) {
+                                                setFormFields((fields) => {
+                                                  const rows =
+                                                    organizeFieldsIntoRows(
+                                                      fields,
+                                                    );
+                                                  const currentRowFields =
+                                                    rows[rowIndex];
+                                                  const targetRowFields =
+                                                    rows[rowIndex + 1];
+
+                                                  // Swap the order values of the two rows
+                                                  const currentMinOrder =
+                                                    Math.min(
+                                                      ...currentRowFields.map(
+                                                        (f) => f.order,
+                                                      ),
+                                                    );
+                                                  const targetMinOrder =
+                                                    Math.min(
+                                                      ...targetRowFields.map(
+                                                        (f) => f.order,
+                                                      ),
+                                                    );
+
+                                                  return fields.map((field) => {
+                                                    if (
+                                                      currentRowFields.some(
+                                                        (f) =>
+                                                          f.id === field.id,
+                                                      )
+                                                    ) {
+                                                      return {
+                                                        ...field,
+                                                        order:
+                                                          targetMinOrder +
+                                                          (field.order -
+                                                            currentMinOrder),
+                                                      };
+                                                    }
+                                                    if (
+                                                      targetRowFields.some(
+                                                        (f) =>
+                                                          f.id === field.id,
+                                                      )
+                                                    ) {
+                                                      return {
+                                                        ...field,
+                                                        order:
+                                                          currentMinOrder +
+                                                          (field.order -
+                                                            targetMinOrder),
+                                                      };
+                                                    }
+                                                    return field;
+                                                  });
+                                                });
+                                              }
+                                            }}
+                                            disabled={!canMoveDown}
+                                            className={`p-1 rounded text-xs ${
+                                              canMoveDown
+                                                ? "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                                : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                                            }`}
+                                            title="Move row down"
+                                          >
+                                            ↓
+                                          </button>
+                                        </div>
+                                      )}
+                                      {rowFields.map((field) => (
                                         <div
-                                          className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
-                                          onMouseDown={(e) => handleResizeStart(e, field.id, rowFields)}
-                                        />
-                                      ) : null}
-                                      
-                                      <SortableField
-                                        field={field}
-                                        isSelected={selectedFieldId === field.id}
-                                        onSelect={() => handleFieldSelect(field.id)}
-                                        onUpdate={(updates) => {
-                                          setFormFields((fields) =>
-                                            fields.map((f) =>
-                                              f.id === field.id
-                                                ? { ...f, ...updates }
-                                                : f,
-                                            ),
-                                          );
-                                        }}
-                                        onDelete={() => {
-                                          setFormFields((fields) => {
-                                            const updatedFields = fields.filter(f => f.id !== field.id);
-                                            
-                                            // If this was the only field in a row, remove the row
-                                            const remainingFieldsInRow = updatedFields.filter(f => f.rowId === field.rowId);
-                                            if (field.rowId && remainingFieldsInRow.length === 0) {
-                                              // Row is empty, nothing more to do
-                                              return updatedFields;
+                                          key={field.id}
+                                          className="relative group"
+                                          style={{
+                                            width: `${field.width || 100 / rowFields.length}%`,
+                                          }}
+                                        >
+                                          {/* Resize Handle */}
+                                          {(rowFields.length > 1 &&
+                                            rowFields.indexOf(field) <
+                                              rowFields.length - 1) ||
+                                          rowFields.length === 1 ? (
+                                            <div
+                                              className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
+                                              onMouseDown={(e) =>
+                                                handleResizeStart(
+                                                  e,
+                                                  field.id,
+                                                  rowFields,
+                                                )
+                                              }
+                                            />
+                                          ) : null}
+
+                                          <SortableField
+                                            field={field}
+                                            isSelected={
+                                              selectedFieldId === field.id
                                             }
-                                            
-                                            // If there are remaining fields in the row, redistribute widths
-                                            if (field.rowId && remainingFieldsInRow.length > 0) {
-                                              const evenWidth = 100 / remainingFieldsInRow.length;
-                                              return updatedFields.map(f => {
-                                                if (f.rowId === field.rowId) {
-                                                  return { ...f, width: evenWidth };
+                                            onSelect={() =>
+                                              handleFieldSelect(field.id)
+                                            }
+                                            onUpdate={(updates) => {
+                                              setFormFields((fields) =>
+                                                fields.map((f) =>
+                                                  f.id === field.id
+                                                    ? { ...f, ...updates }
+                                                    : f,
+                                                ),
+                                              );
+                                            }}
+                                            onDelete={() => {
+                                              setFormFields((fields) => {
+                                                const updatedFields =
+                                                  fields.filter(
+                                                    (f) => f.id !== field.id,
+                                                  );
+
+                                                // If this was the only field in a row, remove the row
+                                                const remainingFieldsInRow =
+                                                  updatedFields.filter(
+                                                    (f) =>
+                                                      f.rowId === field.rowId,
+                                                  );
+                                                if (
+                                                  field.rowId &&
+                                                  remainingFieldsInRow.length ===
+                                                    0
+                                                ) {
+                                                  // Row is empty, nothing more to do
+                                                  return updatedFields;
                                                 }
-                                                return f;
+
+                                                // If there are remaining fields in the row, redistribute widths
+                                                if (
+                                                  field.rowId &&
+                                                  remainingFieldsInRow.length >
+                                                    0
+                                                ) {
+                                                  const evenWidth =
+                                                    100 /
+                                                    remainingFieldsInRow.length;
+                                                  return updatedFields.map(
+                                                    (f) => {
+                                                      if (
+                                                        f.rowId === field.rowId
+                                                      ) {
+                                                        return {
+                                                          ...f,
+                                                          width: evenWidth,
+                                                        };
+                                                      }
+                                                      return f;
+                                                    },
+                                                  );
+                                                }
+
+                                                return updatedFields;
                                               });
-                                            }
-                                            
-                                            return updatedFields;
-                                          });
-                                          
-                                          // Clear selection if deleted field was selected
-                                          if (selectedFieldId === field.id) {
-                                            setSelectedFieldId(null);
-                                            setShowPropertiesPanel(false);
-                                          }
-                                        }}
-                                      />
+
+                                              // Clear selection if deleted field was selected
+                                              if (
+                                                selectedFieldId === field.id
+                                              ) {
+                                                setSelectedFieldId(null);
+                                                setShowPropertiesPanel(false);
+                                              }
+                                            }}
+                                          />
+                                        </div>
+                                      ))}
+
+                                      {/* Drop Zone for adding fields to this row */}
+                                      {rowFields[0]?.rowId && (
+                                        <RowDropZone
+                                          rowId={rowFields[0].rowId}
+                                        />
+                                      )}
                                     </div>
-                                  ))}
-                                  
-                                  {/* Drop Zone for adding fields to this row */}
-                                  {rowFields[0]?.rowId && <RowDropZone rowId={rowFields[0].rowId} />}
-                                </div>
-                                );
-                              })}
-                              
+                                  );
+                                },
+                              )}
+
                               {/* Empty row for new fields */}
                               <NewRowDropZone />
                             </div>
@@ -2382,8 +2666,10 @@ export default function FormEditor() {
                                     );
                                   }}
                                   onDelete={() => {
-                                    setFormFields((fields) => fields.filter(f => f.id !== field.id));
-                                    
+                                    setFormFields((fields) =>
+                                      fields.filter((f) => f.id !== field.id),
+                                    );
+
                                     // Clear selection if deleted field was selected
                                     if (selectedFieldId === field.id) {
                                       setSelectedFieldId(null);
@@ -2503,7 +2789,7 @@ export default function FormEditor() {
                     const fieldType = selectedField.type;
                     const isTextInput = [
                       "text",
-                      "textarea", 
+                      "textarea",
                       "email",
                       "number",
                       "tel",
@@ -3613,13 +3899,14 @@ export default function FormEditor() {
                                       ? {
                                           ...f,
                                           options:
-                                            f.options?.map((opt: any, i: number) =>
-                                              i === index
-                                                ? {
-                                                    ...opt,
-                                                    label: e.target.value,
-                                                  }
-                                                : opt,
+                                            f.options?.map(
+                                              (opt: any, i: number) =>
+                                                i === index
+                                                  ? {
+                                                      ...opt,
+                                                      label: e.target.value,
+                                                    }
+                                                  : opt,
                                             ) || [],
                                         }
                                       : f,
@@ -3638,13 +3925,14 @@ export default function FormEditor() {
                                       ? {
                                           ...f,
                                           options:
-                                            f.options?.map((opt: any, i: number) =>
-                                              i === index
-                                                ? {
-                                                    ...opt,
-                                                    value: e.target.value,
-                                                  }
-                                                : opt,
+                                            f.options?.map(
+                                              (opt: any, i: number) =>
+                                                i === index
+                                                  ? {
+                                                      ...opt,
+                                                      value: e.target.value,
+                                                    }
+                                                  : opt,
                                             ) || [],
                                         }
                                       : f,
@@ -3665,7 +3953,8 @@ export default function FormEditor() {
                                           ...f,
                                           options:
                                             f.options?.filter(
-                                              (_: any, i: number) => i !== index,
+                                              (_: any, i: number) =>
+                                                i !== index,
                                             ) || [],
                                         }
                                       : f,
@@ -3904,10 +4193,11 @@ export default function FormEditor() {
                                         condition: {
                                           ...f.condition,
                                           rules:
-                                            f.condition?.rules?.map((r: any, i: number) =>
-                                              i === index
-                                                ? { ...r, field: value }
-                                                : r,
+                                            f.condition?.rules?.map(
+                                              (r: any, i: number) =>
+                                                i === index
+                                                  ? { ...r, field: value }
+                                                  : r,
                                             ) || [],
                                         },
                                       }
@@ -3941,13 +4231,14 @@ export default function FormEditor() {
                                         condition: {
                                           ...f.condition,
                                           rules:
-                                            f.condition?.rules?.map((r: any, i: number) =>
-                                              i === index
-                                                ? {
-                                                    ...r,
-                                                    operator: value as any,
-                                                  }
-                                                : r,
+                                            f.condition?.rules?.map(
+                                              (r: any, i: number) =>
+                                                i === index
+                                                  ? {
+                                                      ...r,
+                                                      operator: value as any,
+                                                    }
+                                                  : r,
                                             ) || [],
                                         },
                                       }
@@ -3982,13 +4273,14 @@ export default function FormEditor() {
                                         condition: {
                                           ...f.condition,
                                           rules:
-                                            f.condition?.rules?.map((r: any, i: number) =>
-                                              i === index
-                                                ? {
-                                                    ...r,
-                                                    value: e.target.value,
-                                                  }
-                                                : r,
+                                            f.condition?.rules?.map(
+                                              (r: any, i: number) =>
+                                                i === index
+                                                  ? {
+                                                      ...r,
+                                                      value: e.target.value,
+                                                    }
+                                                  : r,
                                             ) || [],
                                         },
                                       }
@@ -4013,7 +4305,8 @@ export default function FormEditor() {
                                           ...f.condition,
                                           rules:
                                             f.condition?.rules?.filter(
-                                              (_: any, i: number) => i !== index,
+                                              (_: any, i: number) =>
+                                                i !== index,
                                             ) || [],
                                         },
                                       }

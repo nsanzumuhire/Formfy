@@ -40,7 +40,7 @@ export function ProjectCreateDialog({ open, onOpenChange, onSuccess }: ProjectCr
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: CreateProjectForm) => {
-      return await apiRequest("POST", "/api/projects", data);
+      return await apiRequest("/api/projects", "POST", data);
     },
     onSuccess: (newProject: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -51,6 +51,13 @@ export function ProjectCreateDialog({ open, onOpenChange, onSuccess }: ProjectCr
         title: "Project created",
         description: `${newProject.name} has been created successfully.`,
       });
+
+      // Auto-select the newly created project
+      if (newProject?.id) {
+        localStorage.setItem("formfy_selected_project", newProject.id);
+        window.dispatchEvent(new CustomEvent('projectChanged', { detail: { projectId: newProject.id } }));
+        window.dispatchEvent(new Event('localStorageChange'));
+      }
 
       // Call onSuccess callback if provided
       onSuccess?.();
