@@ -42,6 +42,12 @@ export interface FormFieldData {
   readonly?: boolean;
   // Conditional logic
   condition?: ConditionalLogic;
+  // Styling and rendering properties for SDK
+  className?: string; // CSS classes for the input field
+  style?: Record<string, any>; // Inline styles for the input field
+  height?: number | string; // Height for textarea and other fields
+  containerClassName?: string; // CSS classes for the field container
+  labelClassName?: string; // CSS classes for the label
 }
 
 export interface FormSchema {
@@ -56,6 +62,13 @@ export interface FormSchema {
     submitButtonColor?: string;
     cancelButtonColor?: string;
     showCancelButton?: boolean;
+    // Form container styling for SDK
+    formClassName?: string; // CSS classes for the form container
+    formStyle?: Record<string, any>; // Inline styles for the form container
+    layout?: string; // Layout mode (auto, grid, two-column, single-column)
+    gridColumns?: number; // Number of columns for grid layout
+    spacing?: string; // Spacing between fields
+    customSpacing?: number; // Custom spacing value
   };
 }
 
