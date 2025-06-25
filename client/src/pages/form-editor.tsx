@@ -1984,7 +1984,7 @@ export default function FormEditor() {
                                             </div>
                                           )}
 
-                                          <div className="relative flex-1">
+                                          <div className="relative w-full">
                                             {/* Render form field based on type */}
                                             {field.type === "text" ||
                                             field.type === "email" ||
@@ -1997,6 +1997,7 @@ export default function FormEditor() {
                                                 disabled={field.disabled}
                                                 readOnly={field.readonly}
                                                 className="w-full"
+                                                style={{ width: "100%" }}
                                               />
                                             ) : field.type === "textarea" ? (
                                               <Textarea
@@ -2004,6 +2005,7 @@ export default function FormEditor() {
                                                 disabled={field.disabled}
                                                 readOnly={field.readonly}
                                                 className="w-full resize-none"
+                                                style={{ width: "100%" }}
                                                 rows={3}
                                               />
                                             ) : field.type === "radio" ? (
@@ -2069,9 +2071,7 @@ export default function FormEditor() {
                                               <Select>
                                                 <SelectTrigger 
                                                   className="w-full"
-                                                  style={{
-                                                    width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
-                                                  }}
+                                                  style={{ width: "100%" }}
                                                 >
                                                   <SelectValue
                                                     placeholder={
@@ -2099,17 +2099,13 @@ export default function FormEditor() {
                                               <Input
                                                 type="date"
                                                 className="w-full"
-                                                style={{
-                                                  width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
-                                                }}
+                                                style={{ width: "100%" }}
                                               />
                                             ) : field.type === "file" ? (
                                               <Input
                                                 type="file"
                                                 className="w-full"
-                                                style={{
-                                                  width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
-                                                }}
+                                                style={{ width: "100%" }}
                                               />
                                             ) : null}
                                           </div>
