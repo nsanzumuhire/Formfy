@@ -270,6 +270,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public form API for SDK consumption - returns form with full styling
+  app.get('/form/:formId/:environment', async (req, res) => {
+    try {
+      const { formId, environment } = req.params;
+      
+      // Validate environment
+      if (!['testing', 'production'].includes(environment)) {
+        return res.status(400).json({ 
+          error: 'Invalid environment. Must be "testing" or "production"' 
+        });
+      }
+      
+      const form = await storage.getForm(formId);
+      if (!form || !form.isActive) {
+        return res.status(404).json({ error: 'Form not found or inactive' });
+      }
+      
+      // Return form schema with full styling information for SDK
+      res.json({
+        id: form.id,
+        name: form.name,
+        description: form.description,
+        schema: form.schema,
+        environment,
+        createdAt: form.createdAt,
+        updatedAt: form.updatedAt
+      });
+    } catch (error) {
+      console.error("Error fetching public form:", error);
+      res.status(500).json({ error: "Failed to fetch form" });
+    }
+  });
+
   app.delete('/api/forms/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;

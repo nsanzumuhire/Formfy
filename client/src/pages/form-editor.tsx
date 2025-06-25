@@ -326,6 +326,96 @@ export default function FormEditor() {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [spacingOpen, setSpacingOpen] = useState(false);
 
+  // Helper functions for styling capture
+  const getFieldClassName = (field: any, config: any) => {
+    const baseClasses = ["w-full"];
+    
+    if (field.type === "textarea") {
+      baseClasses.push("resize-none");
+    }
+    
+    if (config.layout === "auto") {
+      baseClasses.push("flex-1");
+    }
+    
+    return baseClasses.join(" ");
+  };
+
+  const getFieldStyle = (field: any, config: any) => {
+    const style: Record<string, any> = {};
+    
+    if (config.layout === "auto" && field.width) {
+      style.width = typeof field.width === 'number' ? `${field.width}%` : field.width;
+    }
+    
+    if (field.height && field.type === "textarea") {
+      style.height = typeof field.height === 'number' ? `${field.height}px` : field.height;
+    }
+    
+    return style;
+  };
+
+  const getFieldHeight = (field: any) => {
+    if (field.type === "textarea") {
+      return field.height || "auto";
+    }
+    return undefined;
+  };
+
+  const getFieldContainerClassName = (field: any, config: any) => {
+    const classes = ["space-y-2"];
+    
+    if (config.layout === "auto") {
+      classes.push("flex-1");
+    } else if (config.layout === "grid") {
+      classes.push("grid-item");
+    } else if (config.layout === "two-column") {
+      classes.push("col-span-1");
+    }
+    
+    return classes.join(" ");
+  };
+
+  const getLabelClassName = (config: any) => {
+    const classes = ["text-sm", "font-medium", "text-gray-700", "dark:text-gray-300"];
+    
+    if (!config.showLabels) {
+      classes.push("sr-only");
+    }
+    
+    return classes.join(" ");
+  };
+
+  const getFormContainerClassName = (config: any) => {
+    const classes = ["space-y-4"];
+    
+    switch (config.layout) {
+      case "grid":
+        classes.push("grid", `grid-cols-${config.gridColumns}`, "gap-4");
+        break;
+      case "two-column":
+        classes.push("grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
+        break;
+      case "auto":
+        classes.push("space-y-4");
+        break;
+      default:
+        classes.push("space-y-4");
+    }
+    
+    return classes.join(" ");
+  };
+
+  const getFormContainerStyle = (config: any) => {
+    const style: Record<string, any> = {};
+    
+    if (config.spacing === "custom" && config.customSpacing) {
+      style.gap = `${config.customSpacing}px`;
+    }
+    
+    return style;
+  };
+
   const { selectedProject } = useProject();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -420,11 +510,27 @@ export default function FormEditor() {
         {
           ...formData,
           schema: {
-            fields: formFields,
+            fields: formFields.map((field) => ({
+              ...field,
+              order: field.order || 0,
+              // Add styling information for SDK rendering
+              className: getFieldClassName(field, formConfig),
+              style: getFieldStyle(field, formConfig),
+              height: getFieldHeight(field),
+              containerClassName: getFieldContainerClassName(field, formConfig),
+              labelClassName: getLabelClassName(formConfig),
+            })),
             settings: {
               ...formConfig,
               title: formData.name,
               description: formData.description,
+              // Add form container styling for SDK
+              formClassName: getFormContainerClassName(formConfig),
+              formStyle: getFormContainerStyle(formConfig),
+              layout: formConfig.layout,
+              gridColumns: formConfig.gridColumns,
+              spacing: formConfig.spacing,
+              customSpacing: formConfig.customSpacing,
             },
           },
         },
@@ -441,12 +547,12 @@ export default function FormEditor() {
       setFormFields([]);
       setSelectedFieldId(null);
 
-      // Generate public form URL
-      const publicUrl = `${window.location.origin}/form/${currentProjectId}/${formName.trim().toLowerCase().replace(/\s+/g, "-")}`;
+      // Generate public form URL with form ID for SDK access
+      const publicUrl = `${window.location.origin}/form/${data.id}/testing`;
 
       toast({
         title: "Form created successfully",
-        description: "Click to copy the public form URL",
+        description: "Click to copy the SDK API URL",
         action: (
           <button
             onClick={() => {
@@ -484,11 +590,27 @@ export default function FormEditor() {
         name: formData.name,
         description: formData.description,
         schema: {
-          fields: formFields,
+          fields: formFields.map((field) => ({
+            ...field,
+            order: field.order || 0,
+            // Add styling information for SDK rendering
+            className: getFieldClassName(field, formConfig),
+            style: getFieldStyle(field, formConfig),
+            height: getFieldHeight(field),
+            containerClassName: getFieldContainerClassName(field, formConfig),
+            labelClassName: getLabelClassName(formConfig),
+          })),
           settings: {
             ...formConfig,
             title: formData.name,
             description: formData.description,
+            // Add form container styling for SDK
+            formClassName: getFormContainerClassName(formConfig),
+            formStyle: getFormContainerStyle(formConfig),
+            layout: formConfig.layout,
+            gridColumns: formConfig.gridColumns,
+            spacing: formConfig.spacing,
+            customSpacing: formConfig.customSpacing,
           },
         },
       });
