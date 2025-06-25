@@ -53,23 +53,21 @@ export function Header() {
   } = useProject();
 
   const handleLogout = () => {
-    window.location.href = "/api/logout";
+    window.location.href = "/api/auth/logout";
   };
 
   const getUserInitials = () => {
-    const userAny = user as any;
-    if (userAny?.firstName && userAny?.lastName) {
-      return `${userAny.firstName[0]}${userAny.lastName[0]}`.toUpperCase();
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     }
-    return userAny?.email?.[0]?.toUpperCase() || "U";
+    return user?.email?.[0]?.toUpperCase() || "U";
   };
 
   const getUserDisplayName = () => {
-    const userAny = user as any;
-    if (userAny?.firstName && userAny?.lastName) {
-      return `${userAny.firstName} ${userAny.lastName}`;
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
     }
-    return userAny?.email || "User";
+    return user?.email || "User";
   };
 
   return (
@@ -198,7 +196,7 @@ export function Header() {
               <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src={(user as any)?.profileImageUrl}
+                    src={user?.profileImageUrl}
                     alt={getUserDisplayName()}
                   />
                   <AvatarFallback className="text-xs font-medium">
@@ -214,7 +212,7 @@ export function Header() {
                     {getUserDisplayName()}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {(user as any)?.email}
+                    {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>

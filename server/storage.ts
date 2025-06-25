@@ -25,21 +25,30 @@ export interface IStorage {
   // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  
+  upsertUserByProvider(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+    authProvider: string;
+    providerUserId: string;
+    profileData?: any;
+  }): Promise<User>;
+
   // Project operations
   getUserProjects(userId: string): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
   createProject(project: Omit<InsertProject, 'projectId' | 'projectKey'>): Promise<Project>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<void>;
-  
+
   // API Key operations
   getProjectApiKeys(projectId: string): Promise<ApiKey[]>;
   getApiKey(key: string): Promise<ApiKey | undefined>;
   createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
   updateApiKey(id: string, apiKey: Partial<InsertApiKey>): Promise<ApiKey>;
   deleteApiKey(id: string): Promise<void>;
-  
+
   // Form operations
   getProjectForms(projectId: string): Promise<Form[]>;
   getForm(id: string): Promise<Form | undefined>;
@@ -47,7 +56,7 @@ export interface IStorage {
   createForm(form: InsertForm): Promise<Form>;
   updateForm(id: string, form: Partial<InsertForm>): Promise<Form>;
   deleteForm(id: string): Promise<void>;
-  
+
   // Submission operations
   getFormSubmissions(formId: string): Promise<Submission[]>;
   createSubmission(submission: InsertSubmission): Promise<Submission>;
@@ -77,6 +86,55 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async upsertUserByProvider(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+    authProvider: string;
+    providerUserId: string;
+    profileData?: any;
+  }): Promise<User> {
+    const { authProvider, providerUserId } = userData;
+
+    // Check if user exists with this provider
+    const existingUsers = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.authProvider, authProvider),
+          eq(users.providerUserId, providerUserId)
+        )
+      );
+
+    if (existingUsers.length > 0) {
+      // Update existing user
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          ...userData,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, existingUsers[0].id))
+        .returning();
+
+      return updatedUser;
+    } else {
+      // Create new user with a generated ID
+      const userId = `${authProvider}_${providerUserId}`;
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          id: userId,
+          ...userData
+        })
+        .returning();
+
+      return newUser;
+    }
+  }
+
   // Project operations
   async getUserProjects(userId: string): Promise<Project[]> {
     return await db
@@ -94,7 +152,7 @@ export class DatabaseStorage implements IStorage {
   async createProject(project: Omit<InsertProject, 'projectId' | 'projectKey'>): Promise<Project> {
     const projectId = this.generateProjectId();
     const projectKey = this.generateProjectKey();
-    
+
     const [newProject] = await db.insert(projects).values({
       ...project,
       projectId,

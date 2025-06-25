@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { insertProjectSchema, createProjectSchema, insertApiKeySchema, insertFormSchema, insertSubmissionSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -12,8 +12,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -24,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project routes
   app.get('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const projects = await storage.getUserProjects(userId);
       res.json(projects);
     } catch (error) {
@@ -37,16 +36,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const project = await storage.getProject(id);
-      
+
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
-      
+
       // Check if user owns the project
-      if (project.userId !== req.user.claims.sub) {
+      if (project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       res.json(project);
     } catch (error) {
       console.error("Error fetching project:", error);
@@ -56,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validatedData = createProjectSchema.parse(req.body);
       const projectData = { ...validatedData, userId };
       const project = await storage.createProject(projectData);
@@ -74,15 +73,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const project = await storage.getProject(id);
-      
+
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
-      
-      if (project.userId !== req.user.claims.sub) {
+
+      if (project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const projectData = insertProjectSchema.partial().parse(req.body);
       const updatedProject = await storage.updateProject(id, projectData);
       res.json(updatedProject);
@@ -99,15 +98,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const project = await storage.getProject(id);
-      
+
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
-      
-      if (project.userId !== req.user.claims.sub) {
+
+      if (project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       await storage.deleteProject(id);
       res.status(204).send();
     } catch (error) {
@@ -121,11 +120,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId } = req.params;
       const project = await storage.getProject(projectId);
-      
-      if (!project || project.userId !== req.user.claims.sub) {
+
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const apiKeys = await storage.getProjectApiKeys(projectId);
       res.json(apiKeys);
     } catch (error) {
@@ -138,11 +137,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId } = req.params;
       const project = await storage.getProject(projectId);
-      
-      if (!project || project.userId !== req.user.claims.sub) {
+
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const apiKeyData = insertApiKeySchema.parse({ ...req.body, projectId });
       const apiKey = await storage.createApiKey(apiKeyData);
       res.status(201).json(apiKey);
@@ -172,11 +171,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId } = req.params;
       const project = await storage.getProject(projectId);
-      
-      if (!project || project.userId !== req.user.claims.sub) {
+
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const forms = await storage.getProjectForms(projectId);
       res.json(forms);
     } catch (error) {
@@ -189,17 +188,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const form = await storage.getForm(id);
-      
+
       if (!form) {
         return res.status(404).json({ message: "Form not found" });
       }
-      
+
       // Check ownership through project
       const project = await storage.getProject(form.projectId);
-      if (!project || project.userId !== req.user.claims.sub) {
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       res.json(form);
     } catch (error) {
       console.error("Error fetching form:", error);
@@ -211,11 +210,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId } = req.params;
       const project = await storage.getProject(projectId);
-      
-      if (!project || project.userId !== req.user.claims.sub) {
+
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const formData = insertFormSchema.parse({ ...req.body, projectId });
       const form = await storage.createForm(formData);
       res.status(201).json(form);
@@ -232,17 +231,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const form = await storage.getForm(id);
-      
+
       if (!form) {
         return res.status(404).json({ message: "Form not found" });
       }
-      
+
       // Check ownership through project
       const project = await storage.getProject(form.projectId);
-      if (!project || project.userId !== req.user.claims.sub) {
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const formData = insertFormSchema.partial().parse(req.body);
       const updatedForm = await storage.updateForm(id, formData);
       res.json(updatedForm);
@@ -259,17 +258,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const form = await storage.getForm(id);
-      
+
       if (!form) {
         return res.status(404).json({ message: "Form not found" });
       }
-      
+
       // Check ownership through project
       const project = await storage.getProject(form.projectId);
-      if (!project || project.userId !== req.user.claims.sub) {
+      if (!project || project.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       await storage.deleteForm(id);
       res.status(204).send();
     } catch (error) {
@@ -283,11 +282,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId, formName } = req.params;
       const form = await storage.getFormByName(projectId, formName);
-      
+
       if (!form || !form.isActive) {
         return res.status(404).json({ message: "Form not found or inactive" });
       }
-      
+
       // Return form schema without sensitive data
       res.json({
         id: form.id,
@@ -307,18 +306,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId, formName } = req.params;
       const form = await storage.getFormByName(projectId, formName);
-      
+
       if (!form || !form.isActive) {
         return res.status(404).json({ message: "Form not found or inactive" });
       }
-      
+
       const submissionData = insertSubmissionSchema.parse({
         formId: form.id,
         data: req.body,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
       });
-      
+
       const submission = await storage.createSubmission(submissionData);
       res.status(201).json({ message: "Form submitted successfully", id: submission.id });
     } catch (error) {
@@ -335,21 +334,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { projectId, formName } = req.params;
       const apiKey = req.headers['x-api-key'] as string;
-      
+
       if (!apiKey) {
         return res.status(401).json({ message: "API key required" });
       }
-      
+
       const keyRecord = await storage.getApiKey(apiKey);
       if (!keyRecord || !keyRecord.isActive || keyRecord.projectId !== projectId) {
         return res.status(403).json({ message: "Invalid API key" });
       }
-      
+
       const form = await storage.getFormByName(projectId, formName);
       if (!form || !form.isActive) {
         return res.status(404).json({ message: "Form not found or inactive" });
       }
-      
+
       res.json({ schema: form.schema });
     } catch (error) {
       console.error("Error fetching form schema:", error);
@@ -360,22 +359,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard stats
   app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const projects = await storage.getUserProjects(userId);
-      
+
       let totalForms = 0;
       let totalSubmissions = 0;
-      
+
       for (const project of projects) {
         const forms = await storage.getProjectForms(project.id);
         totalForms += forms.length;
-        
+
         for (const form of forms) {
           const submissions = await storage.getFormSubmissions(form.id);
           totalSubmissions += submissions.length;
         }
       }
-      
+
       res.json({
         totalProjects: projects.length,
         totalForms,
