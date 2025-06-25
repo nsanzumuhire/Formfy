@@ -34,7 +34,7 @@ export interface FormFieldData {
   order: number;
   // Auto layout properties
   rowId?: string;
-  width?: number; // Width percentage for auto layout
+  width?: number | string; // Width percentage for auto layout or CSS width value
   layout?: "vertical" | "horizontal" | "inline"; // For radio/checkbox options and field layout
   // Additional form properties
   required?: boolean;
@@ -210,7 +210,7 @@ export function createFormField(type: FieldType): FormFieldData {
     label: getDefaultLabel(type),
     placeholder: getDefaultPlaceholder(type),
     order: 0,
-    width: 100, // Default to full width
+    width: "100%", // Default to full width
     layout: 'vertical', // Default layout for radio/checkbox
   };
 

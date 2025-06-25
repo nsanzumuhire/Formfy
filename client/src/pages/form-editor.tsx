@@ -2059,7 +2059,12 @@ export default function FormEditor() {
                                               </div>
                                             ) : field.type === "select" ? (
                                               <Select>
-                                                <SelectTrigger className="w-full">
+                                                <SelectTrigger 
+                                                  className="w-full"
+                                                  style={{
+                                                    width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
+                                                  }}
+                                                >
                                                   <SelectValue
                                                     placeholder={
                                                       field.placeholder
@@ -2086,11 +2091,17 @@ export default function FormEditor() {
                                               <Input
                                                 type="date"
                                                 className="w-full"
+                                                style={{
+                                                  width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
+                                                }}
                                               />
                                             ) : field.type === "file" ? (
                                               <Input
                                                 type="file"
                                                 className="w-full"
+                                                style={{
+                                                  width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
+                                                }}
                                               />
                                             ) : null}
                                           </div>
@@ -2190,7 +2201,7 @@ export default function FormEditor() {
                                             autoComplete={field.autocomplete}
                                             className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
                                             style={{
-                                              width: field.width || "100%",
+                                              width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
                                               ...(field.layout === "inline" && {
                                                 minWidth: "120px",
                                               }),
