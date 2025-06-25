@@ -759,7 +759,7 @@ export default function FormEditor() {
     // For auto layout, create a new row for the field
     if (formConfig.layout === "auto") {
       newField.rowId = generateRowId();
-      newField.width = 100;
+      newField.width = 100; // Numeric percentage for auto layout
     }
 
     setFormFields([...formFields, newField]);
@@ -1535,6 +1535,14 @@ export default function FormEditor() {
                                   ...formConfig,
                                   layout: "auto",
                                 });
+                                
+                                // Convert existing fields to auto layout format
+                                setFormFields(fields => fields.map(field => ({
+                                  ...field,
+                                  rowId: field.rowId || generateRowId(),
+                                  width: typeof field.width === 'string' ? 100 : (field.width || 100)
+                                })));
+                                
                                 setLayoutOpen(false);
                               }}
                             >
@@ -1941,7 +1949,7 @@ export default function FormEditor() {
                                         <div
                                           key={field.id}
                                           style={{
-                                            width: `${field.width || 100 / rowFields.length}%`,
+                                            width: `${typeof field.width === 'number' ? field.width : (100 / rowFields.length)}%`,
                                           }}
                                           className={`${
                                             field.layout === "horizontal" &&
@@ -1976,7 +1984,7 @@ export default function FormEditor() {
                                             </div>
                                           )}
 
-                                          <div className="relative flex-1">
+                                          <div className="relative w-full">
                                             {/* Render form field based on type */}
                                             {field.type === "text" ||
                                             field.type === "email" ||
@@ -1989,6 +1997,7 @@ export default function FormEditor() {
                                                 disabled={field.disabled}
                                                 readOnly={field.readonly}
                                                 className="w-full"
+                                                style={{ width: "100%" }}
                                               />
                                             ) : field.type === "textarea" ? (
                                               <Textarea
@@ -1996,6 +2005,7 @@ export default function FormEditor() {
                                                 disabled={field.disabled}
                                                 readOnly={field.readonly}
                                                 className="w-full resize-none"
+                                                style={{ width: "100%" }}
                                                 rows={3}
                                               />
                                             ) : field.type === "radio" ? (
@@ -2059,7 +2069,10 @@ export default function FormEditor() {
                                               </div>
                                             ) : field.type === "select" ? (
                                               <Select>
-                                                <SelectTrigger className="w-full">
+                                                <SelectTrigger 
+                                                  className="w-full"
+                                                  style={{ width: "100%" }}
+                                                >
                                                   <SelectValue
                                                     placeholder={
                                                       field.placeholder
@@ -2086,11 +2099,13 @@ export default function FormEditor() {
                                               <Input
                                                 type="date"
                                                 className="w-full"
+                                                style={{ width: "100%" }}
                                               />
                                             ) : field.type === "file" ? (
                                               <Input
                                                 type="file"
                                                 className="w-full"
+                                                style={{ width: "100%" }}
                                               />
                                             ) : null}
                                           </div>
@@ -2190,7 +2205,7 @@ export default function FormEditor() {
                                             autoComplete={field.autocomplete}
                                             className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
                                             style={{
-                                              width: field.width || "100%",
+                                              width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
                                               ...(field.layout === "inline" && {
                                                 minWidth: "120px",
                                               }),
@@ -2203,7 +2218,7 @@ export default function FormEditor() {
                                             readOnly={field.readonly}
                                             className={`${field.class || ""} resize-none`}
                                             style={{
-                                              width: field.width || "100%",
+                                              width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
                                             }}
                                             rows={3}
                                           />
