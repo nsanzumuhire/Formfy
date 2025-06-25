@@ -759,7 +759,7 @@ export default function FormEditor() {
     // For auto layout, create a new row for the field
     if (formConfig.layout === "auto") {
       newField.rowId = generateRowId();
-      newField.width = 100;
+      newField.width = 100; // Numeric percentage for auto layout
     }
 
     setFormFields([...formFields, newField]);
@@ -1535,6 +1535,14 @@ export default function FormEditor() {
                                   ...formConfig,
                                   layout: "auto",
                                 });
+                                
+                                // Convert existing fields to auto layout format
+                                setFormFields(fields => fields.map(field => ({
+                                  ...field,
+                                  rowId: field.rowId || generateRowId(),
+                                  width: typeof field.width === 'string' ? 100 : (field.width || 100)
+                                })));
+                                
                                 setLayoutOpen(false);
                               }}
                             >
@@ -1941,7 +1949,7 @@ export default function FormEditor() {
                                         <div
                                           key={field.id}
                                           style={{
-                                            width: `${field.width || 100 / rowFields.length}%`,
+                                            width: `${typeof field.width === 'number' ? field.width : (100 / rowFields.length)}%`,
                                           }}
                                           className={`${
                                             field.layout === "horizontal" &&
