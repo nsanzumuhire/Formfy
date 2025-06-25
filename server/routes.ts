@@ -59,6 +59,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = createProjectSchema.parse(req.body);
       const projectData = { ...validatedData, userId };
       const project = await storage.createProject(projectData);
+
+      // Automatically create testing and production API keys
+      await storage.createApiKey({
+        projectId: project.id,
+        name: "Testing Key",
+        environment: "testing",
+        permissions: ["forms:read", "forms:write", "submissions:read", "submissions:write"],
+      });
+
+      await storage.createApiKey({
+        projectId: project.id,
+        name: "Production Key", 
+        environment: "production",
+        permissions: ["forms:read", "forms:write", "submissions:read", "submissions:write"],
+      });
+
       res.status(201).json(project);
     } catch (error) {
       if (error instanceof z.ZodError) {

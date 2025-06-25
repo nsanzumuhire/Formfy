@@ -162,7 +162,10 @@ export default function ApiKeys() {
         <div>
           <h1 className="text-3xl font-bold">API Keys</h1>
           <p className="text-muted-foreground mt-1">
-            {currentProject?.name} • Manage API keys for secure integrations
+            {currentProject?.name} • Project ID: <span className="font-mono text-xs">{currentProject?.id}</span>
+          </p>
+          <p className="text-muted-foreground text-sm">
+            Manage API keys for secure integrations
           </p>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

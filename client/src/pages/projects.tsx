@@ -205,6 +205,7 @@ export default function Projects() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-lg">{project.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">{project.id}</p>
                     <div className="mt-2">
                       {getStatusIndicator(project.status || "active")}
                     </div>
