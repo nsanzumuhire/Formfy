@@ -510,11 +510,27 @@ export default function FormEditor() {
         {
           ...formData,
           schema: {
-            fields: formFields,
+            fields: formFields.map((field) => ({
+              ...field,
+              order: field.order || 0,
+              // Add styling information for SDK rendering
+              className: getFieldClassName(field, formConfig),
+              style: getFieldStyle(field, formConfig),
+              height: getFieldHeight(field),
+              containerClassName: getFieldContainerClassName(field, formConfig),
+              labelClassName: getLabelClassName(formConfig),
+            })),
             settings: {
               ...formConfig,
               title: formData.name,
               description: formData.description,
+              // Add form container styling for SDK
+              formClassName: getFormContainerClassName(formConfig),
+              formStyle: getFormContainerStyle(formConfig),
+              layout: formConfig.layout,
+              gridColumns: formConfig.gridColumns,
+              spacing: formConfig.spacing,
+              customSpacing: formConfig.customSpacing,
             },
           },
         },
@@ -531,12 +547,12 @@ export default function FormEditor() {
       setFormFields([]);
       setSelectedFieldId(null);
 
-      // Generate public form URL
-      const publicUrl = `${window.location.origin}/form/${currentProjectId}/${formName.trim().toLowerCase().replace(/\s+/g, "-")}`;
+      // Generate public form URL with form ID for SDK access
+      const publicUrl = `${window.location.origin}/form/${data.id}/testing`;
 
       toast({
         title: "Form created successfully",
-        description: "Click to copy the public form URL",
+        description: "Click to copy the SDK API URL",
         action: (
           <button
             onClick={() => {
@@ -574,11 +590,27 @@ export default function FormEditor() {
         name: formData.name,
         description: formData.description,
         schema: {
-          fields: formFields,
+          fields: formFields.map((field) => ({
+            ...field,
+            order: field.order || 0,
+            // Add styling information for SDK rendering
+            className: getFieldClassName(field, formConfig),
+            style: getFieldStyle(field, formConfig),
+            height: getFieldHeight(field),
+            containerClassName: getFieldContainerClassName(field, formConfig),
+            labelClassName: getLabelClassName(formConfig),
+          })),
           settings: {
             ...formConfig,
             title: formData.name,
             description: formData.description,
+            // Add form container styling for SDK
+            formClassName: getFormContainerClassName(formConfig),
+            formStyle: getFormContainerStyle(formConfig),
+            layout: formConfig.layout,
+            gridColumns: formConfig.gridColumns,
+            spacing: formConfig.spacing,
+            customSpacing: formConfig.customSpacing,
           },
         },
       });
