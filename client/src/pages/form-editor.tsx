@@ -2214,7 +2214,7 @@ export default function FormEditor() {
                                             readOnly={field.readonly}
                                             className={`${field.class || ""} resize-none`}
                                             style={{
-                                              width: field.width || "100%",
+                                              width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
                                             }}
                                             rows={3}
                                           />
