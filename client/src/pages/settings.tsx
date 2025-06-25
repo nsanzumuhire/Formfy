@@ -38,7 +38,7 @@ export default function Settings() {
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: { name: string; description?: string }) => {
-      return await apiRequest("POST", "/api/projects", data);
+      return await apiRequest("/api/projects", "POST", data);
     },
     onSuccess: () => {
       toast({
@@ -61,7 +61,7 @@ export default function Settings() {
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      return await apiRequest("DELETE", `/api/projects/${projectId}`);
+      return await apiRequest(`/api/projects/${projectId}`, "DELETE");
     },
     onSuccess: () => {
       toast({

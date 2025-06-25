@@ -45,7 +45,7 @@ export default function ApiKeys() {
 
   const createApiKeyMutation = useMutation({
     mutationFn: async (data: { name: string; environment: string }) => {
-      return await apiRequest("POST", `/api/projects/${currentProject?.id}/api-keys`, data);
+      return await apiRequest(`/api/projects/${currentProject?.id}/api-keys`, "POST", data);
     },
     onSuccess: () => {
       toast({
@@ -68,7 +68,7 @@ export default function ApiKeys() {
 
   const deleteApiKeyMutation = useMutation({
     mutationFn: async (keyId: string) => {
-      return await apiRequest("DELETE", `/api/api-keys/${keyId}`);
+      return await apiRequest(`/api/api-keys/${keyId}`, "DELETE");
     },
     onSuccess: () => {
       toast({

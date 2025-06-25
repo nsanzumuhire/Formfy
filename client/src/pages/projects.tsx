@@ -23,7 +23,7 @@ export default function Projects() {
 
   const updateProjectMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      return await apiRequest("PATCH", `/api/projects/${id}`, { status });
+      return await apiRequest(`/api/projects/${id}`,"PATCH",  { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -43,7 +43,7 @@ export default function Projects() {
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest("DELETE", `/api/projects/${id}`);
+      return await apiRequest(`/api/projects/${id}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
