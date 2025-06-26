@@ -104,6 +104,12 @@ Formfy is a modern form builder platform that allows users to create, manage, an
 
 ```
 Changelog:
+- June 26, 2025. Enhanced form save functionality with complete styling capture
+  - Added input field classes, styles, width, height for all field types
+  - Added form container styling based on layout configuration
+  - Created public SDK API endpoint: /form/:formId/:environment
+  - Configured CORS to accept localhost requests for public APIs
+  - Forms now save complete styling information for SDK rendering
 - June 25, 2025. Initial setup
 ```
 
