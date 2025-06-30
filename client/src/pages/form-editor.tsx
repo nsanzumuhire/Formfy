@@ -513,7 +513,7 @@ export default function FormEditor() {
         {
           ...formData,
           schema: {
-            fields: fieldsWithNames.map((field) => ({
+            fields: ensureFieldNames(formFields).map((field: FormFieldData) => ({
               ...field,
               order: field.order || 0,
               // Add styling information for SDK rendering
@@ -593,7 +593,7 @@ export default function FormEditor() {
         name: formData.name,
         description: formData.description,
         schema: {
-          fields: fieldsWithNames.map((field) => ({
+          fields: ensureFieldNames(formFields).map((field: FormFieldData) => ({
             ...field,
             order: field.order || 0,
             // Add styling information for SDK rendering
@@ -666,9 +666,6 @@ export default function FormEditor() {
       });
       return;
     }
-
-    // Ensure all fields have names before saving
-    const fieldsWithNames = ensureFieldNames(formFields);
 
     if (editingFormId) {
       // Update existing form
@@ -801,8 +798,8 @@ export default function FormEditor() {
     // For multiple fields in a row, allow resizing between fields
     if (!nextField) return;
 
-    const startWidthCurrent = currentField.width || 50;
-    const startWidthNext = nextField.width || 50;
+    const startWidthCurrent = typeof currentField.width === 'number' ? currentField.width : 50;
+    const startWidthNext = typeof nextField.width === 'number' ? nextField.width : 50;
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - startX;
