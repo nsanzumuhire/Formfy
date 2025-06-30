@@ -49,6 +49,7 @@ export interface FormFieldData {
   height?: number | string; // Height for textarea and other fields
   containerClassName?: string; // CSS classes for the field container
   labelClassName?: string; // CSS classes for the label
+  isVisible?: boolean
 }
 
 export interface FormSchema {
@@ -108,7 +109,7 @@ export function organizeFieldsIntoRows(fields: FormFieldData[]): FormFieldData[]
     const minOrderB = Math.min(...b.map(f => f.order));
     return minOrderA - minOrderB;
   });
-  
+
   // Add unassigned fields as individual rows, sorted by order
   unassignedFields.sort((a, b) => a.order - b.order);
   unassignedFields.forEach(field => {
@@ -148,38 +149,38 @@ export function createNewRow(fields: FormFieldData[], fieldId: string): FormFiel
 export function reorderFieldsInRow(fields: FormFieldData[], rowId: string, draggedFieldId: string, targetFieldId: string): FormFieldData[] {
   const fieldsInRow = fields.filter(f => f.rowId === rowId);
   const otherFields = fields.filter(f => f.rowId !== rowId);
-  
+
   const draggedIndex = fieldsInRow.findIndex(f => f.id === draggedFieldId);
   const targetIndex = fieldsInRow.findIndex(f => f.id === targetFieldId);
-  
+
   if (draggedIndex === -1 || targetIndex === -1) return fields;
-  
+
   // Reorder fields within the row
   const reorderedFields = [...fieldsInRow];
   const [draggedField] = reorderedFields.splice(draggedIndex, 1);
   reorderedFields.splice(targetIndex, 0, draggedField);
-  
+
   // Update order values to maintain position
   reorderedFields.forEach((field, index) => {
     field.order = Math.min(...fieldsInRow.map(f => f.order)) + index;
   });
-  
+
   return [...otherFields, ...reorderedFields];
 }
 
 export function moveRowUp(fields: FormFieldData[], rowId: string): FormFieldData[] {
   const rows = organizeFieldsIntoRows(fields);
   const rowIndex = rows.findIndex(row => row[0]?.rowId === rowId);
-  
+
   if (rowIndex <= 0) return fields; // Can't move up if it's already at the top
-  
+
   const targetRowFields = rows[rowIndex - 1];
   const currentRowFields = rows[rowIndex];
-  
+
   // Swap the order values of the two rows
   const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
   const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
-  
+
   return fields.map(field => {
     if (targetRowFields.some(f => f.id === field.id)) {
       return { ...field, order: currentMinOrder + (field.order - targetMinOrder) };
@@ -194,16 +195,16 @@ export function moveRowUp(fields: FormFieldData[], rowId: string): FormFieldData
 export function moveRowDown(fields: FormFieldData[], rowId: string): FormFieldData[] {
   const rows = organizeFieldsIntoRows(fields);
   const rowIndex = rows.findIndex(row => row[0]?.rowId === rowId);
-  
+
   if (rowIndex === -1 || rowIndex >= rows.length - 1) return fields; // Can't move down if it's already at the bottom
-  
+
   const currentRowFields = rows[rowIndex];
   const targetRowFields = rows[rowIndex + 1];
-  
+
   // Swap the order values of the two rows
   const currentMinOrder = Math.min(...currentRowFields.map(f => f.order));
   const targetMinOrder = Math.min(...targetRowFields.map(f => f.order));
-  
+
   return fields.map(field => {
     if (currentRowFields.some(f => f.id === field.id)) {
       return { ...field, order: targetMinOrder + (field.order - currentMinOrder) };
@@ -217,7 +218,7 @@ export function moveRowDown(fields: FormFieldData[], rowId: string): FormFieldDa
 
 export function createFormField(type: FieldType, existingFields: FormFieldData[] = []): FormFieldData {
   const id = generateFieldId();
-  
+
   const baseField: FormFieldData = {
     id,
     type,
@@ -254,7 +255,7 @@ function getDefaultLabel(type: FieldType): string {
     radio: 'Radio Options',
     select: 'Select Option',
   };
-  
+
   return labels[type];
 }
 
@@ -273,47 +274,47 @@ export function generateDefaultFieldName(type: FieldType, existingFields: FormFi
     radio: 'radioField',
     select: 'selectField',
   };
-  
+
   const baseName = baseNames[type];
   const existingNames = existingFields.map(f => f.name).filter(Boolean);
-  
+
   let counter = 1;
   let fieldName = `${baseName}${counter}`;
-  
+
   while (existingNames.includes(fieldName)) {
     counter++;
     fieldName = `${baseName}${counter}`;
   }
-  
+
   return fieldName;
 }
 
 // Validate form before saving
 export function validateFormForSave(fields: FormFieldData[]): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
-  
+
   if (fields.length === 0) {
     errors.push('Form must have at least one field');
     return { isValid: false, errors };
   }
-  
+
   const fieldNames = fields.map(f => f.name).filter(Boolean);
   const duplicateNames = fieldNames.filter((name, index) => fieldNames.indexOf(name) !== index);
-  
+
   if (duplicateNames.length > 0) {
     errors.push(`Duplicate field names found: ${duplicateNames.join(', ')}`);
   }
-  
+
   fields.forEach((field, index) => {
     if (!field.name || field.name.trim() === '') {
       errors.push(`Field ${index + 1} (${field.label}) must have a field name`);
     }
-    
+
     if (!field.label || field.label.trim() === '') {
       errors.push(`Field ${index + 1} must have a label`);
     }
   });
-  
+
   return { isValid: errors.length === 0, errors };
 }
 
@@ -344,15 +345,15 @@ function getDefaultPlaceholder(type: FieldType): string {
     radio: '',
     select: 'Choose an option...',
   };
-  
+
   return placeholders[type];
 }
 
 export function validateFormField(field: FormFieldData, value: any): string[] {
   const errors: string[] = [];
-  
+
   if (!field.validation) return errors;
-  
+
   for (const rule of field.validation) {
     switch (rule.type) {
       case 'required':
@@ -360,31 +361,31 @@ export function validateFormField(field: FormFieldData, value: any): string[] {
           errors.push(rule.message);
         }
         break;
-      
+
       case 'minLength':
         if (typeof value === 'string' && value.length < (rule.value as number)) {
           errors.push(rule.message);
         }
         break;
-      
+
       case 'maxLength':
         if (typeof value === 'string' && value.length > (rule.value as number)) {
           errors.push(rule.message);
         }
         break;
-      
+
       case 'min':
         if (typeof value === 'number' && value < (rule.value as number)) {
           errors.push(rule.message);
         }
         break;
-      
+
       case 'max':
         if (typeof value === 'number' && value > (rule.value as number)) {
           errors.push(rule.message);
         }
         break;
-      
+
       case 'pattern':
         if (typeof value === 'string' && rule.value) {
           const regex = new RegExp(rule.value as string);
@@ -395,7 +396,7 @@ export function validateFormField(field: FormFieldData, value: any): string[] {
         break;
     }
   }
-  
+
   return errors;
 }
 
@@ -404,7 +405,7 @@ export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<
   // Try multiple ways to find the field value
   let fieldValue = formData[rule.field];
   let foundFieldId = rule.field;
-  
+
   // If not found by direct field reference, try other methods
   if (fieldValue === undefined && fields.length > 0) {
     // Try to find by field name property
@@ -421,9 +422,9 @@ export function evaluateConditionalRule(rule: ConditionalRule, formData: Record<
       }
     }
   }
-  
+
   const ruleValue = rule.value;
-  
+
   // Debug logging
   console.log('Evaluating conditional rule:', {
     rule,

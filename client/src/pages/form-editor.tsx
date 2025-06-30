@@ -347,7 +347,7 @@ export default function FormEditor() {
     const classes = ["space-y-2"];
     
     if (config.layout === "auto") {
-      classes.push("flex-1");
+      classes.push("");
     } else if (config.layout === "grid") {
       classes.push("grid-item");
     } else if (config.layout === "two-column") {
@@ -522,6 +522,7 @@ export default function FormEditor() {
         queryKey: [`/api/projects/${currentProjectId}/forms`],
       });
       setIsCreatingForm(false);
+      setShowFormsList(true); // Show forms list again
       setShowSaveDialog(false);
       setFormName("");
       setFormDescription("");
@@ -601,6 +602,7 @@ export default function FormEditor() {
         queryKey: [`/api/projects/${currentProjectId}/forms`],
       });
       setIsCreatingForm(false);
+      setShowFormsList(true); // Show forms list again
       setShowSaveDialog(false);
       setFormName("");
       setFormDescription("");
