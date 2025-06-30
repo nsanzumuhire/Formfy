@@ -47,9 +47,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useProject } from "@/hooks/useProject";
 import {
   createFormField,
+  ensureFieldNames,
   FormFieldData,
   generateRowId,
-  organizeFieldsIntoRows
+  organizeFieldsIntoRows,
+  validateFormForSave
 } from "@/lib/form-builder";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
@@ -489,7 +491,7 @@ export default function FormEditor() {
         {
           ...formData,
           schema: {
-            fields: formFields.map((field) => ({
+            fields: ensureFieldNames(formFields).map((field: FormFieldData) => ({
               ...field,
               order: field.order || 0,
               // Add styling information for SDK rendering
@@ -569,7 +571,7 @@ export default function FormEditor() {
         name: formData.name,
         description: formData.description,
         schema: {
-          fields: formFields.map((field) => ({
+          fields: ensureFieldNames(formFields).map((field: FormFieldData) => ({
             ...field,
             order: field.order || 0,
             // Add styling information for SDK rendering
@@ -631,6 +633,17 @@ export default function FormEditor() {
 
   const handleCreateForm = () => {
     if (!formName.trim() || !currentProjectId) return;
+
+    // Validate form fields before saving
+    const validation = validateFormForSave(formFields);
+    if (!validation.isValid) {
+      toast({
+        title: "Form validation failed",
+        description: validation.errors.join(", "),
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (editingFormId) {
       // Update existing form
@@ -763,8 +776,8 @@ export default function FormEditor() {
     // For multiple fields in a row, allow resizing between fields
     if (!nextField) return;
 
-    const startWidthCurrent = currentField.width || 50;
-    const startWidthNext = nextField.width || 50;
+    const startWidthCurrent = typeof currentField.width === 'number' ? currentField.width : 50;
+    const startWidthNext = typeof nextField.width === 'number' ? nextField.width : 50;
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - startX;

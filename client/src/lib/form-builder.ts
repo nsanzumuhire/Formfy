@@ -27,6 +27,7 @@ export interface FormFieldData {
   id: string;
   type: FieldType;
   label: string;
+  name?: string; // Field name for form submission
   placeholder?: string;
   description?: string;
   validation?: ValidationRule[];
@@ -214,13 +215,14 @@ export function moveRowDown(fields: FormFieldData[], rowId: string): FormFieldDa
   });
 }
 
-export function createFormField(type: FieldType): FormFieldData {
+export function createFormField(type: FieldType, existingFields: FormFieldData[] = []): FormFieldData {
   const id = generateFieldId();
   
   const baseField: FormFieldData = {
     id,
     type,
     label: getDefaultLabel(type),
+    name: generateDefaultFieldName(type, existingFields),
     placeholder: getDefaultPlaceholder(type),
     order: 0,
     width: "100%", // Default to full width
@@ -254,6 +256,78 @@ function getDefaultLabel(type: FieldType): string {
   };
   
   return labels[type];
+}
+
+// Generate unique field names for form submission
+export function generateDefaultFieldName(type: FieldType, existingFields: FormFieldData[]): string {
+  const baseNames: Record<FieldType, string> = {
+    text: 'textField',
+    textarea: 'textArea',
+    email: 'emailField',
+    number: 'numberField',
+    tel: 'phoneField',
+    url: 'urlField',
+    date: 'dateField',
+    file: 'fileField',
+    checkbox: 'checkboxField',
+    radio: 'radioField',
+    select: 'selectField',
+  };
+  
+  const baseName = baseNames[type];
+  const existingNames = existingFields.map(f => f.name).filter(Boolean);
+  
+  let counter = 1;
+  let fieldName = `${baseName}${counter}`;
+  
+  while (existingNames.includes(fieldName)) {
+    counter++;
+    fieldName = `${baseName}${counter}`;
+  }
+  
+  return fieldName;
+}
+
+// Validate form before saving
+export function validateFormForSave(fields: FormFieldData[]): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (fields.length === 0) {
+    errors.push('Form must have at least one field');
+    return { isValid: false, errors };
+  }
+  
+  const fieldNames = fields.map(f => f.name).filter(Boolean);
+  const duplicateNames = fieldNames.filter((name, index) => fieldNames.indexOf(name) !== index);
+  
+  if (duplicateNames.length > 0) {
+    errors.push(`Duplicate field names found: ${duplicateNames.join(', ')}`);
+  }
+  
+  fields.forEach((field, index) => {
+    if (!field.name || field.name.trim() === '') {
+      errors.push(`Field ${index + 1} (${field.label}) must have a field name`);
+    }
+    
+    if (!field.label || field.label.trim() === '') {
+      errors.push(`Field ${index + 1} must have a label`);
+    }
+  });
+  
+  return { isValid: errors.length === 0, errors };
+}
+
+// Ensure all fields have names before saving
+export function ensureFieldNames(fields: FormFieldData[]): FormFieldData[] {
+  return fields.map(field => {
+    if (!field.name || field.name.trim() === '') {
+      return {
+        ...field,
+        name: generateDefaultFieldName(field.type, fields)
+      };
+    }
+    return field;
+  });
 }
 
 function getDefaultPlaceholder(type: FieldType): string {
