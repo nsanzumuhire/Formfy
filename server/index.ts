@@ -12,16 +12,16 @@ app.use((req, res, next) => {
   if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
     res.header('Access-Control-Allow-Origin', origin);
   }
-  
+
   // For public form endpoints, allow all origins
-  if (req.path.startsWith('/form/')) {
+  if (req.path.startsWith('/forms/')) {
     res.header('Access-Control-Allow-Origin', '*');
   }
-  
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Api-Key');
   res.header('Access-Control-Allow-Credentials', 'true');
-  
+
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);

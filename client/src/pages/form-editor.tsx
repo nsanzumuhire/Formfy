@@ -1,72 +1,17 @@
-import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute } from "wouter";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  useDroppable,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  FileText,
-  Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Copy,
-  Link as LinkIcon,
-  Settings,
-  Grid3X3,
-  Rows,
-  Square,
-  Palette,
-  Type,
-  Move,
-  PanelRightOpen,
-  AlignLeft,
-  Hash,
-  CheckSquare,
-  Circle,
-  ChevronDown,
-  Grip,
-  Save,
-  Eye,
-  Layout,
-  Maximize,
-  ArrowLeftRight,
-  Calendar,
-  Phone,
-  Upload,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Command,
+  CommandGroup,
+  CommandItem
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -76,52 +21,86 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProject } from "@/hooks/useProject";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useProject } from "@/hooks/useProject";
+import {
+  createFormField,
+  FormFieldData,
+  generateRowId,
+  organizeFieldsIntoRows
+} from "@/lib/form-builder";
 import { apiRequest } from "@/lib/queryClient";
-import type { Form, Project } from "@shared/schema";
-import { formatDistanceToNow } from "date-fns";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  FormFieldData,
-  createFormField,
-  generateFieldId,
-  generateRowId,
-  organizeFieldsIntoRows,
-  distributeWidthsEvenly,
-  addFieldToRow,
-  createNewRow,
-  reorderFieldsInRow,
-  moveRowUp,
-  moveRowDown,
-} from "@/lib/form-builder";
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { Form, Project } from "@shared/schema";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlignLeft,
+  Calendar,
+  Check,
+  CheckSquare,
+  ChevronDown,
+  ChevronsUpDown,
+  Circle,
+  Copy,
+  Edit,
+  Eye,
+  FileText,
+  Grip,
+  Hash,
+  Link as LinkIcon,
+  MoreHorizontal,
+  PanelRightOpen,
+  Phone,
+  Plus,
+  Save,
+  Search,
+  Settings,
+  Trash2,
+  Type,
+  Upload
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRoute } from "wouter";
 
 // Droppable components for drop zones
 function RowDropZone({ rowId }: { rowId: string }) {
@@ -685,8 +664,8 @@ export default function FormEditor() {
     setFormConfig({
       layout: "single",
       gridColumns: 2,
-      spacing: "8px",
-      customSpacing: 8,
+      spacing: "12px",
+      customSpacing: 12,
       showLabels: true,
       buttonLayout: "right",
       submitButtonText: "Submit",
@@ -724,8 +703,8 @@ export default function FormEditor() {
       setFormConfig({
         layout: settings.layout || "single",
         gridColumns: settings.gridColumns || 2,
-        spacing: settings.spacing || "8px",
-        customSpacing: settings.customSpacing || 8,
+        spacing: settings.spacing || "12px",
+        customSpacing: settings.customSpacing || 12,
         showLabels: settings.showLabels !== false,
         buttonLayout: settings.buttonLayout || "right",
         submitButtonText: settings.submitButtonText || "Submit",
@@ -2035,24 +2014,7 @@ export default function FormEditor() {
                       /* Preview Mode */
                       <div className="w-full h-full">
                         <div className="space-y-6 h-full">
-                          {/* Validation & Logic Demo Badge */}
-                          <div className="flex justify-between items-center">
-                            <div className="flex gap-2">
-                              <Badge
-                                variant="outline"
-                                className="text-blue-600 border-blue-200 bg-blue-50"
-                              >
-                                ✓ Validation Rules Active
-                              </Badge>
-                              <Badge
-                                variant="outline"
-                                className="text-green-600 border-green-200 bg-green-50"
-                              >
-                                ✓ Conditional Logic Active
-                              </Badge>
-                            </div>
-                          </div>
-
+                          
                           <form className="w-full">
                             {formConfig.layout === "auto" ? (
                               // Auto Layout Preview Mode - Row-based layout
@@ -4632,19 +4594,7 @@ export default function FormEditor() {
           </div>
         ) : selectedFormId ? (
           /* Form Editor Interface */
-          <div className="p-6">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <Edit className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                Form Editor Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                Form editing interface will be available in the next update
-              </p>
-            </div>
-          </div>
+          ''
         ) : (
           /* Default State */
           <div className="flex items-center justify-center h-full">

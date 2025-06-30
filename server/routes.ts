@@ -70,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.createApiKey({
         projectId: project.id,
-        name: "Production Key", 
+        name: "Production Key",
         environment: "production",
         permissions: ["forms:read", "forms:write", "submissions:read", "submissions:write"],
       });
@@ -274,19 +274,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/form/:formId/:environment', async (req, res) => {
     try {
       const { formId, environment } = req.params;
-      
+
       // Validate environment
       if (!['testing', 'production'].includes(environment)) {
-        return res.status(400).json({ 
-          error: 'Invalid environment. Must be "testing" or "production"' 
+        return res.status(400).json({
+          error: 'Invalid environment. Must be "testing" or "production"'
         });
       }
-      
+
       const form = await storage.getForm(formId);
       if (!form || !form.isActive) {
         return res.status(404).json({ error: 'Form not found or inactive' });
       }
-      
+
       // Return form schema with full styling information for SDK
       res.json({
         id: form.id,
@@ -323,30 +323,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting form:", error);
       res.status(500).json({ message: "Failed to delete form" });
-    }
-  });
-
-  // Public form access endpoint (no auth required)
-  app.get('/api/forms/:projectId/:formName', async (req, res) => {
-    try {
-      const { projectId, formName } = req.params;
-      const form = await storage.getFormByName(projectId, formName);
-
-      if (!form || !form.isActive) {
-        return res.status(404).json({ message: "Form not found or inactive" });
-      }
-
-      // Return form schema without sensitive data
-      res.json({
-        id: form.id,
-        name: form.name,
-        description: form.description,
-        schema: form.schema,
-        projectId: form.projectId,
-      });
-    } catch (error) {
-      console.error("Error fetching public form:", error);
-      res.status(500).json({ message: "Failed to fetch form" });
     }
   });
 
