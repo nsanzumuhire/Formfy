@@ -3576,12 +3576,7 @@ export default function FormEditor() {
                                       f.id === selectedFieldId
                                         ? { 
                                             ...f, 
-                                            lazySelectData: checked ? {
-                                              endpoint: "",
-                                              labelField: "label",
-                                              valueField: "value",
-                                              params: {}
-                                            } : undefined,
+                                            lazySelectData: checked || undefined,
                                             // Clear manual options when enabling lazy data
                                             options: checked ? [] : (f.options || [])
                                           }
