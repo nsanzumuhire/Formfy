@@ -509,3 +509,39 @@ export function shouldEnableField(field: FormFieldData, formData: Record<string,
 
   return evaluateConditionalLogic(field.condition, formData, fields);
 }
+
+// Utility function to fetch lazy select data
+export async function fetchLazySelectData(lazyConfig: FormFieldData['lazySelectData']): Promise<FormFieldOption[]> {
+  if (!lazyConfig || !lazyConfig.endpoint) {
+    return [];
+  }
+
+  try {
+    const response = await fetch('/api/lazy-select-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        endpoint: lazyConfig.endpoint,
+        params: lazyConfig.params || {},
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    const data = result.data || [];
+
+    // Transform the data based on labelField and valueField configuration
+    return data.map((item: any) => ({
+      label: item[lazyConfig.labelField] || item.name || item.label || 'Unknown',
+      value: item[lazyConfig.valueField] || item.id || item.value || '',
+    }));
+  } catch (error) {
+    console.error('Error fetching lazy select data:', error);
+    return [];
+  }
+}
