@@ -104,6 +104,13 @@ Formfy is a modern form builder platform that allows users to create, manage, an
 
 ```
 Changelog:
+- June 30, 2025. Simplified lazy select data functionality for dynamic dropdown options
+  - Changed lazySelectData from object to boolean for simplified interface
+  - Added checkbox toggle in property panel to switch between manual options and API loading
+  - When enabled: hides manual options interface and uses default API endpoint
+  - When disabled: shows manual options with add/remove functionality
+  - Implemented /api/lazy-select-data endpoint with sample data (countries, states, categories, departments)
+  - Enhanced field name validation with auto-generation for proper form submission
 - June 26, 2025. Enhanced form save functionality with complete styling capture
   - Added input field classes, styles, width, height for all field types
   - Added form container styling based on layout configuration

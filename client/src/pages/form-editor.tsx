@@ -3529,30 +3529,38 @@ export default function FormEditor() {
                               Options
                             </h4>
 
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Option Source
-                              </Label>
-                              <Input
-                                value={selectedField.optionSource || ""}
-                                onChange={(e) => {
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="useLazyData"
+                                checked={!!selectedField.lazySelectData}
+                                onCheckedChange={(checked) => {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
                                       f.id === selectedFieldId
-                                        ? { ...f, optionSource: e.target.value }
+                                        ? { 
+                                            ...f, 
+                                            lazySelectData: checked || undefined,
+                                            // Clear manual options when enabling lazy data
+                                            options: checked ? [] : (f.options || [])
+                                          }
                                         : f,
                                     ),
                                   );
                                 }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="API endpoint or function name"
                               />
+                              <Label
+                                htmlFor="useLazyData"
+                                className="text-xs cursor-pointer"
+                              >
+                                Load options from API
+                              </Label>
                             </div>
 
-                            <div className="space-y-2">
-                              <Label className="text-xs font-medium">
-                                Static Options
-                              </Label>
+                            {!selectedField.lazySelectData && (
+                              <div className="space-y-2">
+                                <Label className="text-xs font-medium">
+                                  Static Options
+                                </Label>
                               {(selectedField.options || []).map(
                                 (option: any, index: number) => (
                                   <div key={index} className="flex gap-2">
@@ -3659,8 +3667,11 @@ export default function FormEditor() {
                                 + Add Option
                               </Button>
                             </div>
+                            )}
                           </div>
                         )}
+
+
 
                         {/* Date Configuration - Only for date inputs */}
                         {isDateInput && (

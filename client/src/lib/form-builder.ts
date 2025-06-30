@@ -32,6 +32,7 @@ export interface FormFieldData {
   description?: string;
   validation?: ValidationRule[];
   options?: FormFieldOption[];
+  lazySelectData?: boolean; // Whether to load options from API
   order: number;
   // Auto layout properties
   rowId?: string;
@@ -503,4 +504,26 @@ export function shouldEnableField(field: FormFieldData, formData: Record<string,
   }
 
   return evaluateConditionalLogic(field.condition, formData, fields);
+}
+
+// Utility function to fetch lazy select data
+export async function fetchLazySelectData(dataset: string = 'countries'): Promise<FormFieldOption[]> {
+  try {
+    const response = await fetch(`/api/lazy-select-data?dataset=${dataset}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Transform the data to standard format
+    return data.map((item: any) => ({
+      label: item.label || item.name || 'Unknown',
+      value: item.value || item.id || '',
+    }));
+  } catch (error) {
+    console.error('Error fetching lazy select data:', error);
+    return [];
+  }
 }
