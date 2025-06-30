@@ -121,6 +121,9 @@ import {
   reorderFieldsInRow,
   moveRowUp,
   moveRowDown,
+  validateFormForSave,
+  ensureFieldNames,
+  generateDefaultFieldName,
 } from "@/lib/form-builder";
 
 // Droppable components for drop zones
@@ -510,7 +513,7 @@ export default function FormEditor() {
         {
           ...formData,
           schema: {
-            fields: formFields.map((field) => ({
+            fields: fieldsWithNames.map((field) => ({
               ...field,
               order: field.order || 0,
               // Add styling information for SDK rendering
@@ -590,7 +593,7 @@ export default function FormEditor() {
         name: formData.name,
         description: formData.description,
         schema: {
-          fields: formFields.map((field) => ({
+          fields: fieldsWithNames.map((field) => ({
             ...field,
             order: field.order || 0,
             // Add styling information for SDK rendering
@@ -652,6 +655,20 @@ export default function FormEditor() {
 
   const handleCreateForm = () => {
     if (!formName.trim() || !currentProjectId) return;
+
+    // Validate form fields before saving
+    const validation = validateFormForSave(formFields);
+    if (!validation.isValid) {
+      toast({
+        title: "Form validation failed",
+        description: validation.errors.join(", "),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Ensure all fields have names before saving
+    const fieldsWithNames = ensureFieldNames(formFields);
 
     if (editingFormId) {
       // Update existing form
