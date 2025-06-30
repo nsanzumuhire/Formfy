@@ -32,6 +32,12 @@ export interface FormFieldData {
   description?: string;
   validation?: ValidationRule[];
   options?: FormFieldOption[];
+  lazySelectData?: {
+    endpoint: string; // API endpoint to fetch options from
+    labelField: string; // Field name for option labels
+    valueField: string; // Field name for option values
+    params?: Record<string, any>; // Additional parameters to send with request
+  };
   order: number;
   // Auto layout properties
   rowId?: string;

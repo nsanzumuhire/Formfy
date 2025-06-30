@@ -406,6 +406,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Lazy select data endpoint for dynamic options loading
+  app.post('/api/lazy-select-data', async (req, res) => {
+    try {
+      const { endpoint, params } = req.body;
+      
+      if (!endpoint) {
+        return res.status(400).json({ message: "Endpoint is required" });
+      }
+
+      // Handle different types of endpoints
+      let data = [];
+      
+      if (endpoint === '/api/countries') {
+        // Sample countries data
+        data = [
+          { id: 'us', name: 'United States', code: 'US' },
+          { id: 'ca', name: 'Canada', code: 'CA' },
+          { id: 'uk', name: 'United Kingdom', code: 'UK' },
+          { id: 'de', name: 'Germany', code: 'DE' },
+          { id: 'fr', name: 'France', code: 'FR' },
+          { id: 'jp', name: 'Japan', code: 'JP' },
+          { id: 'au', name: 'Australia', code: 'AU' },
+          { id: 'br', name: 'Brazil', code: 'BR' },
+          { id: 'in', name: 'India', code: 'IN' },
+          { id: 'cn', name: 'China', code: 'CN' }
+        ];
+      } else if (endpoint === '/api/states') {
+        // Sample states data (US states)
+        data = [
+          { id: 'ca', name: 'California', abbreviation: 'CA' },
+          { id: 'ny', name: 'New York', abbreviation: 'NY' },
+          { id: 'tx', name: 'Texas', abbreviation: 'TX' },
+          { id: 'fl', name: 'Florida', abbreviation: 'FL' },
+          { id: 'il', name: 'Illinois', abbreviation: 'IL' },
+          { id: 'pa', name: 'Pennsylvania', abbreviation: 'PA' },
+          { id: 'oh', name: 'Ohio', abbreviation: 'OH' },
+          { id: 'ga', name: 'Georgia', abbreviation: 'GA' },
+          { id: 'nc', name: 'North Carolina', abbreviation: 'NC' },
+          { id: 'mi', name: 'Michigan', abbreviation: 'MI' }
+        ];
+      } else if (endpoint === '/api/categories') {
+        // Sample categories data
+        data = [
+          { id: 'tech', name: 'Technology', description: 'Technology related items' },
+          { id: 'health', name: 'Health & Fitness', description: 'Health and fitness products' },
+          { id: 'education', name: 'Education', description: 'Educational resources' },
+          { id: 'business', name: 'Business', description: 'Business and finance' },
+          { id: 'entertainment', name: 'Entertainment', description: 'Movies, games, music' },
+          { id: 'travel', name: 'Travel', description: 'Travel and tourism' },
+          { id: 'food', name: 'Food & Dining', description: 'Restaurants and food' },
+          { id: 'sports', name: 'Sports', description: 'Sports and recreation' }
+        ];
+      } else if (endpoint === '/api/departments') {
+        // Sample departments data
+        data = [
+          { id: 'engineering', name: 'Engineering', code: 'ENG' },
+          { id: 'marketing', name: 'Marketing', code: 'MKT' },
+          { id: 'sales', name: 'Sales', code: 'SAL' },
+          { id: 'hr', name: 'Human Resources', code: 'HR' },
+          { id: 'finance', name: 'Finance', code: 'FIN' },
+          { id: 'operations', name: 'Operations', code: 'OPS' },
+          { id: 'support', name: 'Customer Support', code: 'SUP' },
+          { id: 'design', name: 'Design', code: 'DES' }
+        ];
+      } else {
+        // For unknown endpoints, return empty array
+        data = [];
+      }
+
+      // Apply filtering based on params if provided
+      if (params && typeof params === 'object') {
+        if (params.filter) {
+          const filterText = params.filter.toLowerCase();
+          data = data.filter(item => 
+            item.name.toLowerCase().includes(filterText) ||
+            (item.code && item.code.toLowerCase().includes(filterText))
+          );
+        }
+        
+        if (params.limit && typeof params.limit === 'number') {
+          data = data.slice(0, params.limit);
+        }
+      }
+
+      res.json({ data });
+    } catch (error) {
+      console.error("Error fetching lazy select data:", error);
+      res.status(500).json({ message: "Failed to fetch select data" });
+    }
+  });
+
   // Dashboard stats
   app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
     try {

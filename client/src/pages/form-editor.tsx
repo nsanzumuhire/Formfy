@@ -3699,6 +3699,160 @@ export default function FormEditor() {
                           </div>
                         )}
 
+                        {/* Lazy Select Data Configuration - Only for select fields */}
+                        {fieldType === "select" && (
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                              Dynamic Data Source
+                            </h4>
+
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="useLazyData"
+                                checked={!!selectedField.lazySelectData}
+                                onCheckedChange={(checked) => {
+                                  setFormFields((fields) =>
+                                    fields.map((f) =>
+                                      f.id === selectedFieldId
+                                        ? { 
+                                            ...f, 
+                                            lazySelectData: checked ? {
+                                              endpoint: "",
+                                              labelField: "label",
+                                              valueField: "value",
+                                              params: {}
+                                            } : undefined
+                                          }
+                                        : f,
+                                    ),
+                                  );
+                                }}
+                              />
+                              <Label
+                                htmlFor="useLazyData"
+                                className="text-xs cursor-pointer"
+                              >
+                                Load options from API
+                              </Label>
+                            </div>
+
+                            {selectedField.lazySelectData && (
+                              <div className="space-y-3 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                <div>
+                                  <Label className="text-xs font-medium">
+                                    API Endpoint
+                                  </Label>
+                                  <Input
+                                    value={selectedField.lazySelectData.endpoint || ""}
+                                    onChange={(e) => {
+                                      setFormFields((fields) =>
+                                        fields.map((f) =>
+                                          f.id === selectedFieldId
+                                            ? {
+                                                ...f,
+                                                lazySelectData: {
+                                                  ...f.lazySelectData!,
+                                                  endpoint: e.target.value,
+                                                },
+                                              }
+                                            : f,
+                                        ),
+                                      );
+                                    }}
+                                    className="mt-1 h-8 text-xs"
+                                    placeholder="/api/countries"
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label className="text-xs font-medium">
+                                      Label Field
+                                    </Label>
+                                    <Input
+                                      value={selectedField.lazySelectData.labelField || "label"}
+                                      onChange={(e) => {
+                                        setFormFields((fields) =>
+                                          fields.map((f) =>
+                                            f.id === selectedFieldId
+                                              ? {
+                                                  ...f,
+                                                  lazySelectData: {
+                                                    ...f.lazySelectData!,
+                                                    labelField: e.target.value,
+                                                  },
+                                                }
+                                              : f,
+                                          ),
+                                        );
+                                      }}
+                                      className="mt-1 h-8 text-xs"
+                                      placeholder="name"
+                                    />
+                                  </div>
+                                  
+                                  <div>
+                                    <Label className="text-xs font-medium">
+                                      Value Field
+                                    </Label>
+                                    <Input
+                                      value={selectedField.lazySelectData.valueField || "value"}
+                                      onChange={(e) => {
+                                        setFormFields((fields) =>
+                                          fields.map((f) =>
+                                            f.id === selectedFieldId
+                                              ? {
+                                                  ...f,
+                                                  lazySelectData: {
+                                                    ...f.lazySelectData!,
+                                                    valueField: e.target.value,
+                                                  },
+                                                }
+                                              : f,
+                                          ),
+                                        );
+                                      }}
+                                      className="mt-1 h-8 text-xs"
+                                      placeholder="id"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <Label className="text-xs font-medium">
+                                    Additional Parameters (JSON)
+                                  </Label>
+                                  <textarea
+                                    value={JSON.stringify(selectedField.lazySelectData.params || {}, null, 2)}
+                                    onChange={(e) => {
+                                      try {
+                                        const params = JSON.parse(e.target.value);
+                                        setFormFields((fields) =>
+                                          fields.map((f) =>
+                                            f.id === selectedFieldId
+                                              ? {
+                                                  ...f,
+                                                  lazySelectData: {
+                                                    ...f.lazySelectData!,
+                                                    params,
+                                                  },
+                                                }
+                                              : f,
+                                          ),
+                                        );
+                                      } catch (error) {
+                                        // Invalid JSON, ignore
+                                      }
+                                    }}
+                                    className="mt-1 h-16 text-xs w-full p-2 border rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                                    placeholder='{"category": "countries"}'
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {/* Date Configuration - Only for date inputs */}
                         {isDateInput && (
                           <div className="space-y-3">
