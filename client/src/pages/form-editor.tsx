@@ -4574,6 +4574,45 @@ export default function FormEditor() {
                       />
                     </div>
 
+                    <div>
+                      <Label className="text-xs font-medium">
+                        Mathematical Operation
+                      </Label>
+                      <Select
+                        value={
+                          formFields.find((f) => f.id === selectedFieldId)
+                            ?.mathOperation || "none"
+                        }
+                        onValueChange={(value) => {
+                          setFormFields((fields) =>
+                            fields.map((f) =>
+                              f.id === selectedFieldId
+                                ? { 
+                                    ...f, 
+                                    mathOperation: value === "none" ? undefined : value
+                                  }
+                                : f,
+                            ),
+                          );
+                        }}
+                      >
+                        <SelectTrigger className="mt-1 h-8 text-xs">
+                          <SelectValue placeholder="Select operation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="sum">Sum()</SelectItem>
+                          <SelectItem value="subtraction">Subtraction()</SelectItem>
+                          <SelectItem value="multiplication">Multiplication()</SelectItem>
+                          <SelectItem value="division">Division()</SelectItem>
+                          <SelectItem value="average">Average()</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Apply mathematical operations to watched fields
+                      </p>
+                    </div>
+
                     
                   </div>
                 </div>
