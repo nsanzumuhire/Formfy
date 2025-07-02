@@ -230,7 +230,7 @@ function SortableField({
       field.type === "tel" ||
       field.type === "url" ? (
         <div className="relative flex items-center">
-          {field.icon && field.icon.position === 'left' && (
+          {field.icon && field.icon.position === "left" && (
             <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
               {(() => {
                 const IconComponent = (LucideIcons as any)[field.icon.name];
@@ -245,13 +245,19 @@ function SortableField({
             type={field.type}
             placeholder={field.placeholder}
             disabled
-            className={`bg-gray-50 dark:bg-gray-900 ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''}`}
-            style={{ 
-              paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
-              paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined
+            className={`bg-gray-50 dark:bg-gray-900 ${field.icon?.position === "left" ? "pl-10" : ""} ${field.icon?.position === "right" ? "pr-10" : ""}`}
+            style={{
+              paddingLeft:
+                field.icon?.position === "left"
+                  ? `${30 + (field.icon.size || 16)}px`
+                  : undefined,
+              paddingRight:
+                field.icon?.position === "right"
+                  ? `${30 + (field.icon.size || 16)}px`
+                  : undefined,
             }}
           />
-          {field.icon && field.icon.position === 'right' && (
+          {field.icon && field.icon.position === "right" && (
             <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
               {(() => {
                 const IconComponent = (LucideIcons as any)[field.icon.name];
@@ -381,7 +387,9 @@ export default function FormEditor() {
   const projectId = params?.projectId;
   const formIdFromUrl = params?.formId;
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFormId, setSelectedFormId] = useState<string | null>(formIdFromUrl || null);
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(
+    formIdFromUrl || null,
+  );
   const [isCreatingForm, setIsCreatingForm] = useState(false);
   const [isLoadingFormFromUrl, setIsLoadingFormFromUrl] = useState(false);
 
@@ -420,29 +428,31 @@ export default function FormEditor() {
   // Helper functions for styling capture
   const getFieldClassName = (field: any, config: any) => {
     const baseClasses = ["w-full"];
-    
+
     if (field.type === "textarea") {
       baseClasses.push("resize-none");
     }
-    
+
     if (config.layout === "auto") {
       baseClasses.push("flex-1");
     }
-    
+
     return baseClasses.join(" ");
   };
 
   const getFieldStyle = (field: any, config: any) => {
     const style: Record<string, any> = {};
-    
+
     if (config.layout === "auto" && field.width) {
-      style.width = typeof field.width === 'number' ? `${field.width}%` : field.width;
+      style.width =
+        typeof field.width === "number" ? `${field.width}%` : field.width;
     }
-    
+
     if (field.height && field.type === "textarea") {
-      style.height = typeof field.height === 'number' ? `${field.height}px` : field.height;
+      style.height =
+        typeof field.height === "number" ? `${field.height}px` : field.height;
     }
-    
+
     return style;
   };
 
@@ -455,7 +465,7 @@ export default function FormEditor() {
 
   const getFieldContainerClassName = (field: any, config: any) => {
     const classes = ["space-y-2"];
-    
+
     if (config.layout === "auto") {
       classes.push("flex-1");
     } else if (config.layout === "grid") {
@@ -463,23 +473,28 @@ export default function FormEditor() {
     } else if (config.layout === "two-column") {
       classes.push("col-span-1");
     }
-    
+
     return classes.join(" ");
   };
 
   const getLabelClassName = (config: any) => {
-    const classes = ["text-sm", "font-medium", "text-gray-700", "dark:text-gray-300"];
-    
+    const classes = [
+      "text-sm",
+      "font-medium",
+      "text-gray-700",
+      "dark:text-gray-300",
+    ];
+
     if (!config.showLabels) {
       classes.push("sr-only");
     }
-    
+
     return classes.join(" ");
   };
 
   const getFormContainerClassName = (config: any) => {
     const classes = ["space-y-4"];
-    
+
     switch (config.layout) {
       case "grid":
         classes.push("grid", `grid-cols-${config.gridColumns}`, "gap-4");
@@ -493,17 +508,17 @@ export default function FormEditor() {
       default:
         classes.push("space-y-4");
     }
-    
+
     return classes.join(" ");
   };
 
   const getFormContainerStyle = (config: any) => {
     const style: Record<string, any> = {};
-    
+
     if (config.spacing === "custom" && config.customSpacing) {
       style.gap = `${config.customSpacing}px`;
     }
-    
+
     return style;
   };
 
@@ -545,7 +560,7 @@ export default function FormEditor() {
       setFormFields(schema.fields);
     }
     if (schema?.settings) {
-      setFormConfig(prev => ({ ...prev, ...schema.settings }));
+      setFormConfig((prev) => ({ ...prev, ...schema.settings }));
     }
     setIsCreatingForm(true);
     setShowPropertiesPanel(false);
@@ -566,7 +581,7 @@ export default function FormEditor() {
   useEffect(() => {
     if (formIdFromUrl) {
       if (forms.length > 0) {
-        const formExists = forms.find(f => f.id === formIdFromUrl);
+        const formExists = forms.find((f) => f.id === formIdFromUrl);
         if (formExists) {
           setIsLoadingFormFromUrl(true);
           setSelectedFormId(formIdFromUrl);
@@ -659,16 +674,21 @@ export default function FormEditor() {
         {
           ...formData,
           schema: {
-            fields: ensureFieldNames(formFields).map((field: FormFieldData) => ({
-              ...field,
-              order: field.order || 0,
-              // Add styling information for SDK rendering
-              className: getFieldClassName(field, formConfig),
-              style: getFieldStyle(field, formConfig),
-              height: getFieldHeight(field),
-              containerClassName: getFieldContainerClassName(field, formConfig),
-              labelClassName: getLabelClassName(formConfig),
-            })),
+            fields: ensureFieldNames(formFields).map(
+              (field: FormFieldData) => ({
+                ...field,
+                order: field.order || 0,
+                // Add styling information for SDK rendering
+                className: getFieldClassName(field, formConfig),
+                style: getFieldStyle(field, formConfig),
+                height: getFieldHeight(field),
+                containerClassName: getFieldContainerClassName(
+                  field,
+                  formConfig,
+                ),
+                labelClassName: getLabelClassName(formConfig),
+              }),
+            ),
             settings: {
               ...formConfig,
               title: formData.name,
@@ -695,6 +715,7 @@ export default function FormEditor() {
       setFormDescription("");
       setFormFields([]);
       setSelectedFieldId(null);
+      setSelectedFormId(null); // Clear selected form to prevent URL routing with form ID
       setShowFormsList(true); // Show forms list sidebar after successful creation
 
       // Navigate back to form editor with just project ID
@@ -780,6 +801,7 @@ export default function FormEditor() {
       setFormDescription("");
       setFormFields([]);
       setSelectedFieldId(null);
+      setSelectedFormId(null); // Clear selected form to prevent URL routing with form ID
       setEditingFormId(null);
       setShowFormsList(true); // Show forms list sidebar after successful update
 
@@ -956,8 +978,10 @@ export default function FormEditor() {
     // For multiple fields in a row, allow resizing between fields
     if (!nextField) return;
 
-    const startWidthCurrent = typeof currentField.width === 'number' ? currentField.width : 50;
-    const startWidthNext = typeof nextField.width === 'number' ? nextField.width : 50;
+    const startWidthCurrent =
+      typeof currentField.width === "number" ? currentField.width : 50;
+    const startWidthNext =
+      typeof nextField.width === "number" ? nextField.width : 50;
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - startX;
@@ -1829,14 +1853,19 @@ export default function FormEditor() {
                                   ...formConfig,
                                   layout: "auto",
                                 });
-                                
+
                                 // Convert existing fields to auto layout format
-                                setFormFields(fields => fields.map(field => ({
-                                  ...field,
-                                  rowId: field.rowId || generateRowId(),
-                                  width: typeof field.width === 'string' ? 100 : (field.width || 100)
-                                })));
-                                
+                                setFormFields((fields) =>
+                                  fields.map((field) => ({
+                                    ...field,
+                                    rowId: field.rowId || generateRowId(),
+                                    width:
+                                      typeof field.width === "string"
+                                        ? 100
+                                        : field.width || 100,
+                                  })),
+                                );
+
                                 setLayoutOpen(false);
                               }}
                             >
@@ -2226,14 +2255,12 @@ export default function FormEditor() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
                     {isPreviewMode ? (
                       /* Preview Mode */
                       <div className="w-full h-full">
                         <div className="space-y-6 h-full">
-                          
-
                           <form className="w-full">
                             {formConfig.layout === "auto" ? (
                               // Auto Layout Preview Mode - Row-based layout
@@ -2252,7 +2279,7 @@ export default function FormEditor() {
                                         <div
                                           key={field.id}
                                           style={{
-                                            width: `${typeof field.width === 'number' ? field.width : (100 / rowFields.length)}%`,
+                                            width: `${typeof field.width === "number" ? field.width : 100 / rowFields.length}%`,
                                           }}
                                           className={`${
                                             field.layout === "horizontal" &&
@@ -2295,39 +2322,65 @@ export default function FormEditor() {
                                             field.type === "tel" ||
                                             field.type === "url" ? (
                                               <div className="relative flex items-center">
-                                                {field.icon && field.icon.position === 'left' && (
-                                                  <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
-                                                    {(() => {
-                                                      const IconComponent = (LucideIcons as any)[field.icon.name];
+                                                {field.icon &&
+                                                  field.icon.position ===
+                                                    "left" && (
+                                                    <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                      {(() => {
+                                                        const IconComponent = (
+                                                          LucideIcons as any
+                                                        )[field.icon.name];
 
-                                                      return IconComponent ? (
-                                                        <IconComponent size={field.icon.size} />
-                                                      ) : null;
-                                                    })()}
-                                                  </div>
-                                                )}
+                                                        return IconComponent ? (
+                                                          <IconComponent
+                                                            size={
+                                                              field.icon.size
+                                                            }
+                                                          />
+                                                        ) : null;
+                                                      })()}
+                                                    </div>
+                                                  )}
                                                 <Input
                                                   type={field.type}
-                                                  placeholder={field.placeholder}
+                                                  placeholder={
+                                                    field.placeholder
+                                                  }
                                                   disabled={field.disabled}
                                                   readOnly={field.readonly}
-                                                  className={`w-full ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''}`}
-                                                  style={{ 
+                                                  className={`w-full ${field.icon?.position === "left" ? "pl-10" : ""} ${field.icon?.position === "right" ? "pr-10" : ""}`}
+                                                  style={{
                                                     width: "100%",
-                                                    paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
-                                                    paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined
+                                                    paddingLeft:
+                                                      field.icon?.position ===
+                                                      "left"
+                                                        ? `${30 + (field.icon.size || 16)}px`
+                                                        : undefined,
+                                                    paddingRight:
+                                                      field.icon?.position ===
+                                                      "right"
+                                                        ? `${30 + (field.icon.size || 16)}px`
+                                                        : undefined,
                                                   }}
                                                 />
-                                                {field.icon && field.icon.position === 'right' && (
-                                                  <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
-                                                    {(() => {
-                                                      const IconComponent = (LucideIcons as any)[field.icon.name];
-                                                      return IconComponent ? (
-                                                        <IconComponent size={field.icon.size} />
-                                                      ) : null;
-                                                    })()}
-                                                  </div>
-                                                )}
+                                                {field.icon &&
+                                                  field.icon.position ===
+                                                    "right" && (
+                                                    <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                      {(() => {
+                                                        const IconComponent = (
+                                                          LucideIcons as any
+                                                        )[field.icon.name];
+                                                        return IconComponent ? (
+                                                          <IconComponent
+                                                            size={
+                                                              field.icon.size
+                                                            }
+                                                          />
+                                                        ) : null;
+                                                      })()}
+                                                    </div>
+                                                  )}
                                               </div>
                                             ) : field.type === "textarea" ? (
                                               <Textarea
@@ -2399,7 +2452,7 @@ export default function FormEditor() {
                                               </div>
                                             ) : field.type === "select" ? (
                                               <Select>
-                                                <SelectTrigger 
+                                                <SelectTrigger
                                                   className="w-full"
                                                   style={{ width: "100%" }}
                                                 >
@@ -2527,16 +2580,22 @@ export default function FormEditor() {
                                         field.type === "tel" ||
                                         field.type === "url" ? (
                                           <div className="relative flex items-center">
-                                            {field.icon && field.icon.position === 'left' && (
-                                              <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
-                                                {(() => {
-                                                  const IconComponent = (LucideIcons as any)[field.icon.name];
-                                                  return IconComponent ? (
-                                                    <IconComponent size={field.icon.size} />
-                                                  ) : null;
-                                                })()}
-                                              </div>
-                                            )}
+                                            {field.icon &&
+                                              field.icon.position ===
+                                                "left" && (
+                                                <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                  {(() => {
+                                                    const IconComponent = (
+                                                      LucideIcons as any
+                                                    )[field.icon.name];
+                                                    return IconComponent ? (
+                                                      <IconComponent
+                                                        size={field.icon.size}
+                                                      />
+                                                    ) : null;
+                                                  })()}
+                                                </div>
+                                              )}
                                             <Input
                                               type={field.type}
                                               placeholder={field.placeholder}
@@ -2544,26 +2603,45 @@ export default function FormEditor() {
                                               readOnly={field.readonly}
                                               autoFocus={field.autofocus}
                                               autoComplete={field.autocomplete}
-                                              className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''} ${field.class || ""}`}
+                                              className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.icon?.position === "left" ? "pl-10" : ""} ${field.icon?.position === "right" ? "pr-10" : ""} ${field.class || ""}`}
                                               style={{
-                                                width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
-                                                paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
-                                                paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined,
-                                                ...(field.layout === "inline" && {
+                                                width:
+                                                  typeof field.width ===
+                                                  "number"
+                                                    ? `${field.width}%`
+                                                    : field.width || "100%",
+                                                paddingLeft:
+                                                  field.icon?.position ===
+                                                  "left"
+                                                    ? `${30 + (field.icon.size || 16)}px`
+                                                    : undefined,
+                                                paddingRight:
+                                                  field.icon?.position ===
+                                                  "right"
+                                                    ? `${30 + (field.icon.size || 16)}px`
+                                                    : undefined,
+                                                ...(field.layout ===
+                                                  "inline" && {
                                                   minWidth: "120px",
                                                 }),
                                               }}
                                             />
-                                            {field.icon && field.icon.position === 'right' && (
-                                              <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
-                                                {(() => {
-                                                  const IconComponent = (LucideIcons as any)[field.icon.name];
-                                                  return IconComponent ? (
-                                                    <IconComponent size={field.icon.size} />
-                                                  ) : null;
-                                                })()}
-                                              </div>
-                                            )}
+                                            {field.icon &&
+                                              field.icon.position ===
+                                                "right" && (
+                                                <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                  {(() => {
+                                                    const IconComponent = (
+                                                      LucideIcons as any
+                                                    )[field.icon.name];
+                                                    return IconComponent ? (
+                                                      <IconComponent
+                                                        size={field.icon.size}
+                                                      />
+                                                    ) : null;
+                                                  })()}
+                                                </div>
+                                              )}
                                           </div>
                                         ) : field.type === "textarea" ? (
                                           <Textarea
@@ -2572,7 +2650,10 @@ export default function FormEditor() {
                                             readOnly={field.readonly}
                                             className={`${field.class || ""} resize-none`}
                                             style={{
-                                              width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
+                                              width:
+                                                typeof field.width === "number"
+                                                  ? `${field.width}%`
+                                                  : field.width || "100%",
                                             }}
                                             rows={3}
                                           />
@@ -3374,15 +3455,11 @@ export default function FormEditor() {
                             onIconChange={(icon) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
-                                  f.id === selectedFieldId
-                                    ? { ...f, icon }
-                                    : f,
+                                  f.id === selectedFieldId ? { ...f, icon } : f,
                                 ),
                               );
                             }}
                           />
-
-                          
                         </div>
 
                         {/* Field States */}
@@ -3677,8 +3754,6 @@ export default function FormEditor() {
                               />
                             </div>
                           )}
-
-                          
                         </div>
 
                         {/* Options Management - Only for select and radio */}
@@ -3696,11 +3771,14 @@ export default function FormEditor() {
                                   setFormFields((fields) =>
                                     fields.map((f) =>
                                       f.id === selectedFieldId
-                                        ? { 
-                                            ...f, 
-                                            lazySelectData: checked || undefined,
+                                        ? {
+                                            ...f,
+                                            lazySelectData:
+                                              checked || undefined,
                                             // Clear manual options when enabling lazy data
-                                            options: checked ? [] : (f.options || [])
+                                            options: checked
+                                              ? []
+                                              : f.options || [],
                                           }
                                         : f,
                                     ),
@@ -3720,121 +3798,123 @@ export default function FormEditor() {
                                 <Label className="text-xs font-medium">
                                   Static Options
                                 </Label>
-                              {(selectedField.options || []).map(
-                                (option: any, index: number) => (
-                                  <div key={index} className="flex gap-2">
-                                    <Input
-                                      value={option.label}
-                                      onChange={(e) => {
-                                        setFormFields((fields) =>
-                                          fields.map((f) =>
-                                            f.id === selectedFieldId
-                                              ? {
-                                                  ...f,
-                                                  options:
-                                                    f.options?.map(
-                                                      (opt: any, i: number) =>
-                                                        i === index
-                                                          ? {
-                                                              ...opt,
-                                                              label:
-                                                                e.target.value,
-                                                            }
-                                                          : opt,
-                                                    ) || [],
-                                                }
-                                              : f,
-                                          ),
-                                        );
-                                      }}
-                                      className="h-8 text-xs flex-1"
-                                      placeholder="Label"
-                                    />
-                                    <Input
-                                      value={option.value}
-                                      onChange={(e) => {
-                                        setFormFields((fields) =>
-                                          fields.map((f) =>
-                                            f.id === selectedFieldId
-                                              ? {
-                                                  ...f,
-                                                  options:
-                                                    f.options?.map(
-                                                      (opt: any, i: number) =>
-                                                        i === index
-                                                          ? {
-                                                              ...opt,
-                                                              value:
-                                                                e.target.value,
-                                                            }
-                                                          : opt,
-                                                    ) || [],
-                                                }
-                                              : f,
-                                          ),
-                                        );
-                                      }}
-                                      className="h-8 text-xs flex-1"
-                                      placeholder="Value"
-                                    />
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setFormFields((fields) =>
-                                          fields.map((f) =>
-                                            f.id === selectedFieldId
-                                              ? {
-                                                  ...f,
-                                                  options:
-                                                    f.options?.filter(
-                                                      (_: any, i: number) =>
-                                                        i !== index,
-                                                    ) || [],
-                                                }
-                                              : f,
-                                          ),
-                                        );
-                                      }}
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      ×
-                                    </Button>
-                                  </div>
-                                ),
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? {
-                                            ...f,
-                                            options: [
-                                              ...(f.options || []),
-                                              { label: "", value: "" },
-                                            ],
-                                          }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="h-8 text-xs w-full"
-                              >
-                                + Add Option
-                              </Button>
-                            </div>
+                                {(selectedField.options || []).map(
+                                  (option: any, index: number) => (
+                                    <div key={index} className="flex gap-2">
+                                      <Input
+                                        value={option.label}
+                                        onChange={(e) => {
+                                          setFormFields((fields) =>
+                                            fields.map((f) =>
+                                              f.id === selectedFieldId
+                                                ? {
+                                                    ...f,
+                                                    options:
+                                                      f.options?.map(
+                                                        (
+                                                          opt: any,
+                                                          i: number,
+                                                        ) =>
+                                                          i === index
+                                                            ? {
+                                                                ...opt,
+                                                                label:
+                                                                  e.target
+                                                                    .value,
+                                                              }
+                                                            : opt,
+                                                      ) || [],
+                                                  }
+                                                : f,
+                                            ),
+                                          );
+                                        }}
+                                        className="h-8 text-xs flex-1"
+                                        placeholder="Label"
+                                      />
+                                      <Input
+                                        value={option.value}
+                                        onChange={(e) => {
+                                          setFormFields((fields) =>
+                                            fields.map((f) =>
+                                              f.id === selectedFieldId
+                                                ? {
+                                                    ...f,
+                                                    options:
+                                                      f.options?.map(
+                                                        (
+                                                          opt: any,
+                                                          i: number,
+                                                        ) =>
+                                                          i === index
+                                                            ? {
+                                                                ...opt,
+                                                                value:
+                                                                  e.target
+                                                                    .value,
+                                                              }
+                                                            : opt,
+                                                      ) || [],
+                                                  }
+                                                : f,
+                                            ),
+                                          );
+                                        }}
+                                        className="h-8 text-xs flex-1"
+                                        placeholder="Value"
+                                      />
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setFormFields((fields) =>
+                                            fields.map((f) =>
+                                              f.id === selectedFieldId
+                                                ? {
+                                                    ...f,
+                                                    options:
+                                                      f.options?.filter(
+                                                        (_: any, i: number) =>
+                                                          i !== index,
+                                                      ) || [],
+                                                  }
+                                                : f,
+                                            ),
+                                          );
+                                        }}
+                                        className="h-8 w-8 p-0"
+                                      >
+                                        ×
+                                      </Button>
+                                    </div>
+                                  ),
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              options: [
+                                                ...(f.options || []),
+                                                { label: "", value: "" },
+                                              ],
+                                            }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                  className="h-8 text-xs w-full"
+                                >
+                                  + Add Option
+                                </Button>
+                              </div>
                             )}
                           </div>
                         )}
-
-
-
-                        
-
-                        
                       </>
                     );
                   })()}
@@ -4267,7 +4347,10 @@ export default function FormEditor() {
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="disablePast"
-                            checked={formFields.find((f) => f.id === selectedFieldId)?.disablePast || false}
+                            checked={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.disablePast || false
+                            }
                             onCheckedChange={(checked) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
@@ -4289,7 +4372,10 @@ export default function FormEditor() {
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="disableFuture"
-                            checked={formFields.find((f) => f.id === selectedFieldId)?.disableFuture || false}
+                            checked={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.disableFuture || false
+                            }
                             onCheckedChange={(checked) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
@@ -4326,10 +4412,15 @@ export default function FormEditor() {
                                   f.id === selectedFieldId
                                     ? {
                                         ...f,
-                                        dateComparison: value === "none" ? undefined : {
-                                          ...f.dateComparison,
-                                          type: value as "before" | "after",
-                                        },
+                                        dateComparison:
+                                          value === "none"
+                                            ? undefined
+                                            : {
+                                                ...f.dateComparison,
+                                                type: value as
+                                                  | "before"
+                                                  | "after",
+                                              },
                                       }
                                     : f,
                                 ),
@@ -4341,8 +4432,12 @@ export default function FormEditor() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">None</SelectItem>
-                              <SelectItem value="before">Must be before</SelectItem>
-                              <SelectItem value="after">Must be after</SelectItem>
+                              <SelectItem value="before">
+                                Must be before
+                              </SelectItem>
+                              <SelectItem value="after">
+                                Must be after
+                              </SelectItem>
                             </SelectContent>
                           </Select>
 
@@ -4367,8 +4462,10 @@ export default function FormEditor() {
                               );
                             }}
                             disabled={
-                              !formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type ||
-                              formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type === "none"
+                              !formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.type ||
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.type === "none"
                             }
                           >
                             <SelectTrigger className="h-8 text-xs">
@@ -4376,9 +4473,16 @@ export default function FormEditor() {
                             </SelectTrigger>
                             <SelectContent>
                               {formFields
-                                .filter((f) => f.id !== selectedFieldId && f.type === "date")
+                                .filter(
+                                  (f) =>
+                                    f.id !== selectedFieldId &&
+                                    f.type === "date",
+                                )
                                 .map((field) => (
-                                  <SelectItem key={field.id} value={field.name || field.id}>
+                                  <SelectItem
+                                    key={field.id}
+                                    value={field.name || field.id}
+                                  >
                                     {field.label}
                                   </SelectItem>
                                 ))}
@@ -4393,7 +4497,9 @@ export default function FormEditor() {
                                 ?.dateComparison?.offset || ""
                             }
                             onChange={(e) => {
-                              const value = e.target.value ? parseInt(e.target.value) : undefined;
+                              const value = e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined;
                               setFormFields((fields) =>
                                 fields.map((f) =>
                                   f.id === selectedFieldId
@@ -4410,13 +4516,16 @@ export default function FormEditor() {
                             }}
                             className="h-8 text-xs"
                             disabled={
-                              !formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type ||
-                              formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type === "none"
+                              !formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.type ||
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.type === "none"
                             }
                           />
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Optional: Add days offset (e.g., 30 days before/after another date)
+                          Optional: Add days offset (e.g., 30 days before/after
+                          another date)
                         </p>
                       </div>
                     </div>
@@ -4690,26 +4799,42 @@ export default function FormEditor() {
                       </Label>
                       <div className="mt-1 space-y-2">
                         {formFields
-                          .filter((f) => f.type === "number" && f.id !== selectedFieldId)
+                          .filter(
+                            (f) =>
+                              f.type === "number" && f.id !== selectedFieldId,
+                          )
                           .map((field) => (
-                            <div key={field.id} className="flex items-center space-x-2">
+                            <div
+                              key={field.id}
+                              className="flex items-center space-x-2"
+                            >
                               <Checkbox
                                 id={`watch-${field.id}`}
                                 checked={(
-                                  formFields.find((f) => f.id === selectedFieldId)
-                                    ?.watch || []
+                                  formFields.find(
+                                    (f) => f.id === selectedFieldId,
+                                  )?.watch || []
                                 ).includes(field.name || field.id)}
                                 onCheckedChange={(checked) => {
-                                  const currentWatch: string[] = formFields.find((f) => f.id === selectedFieldId)?.watch || [];
-                                  const fieldIdentifier = field.name || field.id;
+                                  const currentWatch: string[] =
+                                    formFields.find(
+                                      (f) => f.id === selectedFieldId,
+                                    )?.watch || [];
+                                  const fieldIdentifier =
+                                    field.name || field.id;
                                   let newWatch: string[];
-                                  
+
                                   if (checked) {
-                                    newWatch = [...currentWatch, fieldIdentifier];
+                                    newWatch = [
+                                      ...currentWatch,
+                                      fieldIdentifier,
+                                    ];
                                   } else {
-                                    newWatch = currentWatch.filter((w) => w !== fieldIdentifier);
+                                    newWatch = currentWatch.filter(
+                                      (w) => w !== fieldIdentifier,
+                                    );
                                   }
-                                  
+
                                   setFormFields((fields) =>
                                     fields.map((f) =>
                                       f.id === selectedFieldId
@@ -4727,7 +4852,10 @@ export default function FormEditor() {
                               </Label>
                             </div>
                           ))}
-                        {formFields.filter((f) => f.type === "number" && f.id !== selectedFieldId).length === 0 && (
+                        {formFields.filter(
+                          (f) =>
+                            f.type === "number" && f.id !== selectedFieldId,
+                        ).length === 0 && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 py-2">
                             No number fields available to watch
                           </p>
@@ -4748,9 +4876,10 @@ export default function FormEditor() {
                           setFormFields((fields) =>
                             fields.map((f) =>
                               f.id === selectedFieldId
-                                ? { 
-                                    ...f, 
-                                    mathOperation: value === "none" ? undefined : value
+                                ? {
+                                    ...f,
+                                    mathOperation:
+                                      value === "none" ? undefined : value,
                                   }
                                 : f,
                             ),
@@ -4763,8 +4892,12 @@ export default function FormEditor() {
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
                           <SelectItem value="sum">Sum()</SelectItem>
-                          <SelectItem value="subtraction">Subtraction()</SelectItem>
-                          <SelectItem value="multiplication">Multiplication()</SelectItem>
+                          <SelectItem value="subtraction">
+                            Subtraction()
+                          </SelectItem>
+                          <SelectItem value="multiplication">
+                            Multiplication()
+                          </SelectItem>
                           <SelectItem value="division">Division()</SelectItem>
                           <SelectItem value="average">Average()</SelectItem>
                         </SelectContent>
@@ -4773,8 +4906,6 @@ export default function FormEditor() {
                         Apply mathematical operations to watched fields
                       </p>
                     </div>
-
-                    
                   </div>
                 </div>
               </div>
@@ -4785,19 +4916,7 @@ export default function FormEditor() {
           <FormLoadingSkeleton />
         ) : selectedFormId ? (
           /* Form Editor Interface */
-          <div className="p-6">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <Edit className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                Form Editor Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                Form editing interface will be available in the next update
-              </p>
-            </div>
-          </div>
+          ""
         ) : (
           /* Default State */
           <div className="flex items-center justify-center h-full">

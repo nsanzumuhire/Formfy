@@ -111,7 +111,8 @@ Changelog:
   - Added URL synchronization when forms are selected or projects change
   - Users can now bookmark specific forms and share direct form editing links
   - Improved user experience with proper browser history support
-  - After successful form creation/update, app now routes back to /form-editor
+  - After successful form creation/update, app now routes back to /form-editor only (not /form-editor/form-id)
+  - Fixed form update routing to prevent navigating to form-specific URLs after saving
   - Added skeleton loading state when accessing forms via URL for better UX
   - Loading skeleton displays toolbox, canvas, and properties panel placeholders
 - July 2, 2025. Enhanced date field validation and Test ID field removal
