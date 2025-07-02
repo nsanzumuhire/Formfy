@@ -2073,6 +2073,23 @@ export default function FormEditor() {
               {/* Canvas */}
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
                 <div className="w-full">
+                  {/* Form Name Header */}
+                  {(formName || editingFormId) && (
+                    <div className="mb-4 px-1">
+                      <div className="flex items-center gap-3">
+                        <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                          {formName || "Untitled Form"}
+                        </h2>
+                        {formDescription && (
+                          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                            • {formDescription}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 min-h-[500px] p-6">
                     {isPreviewMode ? (
                       /* Preview Mode */
