@@ -723,7 +723,7 @@ export default function FormEditor() {
     setFormFields([]);
     setSelectedFieldId(null);
     setShowPropertiesPanel(false);
-    setFormName("");
+    setFormName("Untitled Form");
     setFormDescription("");
     setShowFormsList(false); // Collapse forms sidebar when creating
     // Reset form config to defaults
@@ -2076,13 +2076,21 @@ export default function FormEditor() {
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
                 <div className="w-full">
                   {/* Form Name Header */}
-                  {(formName || editingFormId) && (
+                  {(formName || editingFormId || isCreatingForm) && (
                     <div className="mb-4 px-1">
                       <div className="flex items-center gap-3">
                         <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                          {formName || "Untitled Form"}
-                        </h2>
+                        <Input
+                          value={formName || "Untitled Form"}
+                          onChange={(e) => setFormName(e.target.value)}
+                          onBlur={(e) => {
+                            if (!e.target.value.trim()) {
+                              setFormName("Untitled Form");
+                            }
+                          }}
+                          className="text-lg font-medium bg-transparent border-none p-0 h-auto focus:ring-0 focus:border-none text-gray-900 dark:text-gray-100 shadow-none"
+                          placeholder="Form name"
+                        />
                         {formDescription && (
                           <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
                             • {formDescription}
