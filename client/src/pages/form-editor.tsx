@@ -4551,27 +4551,51 @@ export default function FormEditor() {
                       <Label className="text-xs font-medium">
                         Watch Fields
                       </Label>
-                      <Input
-                        value={(
-                          formFields.find((f) => f.id === selectedFieldId)
-                            ?.watch || []
-                        ).join(", ")}
-                        onChange={(e) => {
-                          const watchFields = e.target.value
-                            .split(",")
-                            .map((s) => s.trim())
-                            .filter(Boolean);
-                          setFormFields((fields) =>
-                            fields.map((f) =>
-                              f.id === selectedFieldId
-                                ? { ...f, watch: watchFields }
-                                : f,
-                            ),
-                          );
-                        }}
-                        className="mt-1 h-8 text-xs"
-                        placeholder="field1, field2, field3"
-                      />
+                      <div className="mt-1 space-y-2">
+                        {formFields
+                          .filter((f) => f.type === "number" && f.id !== selectedFieldId)
+                          .map((field) => (
+                            <div key={field.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`watch-${field.id}`}
+                                checked={(
+                                  formFields.find((f) => f.id === selectedFieldId)
+                                    ?.watch || []
+                                ).includes(field.name || field.id)}
+                                onCheckedChange={(checked) => {
+                                  const currentWatch = formFields.find((f) => f.id === selectedFieldId)?.watch || [];
+                                  const fieldIdentifier = field.name || field.id;
+                                  let newWatch;
+                                  
+                                  if (checked) {
+                                    newWatch = [...currentWatch, fieldIdentifier];
+                                  } else {
+                                    newWatch = currentWatch.filter(w => w !== fieldIdentifier);
+                                  }
+                                  
+                                  setFormFields((fields) =>
+                                    fields.map((f) =>
+                                      f.id === selectedFieldId
+                                        ? { ...f, watch: newWatch }
+                                        : f,
+                                    ),
+                                  );
+                                }}
+                              />
+                              <Label
+                                htmlFor={`watch-${field.id}`}
+                                className="text-xs cursor-pointer flex-1"
+                              >
+                                {field.label} ({field.name || field.id})
+                              </Label>
+                            </div>
+                          ))}
+                        {formFields.filter((f) => f.type === "number" && f.id !== selectedFieldId).length === 0 && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 py-2">
+                            No number fields available to watch
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
