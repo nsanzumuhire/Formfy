@@ -30,6 +30,7 @@ export interface FormFieldData {
   name?: string; // Field name for form submission
   placeholder?: string;
   description?: string;
+  hint?: string; // Helper text shown below the field
   validation?: ValidationRule[];
   options?: FormFieldOption[];
   lazySelectData?: boolean; // Whether to load options from API
