@@ -126,7 +126,7 @@ import {
   generateDefaultFieldName,
 } from "@/lib/form-builder";
 import { IconSelector } from "@/components/icon-selector";
-import { FormFieldWithIcon } from "@/components/form-field-with-icon";
+import * as LucideIcons from "lucide-react";
 
 // Droppable components for drop zones
 function RowDropZone({ rowId }: { rowId: string }) {
@@ -2133,7 +2133,7 @@ export default function FormEditor() {
                                                 {field.icon && field.icon.position === 'left' && (
                                                   <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
                                                     {(() => {
-                                                      const IconComponent = (window as any).LucideReact?.[field.icon.name];
+                                                      const IconComponent = (LucideIcons as any)[field.icon.name];
                                                       return IconComponent ? (
                                                         <IconComponent size={field.icon.size} />
                                                       ) : null;
@@ -2155,7 +2155,7 @@ export default function FormEditor() {
                                                 {field.icon && field.icon.position === 'right' && (
                                                   <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
                                                     {(() => {
-                                                      const IconComponent = (window as any).LucideReact?.[field.icon.name];
+                                                      const IconComponent = (LucideIcons as any)[field.icon.name];
                                                       return IconComponent ? (
                                                         <IconComponent size={field.icon.size} />
                                                       ) : null;
