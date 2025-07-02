@@ -578,6 +578,7 @@ export default function FormEditor() {
       setFormDescription("");
       setFormFields([]);
       setSelectedFieldId(null);
+      setShowFormsList(true); // Show forms list sidebar after successful creation
 
       // Generate public form URL with form ID for SDK access
       const publicUrl = `${window.location.origin}/form/${data.id}/testing`;
@@ -658,6 +659,7 @@ export default function FormEditor() {
       setFormFields([]);
       setSelectedFieldId(null);
       setEditingFormId(null);
+      setShowFormsList(true); // Show forms list sidebar after successful update
 
       toast({
         title: "Form updated successfully",
@@ -4563,14 +4565,14 @@ export default function FormEditor() {
                                     ?.watch || []
                                 ).includes(field.name || field.id)}
                                 onCheckedChange={(checked) => {
-                                  const currentWatch = formFields.find((f) => f.id === selectedFieldId)?.watch || [];
+                                  const currentWatch: string[] = formFields.find((f) => f.id === selectedFieldId)?.watch || [];
                                   const fieldIdentifier = field.name || field.id;
-                                  let newWatch;
+                                  let newWatch: string[];
                                   
                                   if (checked) {
                                     newWatch = [...currentWatch, fieldIdentifier];
                                   } else {
-                                    newWatch = currentWatch.filter(w => w !== fieldIdentifier);
+                                    newWatch = currentWatch.filter((w) => w !== fieldIdentifier);
                                   }
                                   
                                   setFormFields((fields) =>
