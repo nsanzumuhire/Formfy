@@ -50,7 +50,22 @@ export interface FormFieldData {
   height?: number | string; // Height for textarea and other fields
   containerClassName?: string; // CSS classes for the field container
   labelClassName?: string; // CSS classes for the label
-  isVisible?: boolean
+  isVisible?: boolean;
+  // Icon properties
+  icon?: {
+    name: string; // Lucide icon name
+    position: 'left' | 'right'; // Icon position relative to input
+    size: number; // Icon size in pixels
+    svg: string; // Stringified SVG content for storage
+  };
+  // Date validation properties
+  disablePast?: boolean; // Cannot be in the past
+  disableFuture?: boolean; // Cannot be in the future
+  dateComparison?: {
+    type: 'before' | 'after'; // Must be before/after another date
+    field: string; // The field name to compare against
+    offset?: number; // Optional days offset
+  };
 }
 
 export interface FormSchema {
