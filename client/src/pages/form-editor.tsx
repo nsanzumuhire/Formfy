@@ -2077,7 +2077,7 @@ export default function FormEditor() {
                   {(formName || editingFormId) && (
                     <div className="mb-4 px-1">
                       <div className="flex items-center gap-3">
-                        <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                        <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                         <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                           {formName || "Untitled Form"}
                         </h2>
