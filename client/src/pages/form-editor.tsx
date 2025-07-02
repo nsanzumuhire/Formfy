@@ -4180,7 +4180,7 @@ export default function FormEditor() {
                           <Select
                             value={
                               formFields.find((f) => f.id === selectedFieldId)
-                                ?.dateComparison?.type || ""
+                                ?.dateComparison?.type || "none"
                             }
                             onValueChange={(value) => {
                               setFormFields((fields) =>
@@ -4188,9 +4188,9 @@ export default function FormEditor() {
                                   f.id === selectedFieldId
                                     ? {
                                         ...f,
-                                        dateComparison: {
+                                        dateComparison: value === "none" ? undefined : {
                                           ...f.dateComparison,
-                                          type: value as "before" | "after" | "",
+                                          type: value as "before" | "after",
                                         },
                                       }
                                     : f,
@@ -4202,7 +4202,7 @@ export default function FormEditor() {
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
                               <SelectItem value="before">Must be before</SelectItem>
                               <SelectItem value="after">Must be after</SelectItem>
                             </SelectContent>
@@ -4228,7 +4228,10 @@ export default function FormEditor() {
                                 ),
                               );
                             }}
-                            disabled={!formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type}
+                            disabled={
+                              !formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type ||
+                              formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type === "none"
+                            }
                           >
                             <SelectTrigger className="h-8 text-xs">
                               <SelectValue placeholder="Field" />
@@ -4268,7 +4271,10 @@ export default function FormEditor() {
                               );
                             }}
                             className="h-8 text-xs"
-                            disabled={!formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type}
+                            disabled={
+                              !formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type ||
+                              formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type === "none"
+                            }
                           />
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
