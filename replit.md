@@ -104,13 +104,16 @@ Formfy is a modern form builder platform that allows users to create, manage, an
 
 ```
 Changelog:
-- July 2, 2025. URL routing with form IDs for page refresh support
+- July 2, 2025. URL routing with form IDs and enhanced UX improvements
   - Updated form editor routing to include form IDs in URL (/form-editor/:projectId/:formId)
   - Form selection now updates browser URL with form ID for proper navigation
   - Page refresh loads the selected form automatically from URL parameters
   - Added URL synchronization when forms are selected or projects change
   - Users can now bookmark specific forms and share direct form editing links
   - Improved user experience with proper browser history support
+  - After successful form creation/update, app now routes back to /form-editor
+  - Added skeleton loading state when accessing forms via URL for better UX
+  - Loading skeleton displays toolbox, canvas, and properties panel placeholders
 - July 2, 2025. Enhanced date field validation and Test ID field removal
   - Removed Test ID field from form configuration to streamline the interface
   - Added comprehensive date validation options for date fields:

@@ -66,6 +66,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
@@ -319,6 +320,61 @@ function SortableField({
   );
 }
 
+function FormLoadingSkeleton() {
+  return (
+    <div className="h-full flex">
+      {/* Toolbox Skeleton */}
+      <div className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <div className="p-3 border-b border-gray-200 dark:border-gray-800">
+          <Skeleton className="w-6 h-6" />
+        </div>
+        <div className="flex-1 p-1 space-y-1">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="w-10 h-10 rounded" />
+          ))}
+        </div>
+      </div>
+
+      {/* Main Canvas Skeleton */}
+      <div className="flex-1 flex flex-col">
+        {/* Header Skeleton */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-6 h-6" />
+              <Skeleton className="w-48 h-8" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="w-20 h-8" />
+              <Skeleton className="w-24 h-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Content Skeleton */}
+        <div className="flex-1 p-6 space-y-4">
+          <Skeleton className="w-full h-12" />
+          <Skeleton className="w-full h-12" />
+          <Skeleton className="w-3/4 h-12" />
+          <Skeleton className="w-full h-20" />
+          <Skeleton className="w-1/2 h-12" />
+        </div>
+      </div>
+
+      {/* Properties Panel Skeleton */}
+      <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-6 space-y-4">
+        <Skeleton className="w-32 h-6" />
+        <div className="space-y-3">
+          <Skeleton className="w-full h-8" />
+          <Skeleton className="w-full h-8" />
+          <Skeleton className="w-full h-20" />
+          <Skeleton className="w-full h-8" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FormEditor() {
   const [, params] = useRoute("/form-editor/:projectId?/:formId?");
   const [, setLocation] = useLocation();
@@ -327,6 +383,7 @@ export default function FormEditor() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFormId, setSelectedFormId] = useState<string | null>(formIdFromUrl || null);
   const [isCreatingForm, setIsCreatingForm] = useState(false);
+  const [isLoadingFormFromUrl, setIsLoadingFormFromUrl] = useState(false);
 
   // Form creation state
   const [formFields, setFormFields] = useState<any[]>([]);
@@ -507,14 +564,28 @@ export default function FormEditor() {
 
   // Sync URL with selected form
   useEffect(() => {
-    if (formIdFromUrl && forms.length > 0) {
-      const formExists = forms.find(f => f.id === formIdFromUrl);
-      if (formExists) {
-        setSelectedFormId(formIdFromUrl);
-        loadForm(formExists);
+    if (formIdFromUrl) {
+      if (forms.length > 0) {
+        const formExists = forms.find(f => f.id === formIdFromUrl);
+        if (formExists) {
+          setIsLoadingFormFromUrl(true);
+          setSelectedFormId(formIdFromUrl);
+          loadForm(formExists);
+          // Add a small delay to show loading state
+          setTimeout(() => {
+            setIsLoadingFormFromUrl(false);
+          }, 500);
+        } else {
+          setIsLoadingFormFromUrl(false);
+        }
+      } else if (!formsLoading) {
+        // If forms are not loading and we have no forms, set loading to false
+        setIsLoadingFormFromUrl(false);
       }
+    } else {
+      setIsLoadingFormFromUrl(false);
     }
-  }, [formIdFromUrl, forms]);
+  }, [formIdFromUrl, forms, formsLoading]);
 
   // Listen for project changes to refresh forms
   useEffect(() => {
@@ -626,6 +697,11 @@ export default function FormEditor() {
       setSelectedFieldId(null);
       setShowFormsList(true); // Show forms list sidebar after successful creation
 
+      // Navigate back to form editor with just project ID
+      if (currentProjectId) {
+        setLocation(`/form-editor/${currentProjectId}`);
+      }
+
       // Generate public form URL with form ID for SDK access
       const publicUrl = `${window.location.origin}/form/${data.id}/testing`;
 
@@ -706,6 +782,11 @@ export default function FormEditor() {
       setSelectedFieldId(null);
       setEditingFormId(null);
       setShowFormsList(true); // Show forms list sidebar after successful update
+
+      // Navigate back to form editor with just project ID
+      if (currentProjectId) {
+        setLocation(`/form-editor/${currentProjectId}`);
+      }
 
       toast({
         title: "Form updated successfully",
@@ -4699,6 +4780,9 @@ export default function FormEditor() {
               </div>
             )}
           </div>
+        ) : isLoadingFormFromUrl ? (
+          /* Form Loading Skeleton */
+          <FormLoadingSkeleton />
         ) : selectedFormId ? (
           /* Form Editor Interface */
           <div className="p-6">
