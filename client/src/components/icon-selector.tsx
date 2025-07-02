@@ -11,21 +11,16 @@ import * as LucideIcons from 'lucide-react';
 const getAllLucideIcons = () => {
   const allKeys = Object.keys(LucideIcons);
   console.log('Total LucideIcons keys:', allKeys.length);
-  console.log('First 10 keys:', allKeys.slice(0, 10));
   
-  const icons = allKeys.filter(key => {
-    const isFunction = typeof (LucideIcons as any)[key] === 'function';
-    const isCapitalized = key[0] === key[0].toUpperCase();
-    const isNotCreateIcon = key !== 'createLucideIcon';
-    const isNotDefault = key !== 'default';
-    const isNotIcons = key !== 'icons';
-    const isNotIconSuffix = !key.endsWith('Icon');
-    
-    console.log(`Key ${key}: function=${isFunction}, capitalized=${isCapitalized}, notCreate=${isNotCreateIcon}, notDefault=${isNotDefault}, notIcons=${isNotIcons}, notIconSuffix=${isNotIconSuffix}`);
-    
-    const isValidIcon = isNotCreateIcon && isNotDefault && isNotIcons && isNotIconSuffix && isFunction && isCapitalized;
-    return isValidIcon;
-  }).sort();
+  // Get just the main icon names (without 'Icon' suffix)
+  const icons = allKeys.filter(key => 
+    key !== 'createLucideIcon' && 
+    key !== 'default' && 
+    key !== 'icons' &&
+    !key.endsWith('Icon') && // This excludes the duplicate 'Icon' suffixed versions
+    typeof (LucideIcons as any)[key] === 'function' &&
+    key[0] === key[0].toUpperCase()
+  ).sort();
   
   console.log('Filtered icons count:', icons.length);
   console.log('First 10 filtered icons:', icons.slice(0, 10));
