@@ -3560,34 +3560,7 @@ export default function FormEditor() {
                             </div>
                           )}
 
-                          {/* Custom validator - Show for all field types */}
-                          <div>
-                            <Label className="text-xs font-medium">
-                              Custom Validator
-                            </Label>
-                            <Input
-                              value={
-                                selectedField.validation?.customValidator || ""
-                              }
-                              onChange={(e) => {
-                                setFormFields((fields) =>
-                                  fields.map((f) =>
-                                    f.id === selectedFieldId
-                                      ? {
-                                          ...f,
-                                          validation: {
-                                            ...f.validation,
-                                            customValidator: e.target.value,
-                                          },
-                                        }
-                                      : f,
-                                  ),
-                                );
-                              }}
-                              className="mt-1 h-8 text-xs"
-                              placeholder="Function name or expression"
-                            />
-                          </div>
+                          
                         </div>
 
                         {/* Options Management - Only for select and radio */}
