@@ -2388,21 +2388,45 @@ export default function FormEditor() {
                                         field.type === "number" ||
                                         field.type === "tel" ||
                                         field.type === "url" ? (
-                                          <Input
-                                            type={field.type}
-                                            placeholder={field.placeholder}
-                                            disabled={field.disabled}
-                                            readOnly={field.readonly}
-                                            autoFocus={field.autofocus}
-                                            autoComplete={field.autocomplete}
-                                            className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.class || ""}`}
-                                            style={{
-                                              width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
-                                              ...(field.layout === "inline" && {
-                                                minWidth: "120px",
-                                              }),
-                                            }}
-                                          />
+                                          <div className="relative flex items-center">
+                                            {field.icon && field.icon.position === 'left' && (
+                                              <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                {(() => {
+                                                  const IconComponent = (LucideIcons as any)[field.icon.name];
+                                                  return IconComponent ? (
+                                                    <IconComponent size={field.icon.size} />
+                                                  ) : null;
+                                                })()}
+                                              </div>
+                                            )}
+                                            <Input
+                                              type={field.type}
+                                              placeholder={field.placeholder}
+                                              disabled={field.disabled}
+                                              readOnly={field.readonly}
+                                              autoFocus={field.autofocus}
+                                              autoComplete={field.autocomplete}
+                                              className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''} ${field.class || ""}`}
+                                              style={{
+                                                width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
+                                                paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
+                                                paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined,
+                                                ...(field.layout === "inline" && {
+                                                  minWidth: "120px",
+                                                }),
+                                              }}
+                                            />
+                                            {field.icon && field.icon.position === 'right' && (
+                                              <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                {(() => {
+                                                  const IconComponent = (LucideIcons as any)[field.icon.name];
+                                                  return IconComponent ? (
+                                                    <IconComponent size={field.icon.size} />
+                                                  ) : null;
+                                                })()}
+                                              </div>
+                                            )}
+                                          </div>
                                         ) : field.type === "textarea" ? (
                                           <Textarea
                                             placeholder={field.placeholder}
