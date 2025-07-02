@@ -12,6 +12,20 @@ const getAllLucideIcons = () => {
   const allKeys = Object.keys(LucideIcons);
   console.log('Total LucideIcons keys:', allKeys.length);
   
+  // Debug each filter condition with a few sample keys
+  const sampleKeys = ['AArrowDown', 'User', 'createLucideIcon', 'default'];
+  sampleKeys.forEach(key => {
+    if (allKeys.includes(key)) {
+      const isFunction = typeof (LucideIcons as any)[key] === 'function';
+      const isCapitalized = key[0] === key[0].toUpperCase();
+      const notCreateIcon = key !== 'createLucideIcon';
+      const notDefault = key !== 'default';
+      const notIcons = key !== 'icons';
+      const notIconSuffix = !key.endsWith('Icon');
+      console.log(`${key}: func=${isFunction}, cap=${isCapitalized}, notCreate=${notCreateIcon}, notDef=${notDefault}, notIcons=${notIcons}, notSuffix=${notIconSuffix}`);
+    }
+  });
+  
   // Get just the main icon names (without 'Icon' suffix)
   const icons = allKeys.filter(key => 
     key !== 'createLucideIcon' && 
