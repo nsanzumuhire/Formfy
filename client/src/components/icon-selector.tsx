@@ -59,8 +59,17 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
   const visibleIcons = useMemo(() => {
     const startIndex = Math.max(0, visibleStartIndex);
     const endIndex = Math.min(filteredIcons.length, startIndex + visibleItemsCount);
-    return filteredIcons.slice(startIndex, endIndex);
-  }, [filteredIcons, visibleStartIndex, visibleItemsCount]);
+    const result = filteredIcons.slice(startIndex, endIndex);
+    console.log('Icon selector debug:', {
+      allIconsCount: allIcons.length,
+      filteredIconsCount: filteredIcons.length,
+      visibleIconsCount: result.length,
+      startIndex,
+      endIndex,
+      searchTerm
+    });
+    return result;
+  }, [filteredIcons, visibleStartIndex, visibleItemsCount, allIcons.length, searchTerm]);
 
   // Handle scroll event for virtual scrolling
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
@@ -206,42 +215,31 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
               />
             </div>
 
-            {/* Icon Grid with Virtual Scrolling */}
-            <div className="h-48 w-full overflow-auto" onScroll={handleScroll}>
-              <div 
-                className="relative"
-                style={{ 
-                  height: totalRows * itemHeight,
-                  minHeight: containerHeight 
-                }}
-              >
-                <div 
-                  className="absolute inset-x-0 grid grid-cols-6 gap-2 p-1"
-                  style={{ 
-                    top: Math.floor(visibleStartIndex / itemsPerRow) * itemHeight,
-                    height: Math.ceil(visibleIcons.length / itemsPerRow) * itemHeight 
-                  }}
-                >
-                  {visibleIcons.map((iconName: string, index: number) => {
-                    const IconComponent = (LucideIcons as any)[iconName];
-                    if (!IconComponent) return null;
+            {/* Icon Grid */}
+            <ScrollArea className="h-48 w-full">
+              <div className="grid grid-cols-6 gap-2 p-1">
+                {filteredIcons.slice(0, 48).map((iconName: string) => {
+                  const IconComponent = (LucideIcons as any)[iconName];
+                  if (!IconComponent) {
+                    console.log('Icon not found:', iconName);
+                    return null;
+                  }
 
-                    return (
-                      <Button
-                        key={`${iconName}-${visibleStartIndex + index}`}
-                        variant="ghost"
-                        size="sm" 
-                        className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        onClick={() => handleIconSelect(iconName)}
-                        title={iconName}
-                      >
-                        <IconComponent size={16} />
-                      </Button>
-                    );
-                  })}
-                </div>
+                  return (
+                    <Button
+                      key={iconName}
+                      variant="ghost"
+                      size="sm" 
+                      className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onClick={() => handleIconSelect(iconName)}
+                      title={iconName}
+                    >
+                      <IconComponent size={16} />
+                    </Button>
+                  );
+                })}
               </div>
-            </div>
+            </ScrollArea>
 
             {/* Action Buttons */}
             <div className="flex gap-2">
