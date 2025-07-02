@@ -66,14 +66,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         projectId: project.id,
         name: "Testing Key",
         environment: "testing",
-        permissions: ["forms:read", "forms:write", "submissions:read", "submissions:write"],
       });
 
       await storage.createApiKey({
         projectId: project.id,
         name: "Production Key", 
         environment: "production",
-        permissions: ["forms:read", "forms:write", "submissions:read", "submissions:write"],
       });
 
       res.status(201).json(project);
@@ -301,6 +299,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching public form:", error);
       res.status(500).json({ error: "Failed to fetch form" });
+    }
+  });
+
+  app.get('/api/forms/:id/validate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const form = await storage.getForm(id);
+      
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+      
+      // Check ownership through project
+      const project = await storage.getProject(form.projectId);
+      if (!project || project.userId !== req.user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Validate form checksum
+      const isValid = storage.validateFormChecksum(form);
+      
+      res.json({
+        formId: form.id,
+        formName: form.name,
+        isValid,
+        checksum: form.checksum,
+        message: isValid 
+          ? "Form integrity verified - no unauthorized modifications detected"
+          : "Form integrity compromised - unauthorized modifications detected"
+      });
+    } catch (error) {
+      console.error("Error validating form:", error);
+      res.status(500).json({ message: "Failed to validate form" });
     }
   });
 

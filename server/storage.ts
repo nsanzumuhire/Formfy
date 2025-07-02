@@ -17,7 +17,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
-import { randomBytes } from "crypto";
+import { randomBytes, createHash } from "crypto";
 
 // Interface for storage operations
 export interface IStorage {
@@ -175,14 +175,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createForm(form: InsertForm): Promise<Form> {
-    const [newForm] = await db.insert(forms).values(form).returning();
+    // Generate checksum for form integrity
+    const checksum = this.generateFormChecksum({
+      name: form.name,
+      description: form.description,
+      schema: form.schema
+    });
+    
+    const formWithChecksum = {
+      ...form,
+      checksum
+    };
+    
+    const [newForm] = await db.insert(forms).values(formWithChecksum).returning();
     return newForm;
   }
 
   async updateForm(id: string, form: Partial<InsertForm>): Promise<Form> {
+    // Get current form data to generate new checksum
+    const currentForm = await this.getForm(id);
+    if (!currentForm) {
+      throw new Error('Form not found');
+    }
+    
+    // Merge current form data with updates
+    const updatedFormData = {
+      name: form.name ?? currentForm.name,
+      description: form.description ?? currentForm.description,
+      schema: form.schema ?? currentForm.schema
+    };
+    
+    // Generate new checksum for updated form
+    const checksum = this.generateFormChecksum(updatedFormData);
+    
     const [updatedForm] = await db
       .update(forms)
-      .set({ ...form, updatedAt: new Date() })
+      .set({ ...form, checksum, updatedAt: new Date() })
       .where(eq(forms.id, id))
       .returning();
     return updatedForm;
@@ -224,6 +252,30 @@ export class DatabaseStorage implements IStorage {
   public generateProjectKey(): string {
     // Generate a secure project key like "pk_live_abc123..."
     return `pk_live_${randomBytes(24).toString('hex')}`;
+  }
+
+  private generateFormChecksum(formData: { name: string; description?: string | null; schema: any }): string {
+    // Create a deterministic string from form data for hashing
+    const checksumData = {
+      name: formData.name,
+      description: formData.description || '',
+      schema: JSON.stringify(formData.schema, Object.keys(formData.schema).sort())
+    };
+    
+    // Generate SHA-256 hash
+    const dataString = JSON.stringify(checksumData, Object.keys(checksumData).sort());
+    return createHash('sha256').update(dataString).digest('hex');
+  }
+
+  public validateFormChecksum(form: Form): boolean {
+    // Validate if the stored checksum matches the calculated checksum
+    const calculatedChecksum = this.generateFormChecksum({
+      name: form.name,
+      description: form.description,
+      schema: form.schema
+    });
+    
+    return calculatedChecksum === form.checksum;
   }
 }
 

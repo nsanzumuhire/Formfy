@@ -122,6 +122,10 @@ Changelog:
   - Implemented form duplication functionality with "Duplicate" option in form dropdown menu
   - Duplicated forms automatically get "(Copy)" suffix and preserve all original form data and schema
   - Form duplication creates new forms instantly without requiring form editor navigation
+  - Added comprehensive form integrity system with SHA-256 checksum validation
+  - Automatic checksum generation for all form create/update operations to prevent unauthorized modifications
+  - Added /api/forms/:id/validate endpoint for form integrity verification
+  - Database migration completed to add checksum field to existing forms with backward compatibility
 - July 2, 2025. Enhanced date field validation and Test ID field removal
   - Removed Test ID field from form configuration to streamline the interface
   - Added comprehensive date validation options for date fields:

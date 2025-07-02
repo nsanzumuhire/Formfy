@@ -68,6 +68,7 @@ export const forms = pgTable("forms", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   schema: jsonb("schema").notNull(), // Form field definitions
+  checksum: varchar("checksum", { length: 64 }).notNull(), // SHA-256 hash for form integrity
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
