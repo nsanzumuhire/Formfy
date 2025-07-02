@@ -11,11 +11,12 @@ import {
   Upload,
   PanelRightOpen,
   AlignLeft,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export type FieldType = "text" | "email" | "number" | "checkbox" | "radio" | "select" | "textarea" | "date" | "tel" | "url" | "file";
+export type FieldType = "text" | "email" | "password" | "number" | "checkbox" | "radio" | "select" | "textarea" | "date" | "tel" | "url" | "file";
 
 interface FieldDefinition {
   type: FieldType;
@@ -26,6 +27,7 @@ interface FieldDefinition {
 const fieldTypes: FieldDefinition[] = [
   { type: "text", label: "Text Input", icon: Type },
   { type: "email", label: "Email", icon: Type },
+  { type: "password", label: "Password Input", icon: Lock },
   { type: "number", label: "Number", icon: Hash },
   { type: "textarea", label: "Textarea", icon: AlignLeft },
   { type: "select", label: "Select", icon: ChevronDown },

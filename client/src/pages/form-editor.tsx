@@ -52,6 +52,7 @@ import {
   Phone,
   Upload,
   Download,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1795,6 +1796,19 @@ export default function FormEditor() {
                   title="Email Input"
                 >
                   <Type className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("password");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
+                  title="Password Input"
+                >
+                  <Lock className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
