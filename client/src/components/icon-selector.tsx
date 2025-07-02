@@ -12,29 +12,26 @@ const getAllLucideIcons = () => {
   const allKeys = Object.keys(LucideIcons);
   console.log('Total LucideIcons keys:', allKeys.length);
   
-  // Debug each filter condition with a few sample keys
-  const sampleKeys = ['AArrowDown', 'User', 'createLucideIcon', 'default'];
+  // Debug what type the Lucide exports actually are
+  const sampleKeys = ['AArrowDown', 'User'];
   sampleKeys.forEach(key => {
     if (allKeys.includes(key)) {
-      const isFunction = typeof (LucideIcons as any)[key] === 'function';
-      const isCapitalized = key[0] === key[0].toUpperCase();
-      const notCreateIcon = key !== 'createLucideIcon';
-      const notDefault = key !== 'default';
-      const notIcons = key !== 'icons';
-      const notIconSuffix = !key.endsWith('Icon');
-      console.log(`${key}: func=${isFunction}, cap=${isCapitalized}, notCreate=${notCreateIcon}, notDef=${notDefault}, notIcons=${notIcons}, notSuffix=${notIconSuffix}`);
+      const exportValue = (LucideIcons as any)[key];
+      console.log(`${key}: type=${typeof exportValue}, constructor=${exportValue?.constructor?.name}, isReactComponent=${!!exportValue?.$$typeof}`);
     }
   });
   
   // Get just the main icon names (without 'Icon' suffix)
-  const icons = allKeys.filter(key => 
-    key !== 'createLucideIcon' && 
-    key !== 'default' && 
-    key !== 'icons' &&
-    !key.endsWith('Icon') && // This excludes the duplicate 'Icon' suffixed versions
-    typeof (LucideIcons as any)[key] === 'function' &&
-    key[0] === key[0].toUpperCase()
-  ).sort();
+  const icons = allKeys.filter(key => {
+    const exportValue = (LucideIcons as any)[key];
+    return key !== 'createLucideIcon' && 
+           key !== 'default' && 
+           key !== 'icons' &&
+           !key.endsWith('Icon') && // This excludes the duplicate 'Icon' suffixed versions
+           exportValue && // Must exist
+           (typeof exportValue === 'function' || exportValue.$$typeof) && // Function or React component
+           key[0] === key[0].toUpperCase(); // Must be capitalized
+  }).sort();
   
   console.log('Filtered icons count:', icons.length);
   console.log('First 10 filtered icons:', icons.slice(0, 10));
