@@ -826,6 +826,44 @@ export default function FormEditor() {
     },
   });
 
+  // Duplicate form mutation
+  const duplicateFormMutation = useMutation({
+    mutationFn: async (formToDuplicate: Form) => {
+      const duplicatedName = `${formToDuplicate.name} (Copy)`;
+      return await apiRequest(
+        `/api/projects/${currentProjectId}/forms`,
+        "POST",
+        {
+          name: duplicatedName,
+          description: formToDuplicate.description,
+          projectId: currentProjectId,
+          schema: formToDuplicate.schema, // Copy the entire schema including fields and settings
+        },
+      );
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/projects/${currentProjectId}/forms`],
+      });
+
+      toast({
+        title: "Form duplicated successfully",
+        description: `"${data.name}" has been created as a copy`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error duplicating form",
+        description: error.message || "Failed to duplicate form",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDuplicateForm = (form: Form) => {
+    duplicateFormMutation.mutate(form);
+  };
+
   const getFormStatusBadge = (form: Form) => {
     const isActive = form.isActive;
     return (
@@ -1675,7 +1713,12 @@ export default function FormEditor() {
                             <Edit className="mr-2 h-3 w-3" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDuplicateForm(form);
+                            }}
+                          >
                             <Copy className="mr-2 h-3 w-3" />
                             Duplicate
                           </DropdownMenuItem>

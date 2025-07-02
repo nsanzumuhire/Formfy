@@ -119,6 +119,9 @@ Changelog:
   - Download JSON creates properly formatted file with complete form data and schema
   - Added ZIP download feature to export all project forms at once using JSZip library
   - ZIP export includes all forms as JSON files plus project metadata for complete backup
+  - Implemented form duplication functionality with "Duplicate" option in form dropdown menu
+  - Duplicated forms automatically get "(Copy)" suffix and preserve all original form data and schema
+  - Form duplication creates new forms instantly without requiring form editor navigation
 - July 2, 2025. Enhanced date field validation and Test ID field removal
   - Removed Test ID field from form configuration to streamline the interface
   - Added comprehensive date validation options for date fields:
