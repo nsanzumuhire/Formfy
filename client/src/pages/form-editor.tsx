@@ -3126,43 +3126,23 @@ export default function FormEditor() {
                       <>
                         {/* Basic Properties */}
                         <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Field Name
-                              </Label>
-                              <Input
-                                value={selectedField.name || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, name: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Test ID
-                              </Label>
-                              <Input
-                                value={selectedField.testId || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, testId: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                              />
-                            </div>
+                          <div>
+                            <Label className="text-xs font-medium">
+                              Field Name
+                            </Label>
+                            <Input
+                              value={selectedField.name || ""}
+                              onChange={(e) => {
+                                setFormFields((fields) =>
+                                  fields.map((f) =>
+                                    f.id === selectedFieldId
+                                      ? { ...f, name: e.target.value }
+                                      : f,
+                                  ),
+                                );
+                              }}
+                              className="mt-1 h-8 text-xs"
+                            />
                           </div>
 
                           <div>
