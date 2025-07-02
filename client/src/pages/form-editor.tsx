@@ -125,6 +125,7 @@ import {
   ensureFieldNames,
   generateDefaultFieldName,
 } from "@/lib/form-builder";
+import { IconSelector } from "@/components/icon-selector";
 
 // Droppable components for drop zones
 function RowDropZone({ rowId }: { rowId: string }) {
@@ -3189,6 +3190,20 @@ export default function FormEditor() {
                                 placeholder="Custom CSS classes"
                               />
                             </div>
+
+                            {/* Icon Selector */}
+                            <IconSelector
+                              selectedIcon={selectedField.icon}
+                              onIconChange={(icon) => {
+                                setFormFields((fields) =>
+                                  fields.map((f) =>
+                                    f.id === selectedFieldId
+                                      ? { ...f, icon }
+                                      : f,
+                                  ),
+                                );
+                              }}
+                            />
                           </div>
 
                           {/* Prefix/Suffix - Only for text inputs */}

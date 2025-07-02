@@ -50,6 +50,13 @@ export interface FormFieldData {
   height?: number | string; // Height for textarea and other fields
   containerClassName?: string; // CSS classes for the field container
   labelClassName?: string; // CSS classes for the label
+  // Icon properties
+  icon?: {
+    name: string; // Lucide icon name
+    position: 'left' | 'right'; // Icon position relative to input
+    size: number; // Icon size in pixels
+    svg: string; // Stringified SVG content for storage
+  };
 }
 
 export interface FormSchema {
