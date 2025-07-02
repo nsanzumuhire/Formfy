@@ -10,16 +10,17 @@ import * as LucideIcons from 'lucide-react';
 // Get all available Lucide icons dynamically
 const getAllLucideIcons = () => {
   const icons = Object.keys(LucideIcons).filter(key => {
+    // Filter out non-icon exports and keep only the main icon components (not the "Icon" suffixed ones)
     const isValidIcon = key !== 'createLucideIcon' && 
                        key !== 'default' && 
                        key !== 'icons' &&
+                       !key.endsWith('Icon') && // Exclude the "Icon" suffixed duplicates
                        typeof (LucideIcons as any)[key] === 'function' &&
                        key[0] === key[0].toUpperCase(); // Only capitalized exports
     return isValidIcon;
   }).sort();
   
   console.log('Available Lucide icons:', icons.length, icons.slice(0, 10));
-  console.log('All LucideIcons keys:', Object.keys(LucideIcons).slice(0, 20));
   return icons;
 };
 
@@ -222,62 +223,42 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
               />
             </div>
 
-            {/* Icon Grid */}
-            <ScrollArea className="h-48 w-full">
-              <div className="grid grid-cols-6 gap-2 p-1">
-                {/* First, show a few common icons as test */}
-                {['User', 'Mail', 'Phone', 'Search', 'Settings', 'Home', 'Heart', 'Star'].map((iconName: string) => {
-                  const IconComponent = (LucideIcons as any)[iconName];
-                  if (!IconComponent) {
-                    console.log('Test icon not found:', iconName);
-                    return (
-                      <div key={iconName} className="h-8 w-8 border border-red-500 text-xs flex items-center justify-center">
-                        {iconName.slice(0, 1)}
-                      </div>
-                    );
-                  }
+            {/* Icon Grid with Virtual Scrolling */}
+            <div className="h-48 w-full overflow-auto" onScroll={handleScroll}>
+              <div 
+                className="relative"
+                style={{ 
+                  height: totalRows * itemHeight,
+                  minHeight: containerHeight 
+                }}
+              >
+                <div 
+                  className="absolute inset-x-0 grid grid-cols-6 gap-2 p-1"
+                  style={{ 
+                    top: Math.floor(visibleStartIndex / itemsPerRow) * itemHeight,
+                    height: Math.ceil(visibleIcons.length / itemsPerRow) * itemHeight 
+                  }}
+                >
+                  {visibleIcons.map((iconName: string, index: number) => {
+                    const IconComponent = (LucideIcons as any)[iconName];
+                    if (!IconComponent) return null;
 
-                  return (
-                    <Button
-                      key={iconName}
-                      variant="ghost"
-                      size="sm" 
-                      className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      onClick={() => handleIconSelect(iconName)}
-                      title={iconName}
-                    >
-                      <IconComponent size={16} />
-                    </Button>
-                  );
-                })}
-                
-                {/* Show filtered icons */}
-                {filteredIcons.slice(0, 40).map((iconName: string) => {
-                  const IconComponent = (LucideIcons as any)[iconName];
-                  if (!IconComponent) {
-                    console.log('Filtered icon not found:', iconName);
                     return (
-                      <div key={iconName} className="h-8 w-8 border border-orange-500 text-xs flex items-center justify-center">
-                        {iconName.slice(0, 1)}
-                      </div>
+                      <Button
+                        key={`${iconName}-${visibleStartIndex + index}`}
+                        variant="ghost"
+                        size="sm" 
+                        className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        onClick={() => handleIconSelect(iconName)}
+                        title={iconName}
+                      >
+                        <IconComponent size={16} />
+                      </Button>
                     );
-                  }
-
-                  return (
-                    <Button
-                      key={iconName}
-                      variant="ghost"
-                      size="sm" 
-                      className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      onClick={() => handleIconSelect(iconName)}
-                      title={iconName}
-                    >
-                      <IconComponent size={16} />
-                    </Button>
-                  );
-                })}
+                  })}
+                </div>
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex gap-2">
