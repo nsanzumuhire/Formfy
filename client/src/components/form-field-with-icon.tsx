@@ -54,6 +54,7 @@ export function FormFieldWithIcon({
     switch (field.type) {
       case 'text':
       case 'email':
+      case 'password':
       case 'tel':
       case 'url':
       case 'number':

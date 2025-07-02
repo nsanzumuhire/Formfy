@@ -2479,6 +2479,7 @@ export default function FormEditor() {
                                             {/* Render form field based on type */}
                                             {field.type === "text" ||
                                             field.type === "email" ||
+                                            field.type === "password" ||
                                             field.type === "number" ||
                                             field.type === "tel" ||
                                             field.type === "url" ? (

@@ -51,6 +51,14 @@ export function FormField({ field, isSelected, onSelect, onUpdate, onDelete }: F
             disabled
           />
         );
+      case "password":
+        return (
+          <Input
+            type="password"
+            placeholder={field.placeholder}
+            disabled
+          />
+        );
       case "number":
         return (
           <Input

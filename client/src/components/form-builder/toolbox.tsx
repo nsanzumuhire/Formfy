@@ -13,10 +13,11 @@ import {
   Phone,
   Link,
   FileText,
+  Lock,
 } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
-export type FieldType = "text" | "email" | "number" | "checkbox" | "radio" | "select" | "textarea" | "date" | "tel" | "url" | "file";
+export type FieldType = "text" | "email" | "number" | "checkbox" | "radio" | "select" | "textarea" | "date" | "tel" | "url" | "file" | "password";
 
 interface FieldDefinition {
   type: FieldType;
@@ -39,6 +40,11 @@ const fieldTypes: FieldDefinition[] = [
     type: "email",
     label: "Email Input",
     icon: Mail,
+  },
+  {
+    type: "password",
+    label: "Password Input",
+    icon: Lock,
   },
   {
     type: "number",

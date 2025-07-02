@@ -126,6 +126,11 @@ Changelog:
   - Automatic checksum generation for all form create/update operations to prevent unauthorized modifications
   - Added /api/forms/:id/validate endpoint for form integrity verification
   - Database migration completed to add checksum field to existing forms with backward compatibility
+- July 2, 2025. Added password form field type and enhanced date field validation
+  - Added password input field type to form builder toolbox with Lock icon
+  - Updated all form field rendering components to support password field type
+  - Password fields display with proper input type="password" for secure text entry
+  - Password field fully supports icons, validation, and all standard field properties
 - July 2, 2025. Enhanced date field validation and Test ID field removal
   - Removed Test ID field from form configuration to streamline the interface
   - Added comprehensive date validation options for date fields:

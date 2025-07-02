@@ -42,6 +42,7 @@ export function SortableFormField({
     switch (field.type) {
       case "text":
       case "email":
+      case "password":
       case "number":
       case "tel":
       case "url":
