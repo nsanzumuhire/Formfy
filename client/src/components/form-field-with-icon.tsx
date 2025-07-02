@@ -17,7 +17,6 @@ interface FormFieldWithIconProps {
   className?: string;
   disabled?: boolean;
   readonly?: boolean;
-  showHint?: boolean; // Control whether to show hint text
 }
 
 export function FormFieldWithIcon({ 
@@ -26,8 +25,7 @@ export function FormFieldWithIcon({
   onChange, 
   className, 
   disabled, 
-  readonly,
-  showHint = false
+  readonly 
 }: FormFieldWithIconProps) {
   const IconComponent = field.icon ? (LucideIcons as any)[field.icon.name] : null;
   
@@ -175,11 +173,6 @@ export function FormFieldWithIcon({
     return (
       <div className={cn("space-y-2", className)}>
         {renderInputField()}
-        {showHint && field.hint && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {field.hint}
-          </p>
-        )}
       </div>
     );
   }
@@ -191,11 +184,6 @@ export function FormFieldWithIcon({
     return (
       <div className={className}>
         {renderInputField()}
-        {showHint && field.hint && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {field.hint}
-          </p>
-        )}
       </div>
     );
   }
@@ -207,11 +195,6 @@ export function FormFieldWithIcon({
         {renderInputField()}
         {renderIcon('right')}
       </div>
-      {showHint && field.hint && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {field.hint}
-        </p>
-      )}
     </div>
   );
 }

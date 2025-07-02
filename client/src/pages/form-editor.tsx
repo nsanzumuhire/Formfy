@@ -104,7 +104,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from "@/hooks/useProject";
 import { useToast } from "@/hooks/use-toast";
-import { FormFieldWithIcon } from "@/components/form-field-with-icon";
 import { apiRequest } from "@/lib/queryClient";
 import type { Form, Project } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
@@ -2371,17 +2370,64 @@ export default function FormEditor() {
                                           : ""
                                       }`}
                                     >
-                                      <FormFieldWithIcon
-                                        field={field}
-                                        showHint={true}
-                                        className={`${
-                                          field.layout === "horizontal" &&
-                                          field.type !== "radio" &&
-                                          field.type !== "checkbox"
-                                            ? "flex-1"
-                                            : ""
-                                        }`}
-                                      />
+                                      {field.hint && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                          {field.hint}
+                                        </p>
+                                      )}
+
+                                      <div className="relative">
+                                        {field.prefix && (
+                                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">
+                                            {field.prefix}
+                                          </span>
+                                        )}
+
+                                        {field.type === "text" ||
+                                        field.type === "email" ||
+                                        field.type === "number" ||
+                                        field.type === "tel" ||
+                                        field.type === "url" ? (
+                                          <div className="relative flex items-center">
+                                            {field.icon && field.icon.position === 'left' && (
+                                              <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                {(() => {
+                                                  const IconComponent = (LucideIcons as any)[field.icon.name];
+                                                  return IconComponent ? (
+                                                    <IconComponent size={field.icon.size} />
+                                                  ) : null;
+                                                })()}
+                                              </div>
+                                            )}
+                                            <Input
+                                              type={field.type}
+                                              placeholder={field.placeholder}
+                                              disabled={field.disabled}
+                                              readOnly={field.readonly}
+                                              autoFocus={field.autofocus}
+                                              autoComplete={field.autocomplete}
+                                              className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''} ${field.class || ""}`}
+                                              style={{
+                                                width: typeof field.width === 'number' ? `${field.width}%` : (field.width || "100%"),
+                                                paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
+                                                paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined,
+                                                ...(field.layout === "inline" && {
+                                                  minWidth: "120px",
+                                                }),
+                                              }}
+                                            />
+                                            {field.icon && field.icon.position === 'right' && (
+                                              <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                {(() => {
+                                                  const IconComponent = (LucideIcons as any)[field.icon.name];
+                                                  return IconComponent ? (
+                                                    <IconComponent size={field.icon.size} />
+                                                  ) : null;
+                                                })()}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ) : field.type === "textarea" ? (
                                           <Textarea
                                             placeholder={field.placeholder}
                                             disabled={field.disabled}
