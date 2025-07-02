@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
+import JSZip from "jszip";
 import {
   DndContext,
   closestCenter,
@@ -51,6 +52,7 @@ import {
   Phone,
   Upload,
   Download,
+  Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -902,6 +904,80 @@ export default function FormEditor() {
     });
   };
 
+  const handleDownloadAllFormsZip = async () => {
+    if (!forms || forms.length === 0) {
+      toast({
+        title: "No forms to download",
+        description: "This project has no forms to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create a new JSZip instance
+      const zip = new JSZip();
+      
+      // Add each form as a JSON file to the zip
+      forms.forEach((form) => {
+        const formData = {
+          id: form.id,
+          name: form.name,
+          description: form.description,
+          schema: form.schema,
+          isActive: form.isActive,
+          createdAt: form.createdAt,
+          updatedAt: form.updatedAt,
+        };
+        
+        const jsonString = JSON.stringify(formData, null, 2);
+        const filename = `${form.name.toLowerCase().replace(/\s+/g, '-')}-form.json`;
+        zip.file(filename, jsonString);
+      });
+
+      // Add a project metadata file
+      const projectMeta = {
+        projectId: currentProjectId,
+        projectName: project?.name || "Unknown Project",
+        totalForms: forms.length,
+        exportDate: new Date().toISOString(),
+        exportedBy: "Formfy Form Builder",
+      };
+      
+      zip.file('project-metadata.json', JSON.stringify(projectMeta, null, 2));
+
+      // Generate the zip file
+      const content = await zip.generateAsync({ type: "blob" });
+      
+      // Create download link
+      const url = URL.createObjectURL(content);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const projectName = project?.name?.toLowerCase().replace(/\s+/g, '-') || 'project';
+      link.download = `${projectName}-forms-export.zip`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Forms exported successfully",
+        description: `Downloaded ${forms.length} forms as ZIP file`,
+      });
+    } catch (error) {
+      console.error('Error creating ZIP file:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to create ZIP file. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleNewFormClick = () => {
     setIsCreatingForm(true);
     setSelectedFormId(null);
@@ -1485,12 +1561,25 @@ export default function FormEditor() {
               <h2 className="font-semibold text-gray-900 dark:text-gray-100">
                 Forms
               </h2>
-              {forms && forms.length > 0 && (
-                <Button size="sm" className="h-7" onClick={handleNewFormClick}>
-                  <Plus className="w-3 h-3 mr-1" />
-                  New
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {forms && forms.length > 0 && (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-7 px-2" 
+                      onClick={handleDownloadAllFormsZip}
+                      title="Download all forms as ZIP"
+                    >
+                      <Archive className="w-3 h-3" />
+                    </Button>
+                    <Button size="sm" className="h-7" onClick={handleNewFormClick}>
+                      <Plus className="w-3 h-3 mr-1" />
+                      New
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

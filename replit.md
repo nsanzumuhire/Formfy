@@ -117,6 +117,8 @@ Changelog:
   - Loading skeleton displays toolbox, canvas, and properties panel placeholders
   - Updated form dropdown menu: removed "Copy Public URL", added "Download JSON" functionality
   - Download JSON creates properly formatted file with complete form data and schema
+  - Added ZIP download feature to export all project forms at once using JSZip library
+  - ZIP export includes all forms as JSON files plus project metadata for complete backup
 - July 2, 2025. Enhanced date field validation and Test ID field removal
   - Removed Test ID field from form configuration to streamline the interface
   - Added comprehensive date validation options for date fields:
