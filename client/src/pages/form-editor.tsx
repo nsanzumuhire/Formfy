@@ -228,12 +228,39 @@ function SortableField({
       field.type === "number" ||
       field.type === "tel" ||
       field.type === "url" ? (
-        <Input
-          type={field.type}
-          placeholder={field.placeholder}
-          disabled
-          className="bg-gray-50 dark:bg-gray-900"
-        />
+        <div className="relative flex items-center">
+          {field.icon && field.icon.position === 'left' && (
+            <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+              {(() => {
+                const IconComponent = (LucideIcons as any)[field.icon.name];
+                console.log('Edit mode left icon:', field.icon.name, IconComponent);
+                return IconComponent ? (
+                  <IconComponent size={field.icon.size} />
+                ) : null;
+              })()}
+            </div>
+          )}
+          <Input
+            type={field.type}
+            placeholder={field.placeholder}
+            disabled
+            className={`bg-gray-50 dark:bg-gray-900 ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''}`}
+            style={{ 
+              paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
+              paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined
+            }}
+          />
+          {field.icon && field.icon.position === 'right' && (
+            <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+              {(() => {
+                const IconComponent = (LucideIcons as any)[field.icon.name];
+                return IconComponent ? (
+                  <IconComponent size={field.icon.size} />
+                ) : null;
+              })()}
+            </div>
+          )}
+        </div>
       ) : field.type === "textarea" ? (
         <Textarea
           placeholder={field.placeholder}
@@ -2134,6 +2161,7 @@ export default function FormEditor() {
                                                   <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
                                                     {(() => {
                                                       const IconComponent = (LucideIcons as any)[field.icon.name];
+                                                      console.log('Preview mode left icon:', field.icon.name, IconComponent, field.icon);
                                                       return IconComponent ? (
                                                         <IconComponent size={field.icon.size} />
                                                       ) : null;
