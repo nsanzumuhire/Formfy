@@ -115,6 +115,8 @@ Changelog:
   - Fixed form update routing to prevent navigating to form-specific URLs after saving
   - Added skeleton loading state when accessing forms via URL for better UX
   - Loading skeleton displays toolbox, canvas, and properties panel placeholders
+  - Updated form dropdown menu: removed "Copy Public URL", added "Download JSON" functionality
+  - Download JSON creates properly formatted file with complete form data and schema
 - July 2, 2025. Enhanced date field validation and Test ID field removal
   - Removed Test ID field from form configuration to streamline the interface
   - Added comprehensive date validation options for date fields:

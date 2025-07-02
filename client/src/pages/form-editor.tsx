@@ -50,6 +50,7 @@ import {
   Calendar,
   Phone,
   Upload,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -865,6 +866,42 @@ export default function FormEditor() {
     }
   };
 
+  const handleDownloadFormJson = (form: Form) => {
+    // Create the JSON data to download
+    const formData = {
+      id: form.id,
+      name: form.name,
+      description: form.description,
+      schema: form.schema,
+      isActive: form.isActive,
+      createdAt: form.createdAt,
+      updatedAt: form.updatedAt,
+    };
+
+    // Convert to JSON string with pretty formatting
+    const jsonString = JSON.stringify(formData, null, 2);
+
+    // Create a blob and download link
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link element and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${form.name.toLowerCase().replace(/\s+/g, '-')}-form.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Form downloaded",
+      description: `${form.name} has been downloaded as JSON`,
+    });
+  };
+
   const handleNewFormClick = () => {
     setIsCreatingForm(true);
     setSelectedFormId(null);
@@ -1550,22 +1587,15 @@ export default function FormEditor() {
                             <Edit className="mr-2 h-3 w-3" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const publicUrl = `${window.location.origin}/form/${currentProjectId}/${form.name.toLowerCase().replace(/\s+/g, "-")}`;
-                              navigator.clipboard.writeText(publicUrl);
-                              toast({
-                                title: "URL copied",
-                                description: "Form URL copied to clipboard",
-                              });
-                            }}
-                          >
-                            <Copy className="mr-2 h-3 w-3" />
-                            Copy Public URL
-                          </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Copy className="mr-2 h-3 w-3" />
                             Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDownloadFormJson(form)}
+                          >
+                            <Download className="mr-2 h-3 w-3" />
+                            Download JSON
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600">
