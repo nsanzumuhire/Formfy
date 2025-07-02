@@ -99,7 +99,8 @@ import {
   Settings,
   Trash2,
   Type,
-  Upload
+  Upload,
+  AtSign
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRoute } from "wouter";
@@ -1418,7 +1419,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Text Input"
                 >
-                  <AlignLeft className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <Type className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1431,7 +1432,7 @@ export default function FormEditor() {
                   className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
                   title="Email Input"
                 >
-                  <Type className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
+                  <AtSign className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1445,6 +1446,32 @@ export default function FormEditor() {
                   title="Number Input"
                 >
                   <Hash className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button> 
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("textarea");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
+                  title="Textarea"
+                >
+                  <AlignLeft className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddField("select");
+                  }}
+                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
+                  title="Dropdown"
+                >
+                  <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
@@ -1471,32 +1498,6 @@ export default function FormEditor() {
                   title="Radio Button"
                 >
                   <Circle className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("select");
-                  }}
-                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
-                  title="Dropdown"
-                >
-                  <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddField("textarea");
-                  }}
-                  className="w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group relative z-30"
-                  title="Textarea"
-                >
-                  <AlignLeft className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
 
                 <button
