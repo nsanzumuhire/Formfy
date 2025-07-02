@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -95,6 +95,21 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
     onIconChange(null);
     setIsOpen(false);
   };
+
+  // Update icon data when size or position changes
+  useEffect(() => {
+    if (selectedIcon) {
+      const iconData = getIconData(selectedIcon.name);
+      if (iconData) {
+        onIconChange({
+          name: selectedIcon.name,
+          position: iconPosition,
+          size: iconSize,
+          svg: iconData.svg
+        });
+      }
+    }
+  }, [iconSize, iconPosition]);
 
   const SelectedIconComponent = selectedIcon ? (LucideIcons as any)[selectedIcon.name] : null;
 

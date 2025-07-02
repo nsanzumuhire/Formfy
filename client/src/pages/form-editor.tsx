@@ -233,7 +233,7 @@ function SortableField({
             <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
               {(() => {
                 const IconComponent = (LucideIcons as any)[field.icon.name];
-                console.log('Edit mode left icon:', field.icon.name, IconComponent);
+
                 return IconComponent ? (
                   <IconComponent size={field.icon.size} />
                 ) : null;
@@ -2161,7 +2161,7 @@ export default function FormEditor() {
                                                   <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
                                                     {(() => {
                                                       const IconComponent = (LucideIcons as any)[field.icon.name];
-                                                      console.log('Preview mode left icon:', field.icon.name, IconComponent, field.icon);
+
                                                       return IconComponent ? (
                                                         <IconComponent size={field.icon.size} />
                                                       ) : null;
