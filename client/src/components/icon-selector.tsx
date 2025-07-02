@@ -9,11 +9,18 @@ import * as LucideIcons from 'lucide-react';
 
 // Get all available Lucide icons dynamically
 const getAllLucideIcons = () => {
-  return Object.keys(LucideIcons).filter(key => 
-    key !== 'createLucideIcon' && 
-    key !== 'default' && 
-    typeof (LucideIcons as any)[key] === 'function'
-  ).sort();
+  const icons = Object.keys(LucideIcons).filter(key => {
+    const isValidIcon = key !== 'createLucideIcon' && 
+                       key !== 'default' && 
+                       key !== 'icons' &&
+                       typeof (LucideIcons as any)[key] === 'function' &&
+                       key[0] === key[0].toUpperCase(); // Only capitalized exports
+    return isValidIcon;
+  }).sort();
+  
+  console.log('Available Lucide icons:', icons.length, icons.slice(0, 10));
+  console.log('All LucideIcons keys:', Object.keys(LucideIcons).slice(0, 20));
+  return icons;
 };
 
 interface IconSelectorProps {
