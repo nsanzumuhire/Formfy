@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,16 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import * as LucideIcons from 'lucide-react';
 
-// Common Lucide icons for form fields
-const FORM_FIELD_ICONS = [
-  'User', 'Mail', 'Phone', 'Lock', 'Calendar', 'Clock', 'MapPin', 'Globe', 
-  'Building', 'Home', 'CreditCard', 'DollarSign', 'Hash', 'Type', 'FileText',
-  'Image', 'Upload', 'Download', 'Search', 'Filter', 'Settings', 'Info',
-  'AlertCircle', 'CheckCircle', 'XCircle', 'Heart', 'Star', 'Flag',
-  'Tag', 'Bookmark', 'Link', 'Share', 'Copy', 'Edit', 'Trash2', 'Plus',
-  'Minus', 'X', 'Check', 'ChevronDown', 'ChevronUp', 'ChevronLeft', 'ChevronRight',
-  'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Send', 'MessageSquare'
-];
+// Get all available Lucide icons dynamically
+const getAllLucideIcons = () => {
+  return Object.keys(LucideIcons).filter(key => 
+    key !== 'createLucideIcon' && 
+    key !== 'default' && 
+    typeof (LucideIcons as any)[key] === 'function'
+  ).sort();
+};
 
 interface IconSelectorProps {
   selectedIcon?: {
@@ -38,14 +36,39 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
   const [searchTerm, setSearchTerm] = useState('');
   const [iconPosition, setIconPosition] = useState<'left' | 'right'>(selectedIcon?.position || 'left');
   const [iconSize, setIconSize] = useState(selectedIcon?.size || 16);
+  const [allIcons] = useState(() => getAllLucideIcons());
 
   // Filter icons based on search term
   const filteredIcons = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return FORM_FIELD_ICONS.filter(iconName =>
+    return allIcons.filter((iconName: string) =>
       iconName.toLowerCase().includes(searchLower)
     );
-  }, [searchTerm]);
+  }, [searchTerm, allIcons]);
+
+  // Virtual scrolling state
+  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+  const itemsPerRow = 6;
+  const itemHeight = 36; // Height of each icon button including gap
+  const containerHeight = 192; // Height of scroll container (h-48 = 192px)
+  const visibleRows = Math.ceil(containerHeight / itemHeight) + 2; // Buffer rows
+  const totalRows = Math.ceil(filteredIcons.length / itemsPerRow);
+  const visibleItemsCount = visibleRows * itemsPerRow;
+
+  // Calculate visible items for current scroll position
+  const visibleIcons = useMemo(() => {
+    const startIndex = Math.max(0, visibleStartIndex);
+    const endIndex = Math.min(filteredIcons.length, startIndex + visibleItemsCount);
+    return filteredIcons.slice(startIndex, endIndex);
+  }, [filteredIcons, visibleStartIndex, visibleItemsCount]);
+
+  // Handle scroll event for virtual scrolling
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const scrollTop = event.currentTarget.scrollTop;
+    const newStartRow = Math.floor(scrollTop / itemHeight);
+    const newStartIndex = newStartRow * itemsPerRow;
+    setVisibleStartIndex(newStartIndex);
+  }, [itemHeight, itemsPerRow]);
 
   // Get icon component and SVG content by rendering to string
   const getIconData = (iconName: string) => {
@@ -110,6 +133,11 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
       }
     }
   }, [iconSize, iconPosition]);
+
+  // Reset scroll position when search term changes
+  useEffect(() => {
+    setVisibleStartIndex(0);
+  }, [searchTerm]);
 
   const SelectedIconComponent = selectedIcon ? (LucideIcons as any)[selectedIcon.name] : null;
 
@@ -178,28 +206,42 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
               />
             </div>
 
-            {/* Icon Grid */}
-            <ScrollArea className="h-48 w-full">
-              <div className="grid grid-cols-6 gap-2 p-1">
-                {filteredIcons.map((iconName) => {
-                  const IconComponent = (LucideIcons as any)[iconName];
-                  if (!IconComponent) return null;
+            {/* Icon Grid with Virtual Scrolling */}
+            <div className="h-48 w-full overflow-auto" onScroll={handleScroll}>
+              <div 
+                className="relative"
+                style={{ 
+                  height: totalRows * itemHeight,
+                  minHeight: containerHeight 
+                }}
+              >
+                <div 
+                  className="absolute inset-x-0 grid grid-cols-6 gap-2 p-1"
+                  style={{ 
+                    top: Math.floor(visibleStartIndex / itemsPerRow) * itemHeight,
+                    height: Math.ceil(visibleIcons.length / itemsPerRow) * itemHeight 
+                  }}
+                >
+                  {visibleIcons.map((iconName: string, index: number) => {
+                    const IconComponent = (LucideIcons as any)[iconName];
+                    if (!IconComponent) return null;
 
-                  return (
-                    <Button
-                      key={iconName}
-                      variant="ghost"
-                      size="sm" 
-                      className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      onClick={() => handleIconSelect(iconName)}
-                      title={iconName}
-                    >
-                      <IconComponent size={16} />
-                    </Button>
-                  );
-                })}
+                    return (
+                      <Button
+                        key={`${iconName}-${visibleStartIndex + index}`}
+                        variant="ghost"
+                        size="sm" 
+                        className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        onClick={() => handleIconSelect(iconName)}
+                        title={iconName}
+                      >
+                        <IconComponent size={16} />
+                      </Button>
+                    );
+                  })}
+                </div>
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex gap-2">
