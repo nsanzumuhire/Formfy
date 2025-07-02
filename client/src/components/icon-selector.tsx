@@ -9,18 +9,26 @@ import * as LucideIcons from 'lucide-react';
 
 // Get all available Lucide icons dynamically
 const getAllLucideIcons = () => {
-  const icons = Object.keys(LucideIcons).filter(key => {
-    // Filter out non-icon exports and keep only the main icon components (not the "Icon" suffixed ones)
-    const isValidIcon = key !== 'createLucideIcon' && 
-                       key !== 'default' && 
-                       key !== 'icons' &&
-                       !key.endsWith('Icon') && // Exclude the "Icon" suffixed duplicates
-                       typeof (LucideIcons as any)[key] === 'function' &&
-                       key[0] === key[0].toUpperCase(); // Only capitalized exports
+  const allKeys = Object.keys(LucideIcons);
+  console.log('Total LucideIcons keys:', allKeys.length);
+  console.log('First 10 keys:', allKeys.slice(0, 10));
+  
+  const icons = allKeys.filter(key => {
+    const isFunction = typeof (LucideIcons as any)[key] === 'function';
+    const isCapitalized = key[0] === key[0].toUpperCase();
+    const isNotCreateIcon = key !== 'createLucideIcon';
+    const isNotDefault = key !== 'default';
+    const isNotIcons = key !== 'icons';
+    const isNotIconSuffix = !key.endsWith('Icon');
+    
+    console.log(`Key ${key}: function=${isFunction}, capitalized=${isCapitalized}, notCreate=${isNotCreateIcon}, notDefault=${isNotDefault}, notIcons=${isNotIcons}, notIconSuffix=${isNotIconSuffix}`);
+    
+    const isValidIcon = isNotCreateIcon && isNotDefault && isNotIcons && isNotIconSuffix && isFunction && isCapitalized;
     return isValidIcon;
   }).sort();
   
-  console.log('Available Lucide icons:', icons.length, icons.slice(0, 10));
+  console.log('Filtered icons count:', icons.length);
+  console.log('First 10 filtered icons:', icons.slice(0, 10));
   return icons;
 };
 
@@ -44,7 +52,13 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
   const [searchTerm, setSearchTerm] = useState('');
   const [iconPosition, setIconPosition] = useState<'left' | 'right'>(selectedIcon?.position || 'left');
   const [iconSize, setIconSize] = useState(selectedIcon?.size || 16);
-  const [allIcons] = useState(() => getAllLucideIcons());
+  // Test with a manual list first to see if the basic functionality works
+  const testIcons = ['User', 'Mail', 'Phone', 'Search', 'Settings', 'Home', 'Heart', 'Star', 'Calendar', 'Clock'];
+  const [allIcons] = useState(() => {
+    const dynamicIcons = getAllLucideIcons();
+    console.log('Using dynamic icons:', dynamicIcons.length > 0 ? dynamicIcons.slice(0, 5) : 'None found, using test icons');
+    return dynamicIcons.length > 0 ? dynamicIcons : testIcons;
+  });
 
   // Filter icons based on search term
   const filteredIcons = useMemo(() => {
