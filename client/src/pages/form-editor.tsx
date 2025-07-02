@@ -52,7 +52,6 @@ import {
   Phone,
   Upload,
   Download,
-  Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1571,7 +1570,7 @@ export default function FormEditor() {
                       onClick={handleDownloadAllFormsZip}
                       title="Download all forms as ZIP"
                     >
-                      <Archive className="w-3 h-3" />
+                      <Download className="w-3 h-3" />
                     </Button>
                     <Button size="sm" className="h-7" onClick={handleNewFormClick}>
                       <Plus className="w-3 h-3 mr-1" />
