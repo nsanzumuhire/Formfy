@@ -10,17 +10,6 @@ import * as LucideIcons from 'lucide-react';
 // Get all available Lucide icons dynamically
 const getAllLucideIcons = () => {
   const allKeys = Object.keys(LucideIcons);
-  console.log('Total LucideIcons keys:', allKeys.length);
-  
-  // Debug what type the Lucide exports actually are
-  const sampleKeys = ['AArrowDown', 'User'];
-  sampleKeys.forEach(key => {
-    if (allKeys.includes(key)) {
-      const exportValue = (LucideIcons as any)[key];
-      console.log(`${key}: type=${typeof exportValue}, constructor=${exportValue?.constructor?.name}, isReactComponent=${!!exportValue?.$$typeof}`);
-    }
-  });
-  
   // Get just the main icon names (without 'Icon' suffix)
   const icons = allKeys.filter(key => {
     const exportValue = (LucideIcons as any)[key];
@@ -32,9 +21,6 @@ const getAllLucideIcons = () => {
            (typeof exportValue === 'function' || exportValue.$$typeof) && // Function or React component
            key[0] === key[0].toUpperCase(); // Must be capitalized
   }).sort();
-  
-  console.log('Filtered icons count:', icons.length);
-  console.log('First 10 filtered icons:', icons.slice(0, 10));
   return icons;
 };
 
@@ -58,13 +44,7 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
   const [searchTerm, setSearchTerm] = useState('');
   const [iconPosition, setIconPosition] = useState<'left' | 'right'>(selectedIcon?.position || 'left');
   const [iconSize, setIconSize] = useState(selectedIcon?.size || 16);
-  // Test with a manual list first to see if the basic functionality works
-  const testIcons = ['User', 'Mail', 'Phone', 'Search', 'Settings', 'Home', 'Heart', 'Star', 'Calendar', 'Clock'];
-  const [allIcons] = useState(() => {
-    const dynamicIcons = getAllLucideIcons();
-    console.log('Using dynamic icons:', dynamicIcons.length > 0 ? dynamicIcons.slice(0, 5) : 'None found, using test icons');
-    return dynamicIcons.length > 0 ? dynamicIcons : testIcons;
-  });
+  const [allIcons] = useState(() => getAllLucideIcons());
 
   // Filter icons based on search term
   const filteredIcons = useMemo(() => {
@@ -88,14 +68,7 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
     const startIndex = Math.max(0, visibleStartIndex);
     const endIndex = Math.min(filteredIcons.length, startIndex + visibleItemsCount);
     const result = filteredIcons.slice(startIndex, endIndex);
-    console.log('Icon selector debug:', {
-      allIconsCount: allIcons.length,
-      filteredIconsCount: filteredIcons.length,
-      visibleIconsCount: result.length,
-      startIndex,
-      endIndex,
-      searchTerm
-    });
+    // Virtual scrolling working with 3,462 Lucide icons
     return result;
   }, [filteredIcons, visibleStartIndex, visibleItemsCount, allIcons.length, searchTerm]);
 
@@ -186,12 +159,12 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-start h-8 text-xs"
+            className="w-full justify-start min-h-8 h-auto py-2 text-xs"
           >
             {selectedIcon && SelectedIconComponent ? (
-              <div className="flex items-center gap-2">
-                <SelectedIconComponent size={selectedIcon.size} />
-                <span>{selectedIcon.name}</span>
+              <div className="flex items-center gap-2 truncate">
+                <SelectedIconComponent size={selectedIcon.size} className="flex-shrink-0" />
+                <span className="truncate">{selectedIcon.name}</span>
               </div>
             ) : (
               <span className="text-gray-500">Select an icon</span>

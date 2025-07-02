@@ -104,7 +104,7 @@ Formfy is a modern form builder platform that allows users to create, manage, an
 
 ```
 Changelog:
-- July 2, 2025. Comprehensive icon support system implementation
+- July 2, 2025. Comprehensive icon support system implementation and critical bug fixes
   - Added icon property to FormFieldData interface with name, position, size, and SVG content
   - Created IconSelector component with Lucide React icons library and search functionality
   - Integrated icon selector into form editor property panel with position and size controls
@@ -112,6 +112,9 @@ Changelog:
   - Fixed icon size/position changes to reflect immediately without re-selection
   - Icons display properly in auto layout, traditional layouts (single, two-column, grid)
   - SVG content is saved with form data for SDK rendering compatibility
+  - CRITICAL FIX: Resolved icon selector showing 0 icons - Lucide React exports are objects with $$typeof (React components), not functions
+  - Implemented virtual scrolling for 3,462 Lucide icons with efficient filtering and search
+  - Fixed button content overflow in icon selector trigger with proper sizing and truncation
 - June 30, 2025. Simplified lazy select data functionality for dynamic dropdown options
   - Changed lazySelectData from object to boolean for simplified interface
   - Added checkbox toggle in property panel to switch between manual options and API loading
