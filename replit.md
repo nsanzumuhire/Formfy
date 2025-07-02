@@ -104,6 +104,18 @@ Formfy is a modern form builder platform that allows users to create, manage, an
 
 ```
 Changelog:
+- July 2, 2025. Enhanced date field validation and Test ID field removal
+  - Removed Test ID field from form configuration to streamline the interface
+  - Added comprehensive date validation options for date fields:
+    * "Cannot be in past" checkbox - prevents selecting past dates
+    * "Cannot be in future" checkbox - prevents selecting future dates
+    * Date comparison validation - "Must be before/after another date field"
+    * Optional days offset for date comparisons (e.g., 30 days before another date)
+  - Updated FormFieldData interface with new date validation properties:
+    * disablePast, disableFuture boolean flags
+    * dateComparison object with type, field, and offset properties
+  - Date comparison allows selecting another date field from the form for validation
+  - All date validation options are only shown when editing date field types
 - July 2, 2025. Comprehensive icon support system implementation and critical bug fixes
   - Added icon property to FormFieldData interface with name, position, size, and SVG content
   - Created IconSelector component with Lucide React icons library and search functionality

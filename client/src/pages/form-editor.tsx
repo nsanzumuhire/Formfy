@@ -4123,6 +4123,158 @@ export default function FormEditor() {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      {/* Date Validation Options */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="disablePast"
+                            checked={formFields.find((f) => f.id === selectedFieldId)?.disablePast || false}
+                            onCheckedChange={(checked) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId
+                                    ? { ...f, disablePast: !!checked }
+                                    : f,
+                                ),
+                              );
+                            }}
+                          />
+                          <Label
+                            htmlFor="disablePast"
+                            className="text-xs cursor-pointer"
+                          >
+                            Cannot be in past
+                          </Label>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="disableFuture"
+                            checked={formFields.find((f) => f.id === selectedFieldId)?.disableFuture || false}
+                            onCheckedChange={(checked) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId
+                                    ? { ...f, disableFuture: !!checked }
+                                    : f,
+                                ),
+                              );
+                            }}
+                          />
+                          <Label
+                            htmlFor="disableFuture"
+                            className="text-xs cursor-pointer"
+                          >
+                            Cannot be in future
+                          </Label>
+                        </div>
+                      </div>
+
+                      {/* Date Comparison Validation */}
+                      <div className="space-y-2">
+                        <Label className="text-xs font-medium">
+                          Date Comparison
+                        </Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Select
+                            value={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.type || ""
+                            }
+                            onValueChange={(value) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
+                                        dateComparison: {
+                                          ...f.dateComparison,
+                                          type: value as "before" | "after" | "",
+                                        },
+                                      }
+                                    : f,
+                                ),
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="before">Must be before</SelectItem>
+                              <SelectItem value="after">Must be after</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Select
+                            value={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.field || ""
+                            }
+                            onValueChange={(value) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
+                                        dateComparison: {
+                                          ...f.dateComparison,
+                                          field: value,
+                                        },
+                                      }
+                                    : f,
+                                ),
+                              );
+                            }}
+                            disabled={!formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {formFields
+                                .filter((f) => f.id !== selectedFieldId && f.type === "date")
+                                .map((field) => (
+                                  <SelectItem key={field.id} value={field.name || field.id}>
+                                    {field.label}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+
+                          <Input
+                            type="number"
+                            placeholder="Days"
+                            value={
+                              formFields.find((f) => f.id === selectedFieldId)
+                                ?.dateComparison?.offset || ""
+                            }
+                            onChange={(e) => {
+                              const value = e.target.value ? parseInt(e.target.value) : undefined;
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId
+                                    ? {
+                                        ...f,
+                                        dateComparison: {
+                                          ...f.dateComparison,
+                                          offset: value,
+                                        },
+                                      }
+                                    : f,
+                                ),
+                              );
+                            }}
+                            className="h-8 text-xs"
+                            disabled={!formFields.find((f) => f.id === selectedFieldId)?.dateComparison?.type}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Optional: Add days offset (e.g., 30 days before/after another date)
+                        </p>
+                      </div>
                     </div>
                   )}
 

@@ -57,6 +57,14 @@ export interface FormFieldData {
     size: number; // Icon size in pixels
     svg: string; // Stringified SVG content for storage
   };
+  // Date validation properties
+  disablePast?: boolean; // Cannot be in the past
+  disableFuture?: boolean; // Cannot be in the future
+  dateComparison?: {
+    type: 'before' | 'after'; // Must be before/after another date
+    field: string; // The field name to compare against
+    offset?: number; // Optional days offset
+  };
 }
 
 export interface FormSchema {
