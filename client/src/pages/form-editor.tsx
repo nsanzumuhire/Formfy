@@ -4519,28 +4519,7 @@ export default function FormEditor() {
                       />
                     </div>
 
-                    <div>
-                      <Label className="text-xs font-medium">
-                        Calculated Value
-                      </Label>
-                      <Input
-                        value={
-                          formFields.find((f) => f.id === selectedFieldId)
-                            ?.calculatedValue || ""
-                        }
-                        onChange={(e) => {
-                          setFormFields((fields) =>
-                            fields.map((f) =>
-                              f.id === selectedFieldId
-                                ? { ...f, calculatedValue: e.target.value }
-                                : f,
-                            ),
-                          );
-                        }}
-                        className="mt-1 h-8 text-xs"
-                        placeholder="Expression or function"
-                      />
-                    </div>
+                    
                   </div>
                 </div>
               </div>
