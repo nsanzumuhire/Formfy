@@ -71,7 +71,7 @@ function Router() {
               <FormBuilder />
             </AuthenticatedLayout>
           </Route>
-          <Route path="/form-editor/:projectId?">
+          <Route path="/form-editor/:projectId?/:formId?">
             <AuthenticatedLayout>
               <FormEditor />
             </AuthenticatedLayout>

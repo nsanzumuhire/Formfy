@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import {
   DndContext,
   closestCenter,
@@ -320,10 +320,12 @@ function SortableField({
 }
 
 export default function FormEditor() {
-  const [, params] = useRoute("/form-editor/:projectId?");
+  const [, params] = useRoute("/form-editor/:projectId?/:formId?");
+  const [, setLocation] = useLocation();
   const projectId = params?.projectId;
+  const formIdFromUrl = params?.formId;
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(formIdFromUrl || null);
   const [isCreatingForm, setIsCreatingForm] = useState(false);
 
   // Form creation state
@@ -478,6 +480,42 @@ export default function FormEditor() {
     enabled: !!currentProjectId,
   });
 
+  // Load form for editing
+  const loadForm = (form: Form) => {
+    setEditingFormId(form.id);
+    const schema = form.schema as any;
+    if (schema?.fields) {
+      setFormFields(schema.fields);
+    }
+    if (schema?.settings) {
+      setFormConfig(prev => ({ ...prev, ...schema.settings }));
+    }
+    setIsCreatingForm(true);
+    setShowPropertiesPanel(false);
+    setSelectedFieldId(null);
+  };
+
+  // Function to update URL when form is selected
+  const selectFormWithUrl = (formId: string | null) => {
+    setSelectedFormId(formId);
+    if (formId && currentProjectId) {
+      setLocation(`/form-editor/${currentProjectId}/${formId}`);
+    } else if (currentProjectId) {
+      setLocation(`/form-editor/${currentProjectId}`);
+    }
+  };
+
+  // Sync URL with selected form
+  useEffect(() => {
+    if (formIdFromUrl && forms.length > 0) {
+      const formExists = forms.find(f => f.id === formIdFromUrl);
+      if (formExists) {
+        setSelectedFormId(formIdFromUrl);
+        loadForm(formExists);
+      }
+    }
+  }, [formIdFromUrl, forms]);
+
   // Listen for project changes to refresh forms
   useEffect(() => {
     const handleProjectChange = (event: CustomEvent) => {
@@ -491,6 +529,10 @@ export default function FormEditor() {
         setSelectedFieldId(null);
         setShowPropertiesPanel(false);
         setShowFormsList(true); // Show forms list again
+        // Update URL to remove form ID
+        if (newProjectId) {
+          setLocation(`/form-editor/${newProjectId}`);
+        }
         // Forms will be automatically refetched due to query key change
       }
     };
@@ -507,6 +549,10 @@ export default function FormEditor() {
         setSelectedFieldId(null);
         setShowPropertiesPanel(false);
         setShowFormsList(true);
+        // Update URL to remove form ID
+        if (storedProject) {
+          setLocation(`/form-editor/${storedProject}`);
+        }
       }
     };
 
@@ -743,7 +789,7 @@ export default function FormEditor() {
   };
 
   const handleFormSelect = (formId: string) => {
-    setSelectedFormId(formId);
+    selectFormWithUrl(formId);
     setIsCreatingForm(false);
 
     // Load and edit the selected form
