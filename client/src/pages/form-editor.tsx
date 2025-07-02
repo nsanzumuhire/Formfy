@@ -2078,23 +2078,7 @@ export default function FormEditor() {
                       /* Preview Mode */
                       <div className="w-full h-full">
                         <div className="space-y-6 h-full">
-                          {/* Validation & Logic Demo Badge */}
-                          <div className="flex justify-between items-center">
-                            <div className="flex gap-2">
-                              <Badge
-                                variant="outline"
-                                className="text-blue-600 border-blue-200 bg-blue-50"
-                              >
-                                ✓ Validation Rules Active
-                              </Badge>
-                              <Badge
-                                variant="outline"
-                                className="text-green-600 border-green-200 bg-green-50"
-                              >
-                                ✓ Conditional Logic Active
-                              </Badge>
-                            </div>
-                          </div>
+                          
 
                           <form className="w-full">
                             {formConfig.layout === "auto" ? (
