@@ -54,7 +54,6 @@ export function FormFieldWithIcon({
     switch (field.type) {
       case 'text':
       case 'email':
-      case 'password':
       case 'tel':
       case 'url':
       case 'number':
@@ -150,58 +149,6 @@ export function FormFieldWithIcon({
             className={baseInputClass}
             disabled={disabled || field.disabled}
             readOnly={readonly || field.readonly}
-            required={field.required}
-          />
-        );
-      
-      case 'time':
-        return (
-          <Input
-            type="time"
-            value={value || ''}
-            onChange={(e) => onChange?.(e.target.value)}
-            className={baseInputClass}
-            disabled={disabled || field.disabled}
-            readOnly={readonly || field.readonly}
-            required={field.required}
-          />
-        );
-      
-      case 'datetime-local':
-        return (
-          <Input
-            type="datetime-local"
-            value={value || ''}
-            onChange={(e) => onChange?.(e.target.value)}
-            className={baseInputClass}
-            disabled={disabled || field.disabled}
-            readOnly={readonly || field.readonly}
-            required={field.required}
-          />
-        );
-      
-      case 'range':
-        return (
-          <input
-            type="range"
-            value={value || 0}
-            onChange={(e) => onChange?.(e.target.value)}
-            className={cn("w-full", field.className)}
-            disabled={disabled || field.disabled}
-            min={field.min}
-            max={field.max}
-            step={field.step}
-          />
-        );
-      
-      case 'color':
-        return (
-          <Input
-            type="color"
-            value={value || '#000000'}
-            onChange={(e) => onChange?.(e.target.value)}
-            className={baseInputClass}
-            disabled={disabled || field.disabled}
             required={field.required}
           />
         );

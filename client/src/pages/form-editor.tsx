@@ -126,6 +126,7 @@ import {
   generateDefaultFieldName,
 } from "@/lib/form-builder";
 import { IconSelector } from "@/components/icon-selector";
+import { FormFieldWithIcon } from "@/components/form-field-with-icon";
 
 // Droppable components for drop zones
 function RowDropZone({ rowId }: { rowId: string }) {
@@ -2128,14 +2129,40 @@ export default function FormEditor() {
                                             field.type === "number" ||
                                             field.type === "tel" ||
                                             field.type === "url" ? (
-                                              <Input
-                                                type={field.type}
-                                                placeholder={field.placeholder}
-                                                disabled={field.disabled}
-                                                readOnly={field.readonly}
-                                                className="w-full"
-                                                style={{ width: "100%" }}
-                                              />
+                                              <div className="relative flex items-center">
+                                                {field.icon && field.icon.position === 'left' && (
+                                                  <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                    {(() => {
+                                                      const IconComponent = (window as any).LucideReact?.[field.icon.name];
+                                                      return IconComponent ? (
+                                                        <IconComponent size={field.icon.size} />
+                                                      ) : null;
+                                                    })()}
+                                                  </div>
+                                                )}
+                                                <Input
+                                                  type={field.type}
+                                                  placeholder={field.placeholder}
+                                                  disabled={field.disabled}
+                                                  readOnly={field.readonly}
+                                                  className={`w-full ${field.icon?.position === 'left' ? 'pl-10' : ''} ${field.icon?.position === 'right' ? 'pr-10' : ''}`}
+                                                  style={{ 
+                                                    width: "100%",
+                                                    paddingLeft: field.icon?.position === 'left' ? `${30 + (field.icon.size || 16)}px` : undefined,
+                                                    paddingRight: field.icon?.position === 'right' ? `${30 + (field.icon.size || 16)}px` : undefined
+                                                  }}
+                                                />
+                                                {field.icon && field.icon.position === 'right' && (
+                                                  <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                    {(() => {
+                                                      const IconComponent = (window as any).LucideReact?.[field.icon.name];
+                                                      return IconComponent ? (
+                                                        <IconComponent size={field.icon.size} />
+                                                      ) : null;
+                                                    })()}
+                                                  </div>
+                                                )}
+                                              </div>
                                             ) : field.type === "textarea" ? (
                                               <Textarea
                                                 placeholder={field.placeholder}
