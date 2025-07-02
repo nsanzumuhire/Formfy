@@ -159,7 +159,7 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-start min-h-8 h-auto py-2 text-xs"
+            className="w-full justify-start min-h-8 h-auto py-2 text-xs text-justify"
           >
             {selectedIcon && SelectedIconComponent ? (
               <div className="flex items-center gap-2 truncate">

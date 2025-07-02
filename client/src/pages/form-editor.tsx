@@ -3229,105 +3229,42 @@ export default function FormEditor() {
                             />
                           </div>
 
-                          {/* Icon and CSS - Show for all */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label className="text-xs font-medium">
-                                Icon
-                              </Label>
-                              <Input
-                                value={selectedField.icon || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, icon: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="Icon name"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium">
-                                CSS Class
-                              </Label>
-                              <Input
-                                value={selectedField.class || ""}
-                                onChange={(e) => {
-                                  setFormFields((fields) =>
-                                    fields.map((f) =>
-                                      f.id === selectedFieldId
-                                        ? { ...f, class: e.target.value }
-                                        : f,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 h-8 text-xs"
-                                placeholder="Custom CSS classes"
-                              />
-                            </div>
-
-                            {/* Icon Selector */}
-                            <IconSelector
-                              selectedIcon={selectedField.icon}
-                              onIconChange={(icon) => {
+                          {/* CSS Class */}
+                          <div>
+                            <Label className="text-xs font-medium">
+                              CSS Class
+                            </Label>
+                            <Input
+                              value={selectedField.class || ""}
+                              onChange={(e) => {
                                 setFormFields((fields) =>
                                   fields.map((f) =>
                                     f.id === selectedFieldId
-                                      ? { ...f, icon }
+                                      ? { ...f, class: e.target.value }
                                       : f,
                                   ),
                                 );
                               }}
+                              className="mt-1 h-8 text-xs"
+                              placeholder="Custom CSS classes"
                             />
                           </div>
 
-                          {/* Prefix/Suffix - Only for text inputs */}
-                          {isTextInput && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Prefix
-                                </Label>
-                                <Input
-                                  value={selectedField.prefix || ""}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, prefix: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                  placeholder="Text before input"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs font-medium">
-                                  Suffix
-                                </Label>
-                                <Input
-                                  value={selectedField.suffix || ""}
-                                  onChange={(e) => {
-                                    setFormFields((fields) =>
-                                      fields.map((f) =>
-                                        f.id === selectedFieldId
-                                          ? { ...f, suffix: e.target.value }
-                                          : f,
-                                      ),
-                                    );
-                                  }}
-                                  className="mt-1 h-8 text-xs"
-                                  placeholder="Text after input"
-                                />
-                              </div>
-                            </div>
-                          )}
+                          {/* Icon Selector - Full Width */}
+                          <IconSelector
+                            selectedIcon={selectedField.icon}
+                            onIconChange={(icon) => {
+                              setFormFields((fields) =>
+                                fields.map((f) =>
+                                  f.id === selectedFieldId
+                                    ? { ...f, icon }
+                                    : f,
+                                ),
+                              );
+                            }}
+                          />
+
+                          
                         </div>
 
                         {/* Field States */}
