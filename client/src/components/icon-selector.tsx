@@ -218,11 +218,42 @@ export function IconSelector({ selectedIcon, onIconChange }: IconSelectorProps) 
             {/* Icon Grid */}
             <ScrollArea className="h-48 w-full">
               <div className="grid grid-cols-6 gap-2 p-1">
-                {filteredIcons.slice(0, 48).map((iconName: string) => {
+                {/* First, show a few common icons as test */}
+                {['User', 'Mail', 'Phone', 'Search', 'Settings', 'Home', 'Heart', 'Star'].map((iconName: string) => {
                   const IconComponent = (LucideIcons as any)[iconName];
                   if (!IconComponent) {
-                    console.log('Icon not found:', iconName);
-                    return null;
+                    console.log('Test icon not found:', iconName);
+                    return (
+                      <div key={iconName} className="h-8 w-8 border border-red-500 text-xs flex items-center justify-center">
+                        {iconName.slice(0, 1)}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Button
+                      key={iconName}
+                      variant="ghost"
+                      size="sm" 
+                      className="h-8 w-8 p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onClick={() => handleIconSelect(iconName)}
+                      title={iconName}
+                    >
+                      <IconComponent size={16} />
+                    </Button>
+                  );
+                })}
+                
+                {/* Show filtered icons */}
+                {filteredIcons.slice(0, 40).map((iconName: string) => {
+                  const IconComponent = (LucideIcons as any)[iconName];
+                  if (!IconComponent) {
+                    console.log('Filtered icon not found:', iconName);
+                    return (
+                      <div key={iconName} className="h-8 w-8 border border-orange-500 text-xs flex items-center justify-center">
+                        {iconName.slice(0, 1)}
+                      </div>
+                    );
                   }
 
                   return (
