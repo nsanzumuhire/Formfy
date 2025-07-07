@@ -136,16 +136,61 @@ import { IconSelector } from "@/components/icon-selector";
 import * as LucideIcons from "lucide-react";
 
 // Droppable components for drop zones
-function RowDropZone({ rowId }: { rowId: string }) {
+function RowDropZone({ rowId, onAddField }: { rowId: string; onAddField?: (fieldType: string, targetRowId?: string) => void }) {
   const { setNodeRef } = useDroppable({ id: `row-drop-zone-${rowId}` });
+  const [showFieldOptions, setShowFieldOptions] = useState(false);
+  
+  const fieldTypes = [
+    { type: "text", label: "Text Input", icon: Type },
+    { type: "email", label: "Email Input", icon: Type },
+    { type: "password", label: "Password Input", icon: Lock },
+    { type: "number", label: "Number Input", icon: Hash },
+    { type: "textarea", label: "Textarea", icon: AlignLeft },
+    { type: "select", label: "Select Dropdown", icon: ChevronDown },
+    { type: "radio", label: "Radio Group", icon: Circle },
+    { type: "checkbox", label: "Checkbox", icon: CheckSquare },
+    { type: "date", label: "Date Picker", icon: Calendar },
+    { type: "tel", label: "Phone Input", icon: Phone },
+    { type: "url", label: "URL Input", icon: Type },
+    { type: "file", label: "File Upload", icon: Upload },
+  ];
 
   return (
-    <div
-      ref={setNodeRef}
-      className="flex-1 min-w-[100px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
-    >
-      <Plus className="w-4 h-4" />
-    </div>
+    <Popover open={showFieldOptions} onOpenChange={setShowFieldOptions}>
+      <div ref={setNodeRef} className="relative flex-1 min-w-[100px]">
+        <PopoverTrigger asChild>
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer h-12">
+            <Plus className="w-4 h-4" />
+          </div>
+        </PopoverTrigger>
+        
+        <PopoverContent className="w-80 p-0" align="center">
+          <div className="p-4">
+            <h4 className="font-medium text-sm mb-3 text-gray-900 dark:text-gray-100">
+              Add Form Field
+            </h4>
+            <div className="grid grid-cols-2 gap-2">
+              {fieldTypes.map((fieldType) => {
+                const IconComponent = fieldType.icon;
+                return (
+                  <button
+                    key={fieldType.type}
+                    className="flex items-center gap-2 p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-sm transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+                    onClick={() => {
+                      onAddField?.(fieldType.type, rowId);
+                      setShowFieldOptions(false);
+                    }}
+                  >
+                    <IconComponent className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-gray-700 dark:text-gray-300">{fieldType.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </PopoverContent>
+      </div>
+    </Popover>
   );
 }
 
@@ -1265,18 +1310,40 @@ export default function FormEditor() {
     });
   };
 
-  const handleAddField = (fieldType: string) => {
+  const handleAddField = (fieldType: string, targetRowId?: string) => {
     const newField = createFormField(fieldType as any);
     newField.id = Date.now().toString();
     newField.order = formFields.length;
 
-    // For auto layout, create a new row for the field
+    // For auto layout
     if (formConfig.layout === "auto") {
-      newField.rowId = generateRowId();
-      newField.width = 100; // Numeric percentage for auto layout
+      if (targetRowId) {
+        // Add to specific row
+        newField.rowId = targetRowId;
+        
+        // Update width distribution for all fields in the target row
+        setFormFields((currentFields) => {
+          const newFields = [...currentFields, newField];
+          const fieldsInTargetRow = newFields.filter(f => f.rowId === targetRowId);
+          const evenWidth = 100 / fieldsInTargetRow.length;
+          
+          return newFields.map(field => {
+            if (field.rowId === targetRowId) {
+              return { ...field, width: evenWidth };
+            }
+            return field;
+          });
+        });
+      } else {
+        // Create a new row for the field
+        newField.rowId = generateRowId();
+        newField.width = 100; // Numeric percentage for auto layout
+        setFormFields([...formFields, newField]);
+      }
+    } else {
+      setFormFields([...formFields, newField]);
     }
 
-    setFormFields([...formFields, newField]);
     setSelectedFieldId(newField.id);
     setShowPropertiesPanel(true);
   };
@@ -3360,6 +3427,7 @@ export default function FormEditor() {
                                       {rowFields[0]?.rowId && (
                                         <RowDropZone
                                           rowId={rowFields[0].rowId}
+                                          onAddField={handleAddField}
                                         />
                                       )}
                                     </div>
