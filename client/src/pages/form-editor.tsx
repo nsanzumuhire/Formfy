@@ -154,55 +154,59 @@ function NewRowDropZone({ onAddField }: { onAddField?: (fieldType: string) => vo
   const [showFieldOptions, setShowFieldOptions] = useState(false);
   
   const fieldTypes = [
-    { type: "text", label: "Text", icon: Type },
-    { type: "email", label: "Email", icon: Type },
-    { type: "password", label: "Password", icon: Lock },
-    { type: "number", label: "Number", icon: Hash },
+    { type: "text", label: "Text Input", icon: Type },
+    { type: "email", label: "Email Input", icon: Type },
+    { type: "password", label: "Password Input", icon: Lock },
+    { type: "number", label: "Number Input", icon: Hash },
     { type: "textarea", label: "Textarea", icon: AlignLeft },
-    { type: "select", label: "Select", icon: ChevronDown },
-    { type: "radio", label: "Radio", icon: Circle },
+    { type: "select", label: "Select Dropdown", icon: ChevronDown },
+    { type: "radio", label: "Radio Group", icon: Circle },
     { type: "checkbox", label: "Checkbox", icon: CheckSquare },
-    { type: "date", label: "Date", icon: Calendar },
-    { type: "tel", label: "Phone", icon: Phone },
-    { type: "url", label: "URL", icon: Type },
-    { type: "file", label: "File", icon: Upload },
+    { type: "date", label: "Date Picker", icon: Calendar },
+    { type: "tel", label: "Phone Input", icon: Phone },
+    { type: "url", label: "URL Input", icon: Type },
+    { type: "file", label: "File Upload", icon: Upload },
   ];
   
   return (
-    <div className="relative">
-      <div
-        ref={setNodeRef}
-        className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer"
-        onClick={() => setShowFieldOptions(!showFieldOptions)}
-      >
-        <div className="text-center">
-          <Plus className="w-6 h-6 mx-auto mb-2" />
-          <p className="text-sm">Click to add field or drop fields here</p>
-        </div>
+    <Popover open={showFieldOptions} onOpenChange={setShowFieldOptions}>
+      <div ref={setNodeRef} className="relative">
+        <PopoverTrigger asChild>
+          <div className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer">
+            <div className="text-center">
+              <Plus className="w-6 h-6 mx-auto mb-2" />
+              <p className="text-sm">Click to add field or drop fields here</p>
+            </div>
+          </div>
+        </PopoverTrigger>
+        
+        <PopoverContent className="w-80 p-0" align="center">
+          <div className="p-4">
+            <h4 className="font-medium text-sm mb-3 text-gray-900 dark:text-gray-100">
+              Add Form Field
+            </h4>
+            <div className="grid grid-cols-2 gap-2">
+              {fieldTypes.map((fieldType) => {
+                const IconComponent = fieldType.icon;
+                return (
+                  <button
+                    key={fieldType.type}
+                    className="flex items-center gap-2 p-3 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-sm transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+                    onClick={() => {
+                      onAddField?.(fieldType.type);
+                      setShowFieldOptions(false);
+                    }}
+                  >
+                    <IconComponent className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-gray-700 dark:text-gray-300">{fieldType.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </PopoverContent>
       </div>
-      
-      {showFieldOptions && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 p-2 grid grid-cols-2 gap-1">
-          {fieldTypes.map((fieldType) => {
-            const IconComponent = fieldType.icon;
-            return (
-              <button
-                key={fieldType.type}
-                className="flex items-center gap-2 p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddField?.(fieldType.type);
-                  setShowFieldOptions(false);
-                }}
-              >
-                <IconComponent className="w-4 h-4 text-gray-500" />
-                {fieldType.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
+    </Popover>
   );
 }
 
