@@ -1944,13 +1944,13 @@ export default function FormEditor() {
                           aria-expanded={layoutOpen}
                           className="w-40 h-8 justify-between"
                         >
-                          {formConfig.layout === "single-column"
-                            ? "Single"
+                          {formConfig.layout === "auto"
+                            ? "Auto"
                             : formConfig.layout === "grid"
                               ? "Grid"
-                              : formConfig.layout === "auto"
-                                ? "Auto"
-                                : "Form layout"}
+                              : formConfig.layout === "single-column"
+                                ? "Single"
+                                : "Auto"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
