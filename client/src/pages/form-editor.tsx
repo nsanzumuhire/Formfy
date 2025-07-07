@@ -53,6 +53,9 @@ import {
   Upload,
   Download,
   Lock,
+  LayoutPanelTop,
+  LayoutGrid,
+  Rows3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -473,8 +476,6 @@ export default function FormEditor() {
       classes.push("flex-1");
     } else if (config.layout === "grid") {
       classes.push("grid-item");
-    } else if (config.layout === "two-column") {
-      classes.push("col-span-1");
     }
 
     return classes.join(" ");
@@ -502,9 +503,7 @@ export default function FormEditor() {
       case "grid":
         classes.push("grid", `grid-cols-${config.gridColumns}`, "gap-4");
         break;
-      case "two-column":
-        classes.push("grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
-        break;
+
       case "auto":
         classes.push("space-y-4");
         break;
@@ -1947,80 +1946,17 @@ export default function FormEditor() {
                         >
                           {formConfig.layout === "single-column"
                             ? "Single"
-                            : formConfig.layout === "two-column"
-                              ? "Two Col"
-                              : formConfig.layout === "grid"
-                                ? "Grid"
-                                : formConfig.layout === "auto"
-                                  ? "Auto"
-                                  : "Form layout"}
+                            : formConfig.layout === "grid"
+                              ? "Grid"
+                              : formConfig.layout === "auto"
+                                ? "Auto"
+                                : "Form layout"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-40 p-0">
                         <Command>
                           <CommandGroup>
-                            <CommandItem
-                              value="single-column"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "single-column",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "single-column"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Single
-                            </CommandItem>
-                            <CommandItem
-                              value="two-column"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "two-column",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "two-column"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Two Col
-                            </CommandItem>
-                            <CommandItem
-                              value="grid"
-                              onSelect={() => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  layout: "grid",
-                                });
-                                setLayoutOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formConfig.layout === "grid"
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              Grid
-                            </CommandItem>
-
                             <CommandItem
                               value="auto"
                               onSelect={() => {
@@ -2052,7 +1988,50 @@ export default function FormEditor() {
                                     : "opacity-0",
                                 )}
                               />
+                              <LayoutPanelTop className="mr-2 h-4 w-4" />
                               Auto
+                            </CommandItem>
+                            <CommandItem
+                              value="grid"
+                              onSelect={() => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "grid",
+                                });
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "grid"
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              <LayoutGrid className="mr-2 h-4 w-4" />
+                              Grid
+                            </CommandItem>
+                            <CommandItem
+                              value="single-column"
+                              onSelect={() => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  layout: "single-column",
+                                });
+                                setLayoutOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formConfig.layout === "single-column"
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              <Rows3 className="mr-2 h-4 w-4" />
+                              Single
                             </CommandItem>
                           </CommandGroup>
                         </Command>
@@ -2678,11 +2657,9 @@ export default function FormEditor() {
                               // Traditional Layout Preview Mode
                               <div
                                 className={`w-full ${
-                                  formConfig.layout === "two-column"
-                                    ? "grid grid-cols-2"
-                                    : formConfig.layout === "grid"
-                                      ? "grid"
-                                      : "flex flex-col"
+                                  formConfig.layout === "grid"
+                                    ? "grid"
+                                    : "flex flex-col"
                                 }`}
                                 style={{
                                   gap: getSpacingValue(),
@@ -3351,11 +3328,9 @@ export default function FormEditor() {
                             // Traditional Layout Modes
                             <div
                               className={`${
-                                formConfig.layout === "two-column"
-                                  ? "grid grid-cols-2"
-                                  : formConfig.layout === "grid"
-                                    ? "grid"
-                                    : "flex flex-col"
+                                formConfig.layout === "grid"
+                                  ? "grid"
+                                  : "flex flex-col"
                               }`}
                               style={{
                                 gap: getSpacingValue(),
