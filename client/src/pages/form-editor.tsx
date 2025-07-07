@@ -149,17 +149,59 @@ function RowDropZone({ rowId }: { rowId: string }) {
   );
 }
 
-function NewRowDropZone() {
+function NewRowDropZone({ onAddField }: { onAddField?: (fieldType: string) => void }) {
   const { setNodeRef } = useDroppable({ id: "new-row-drop-zone" });
+  const [showFieldOptions, setShowFieldOptions] = useState(false);
+  
+  const fieldTypes = [
+    { type: "text", label: "Text", icon: Type },
+    { type: "email", label: "Email", icon: Type },
+    { type: "password", label: "Password", icon: Lock },
+    { type: "number", label: "Number", icon: Hash },
+    { type: "textarea", label: "Textarea", icon: AlignLeft },
+    { type: "select", label: "Select", icon: ChevronDown },
+    { type: "radio", label: "Radio", icon: Circle },
+    { type: "checkbox", label: "Checkbox", icon: CheckSquare },
+    { type: "date", label: "Date", icon: Calendar },
+    { type: "tel", label: "Phone", icon: Phone },
+    { type: "url", label: "URL", icon: Type },
+    { type: "file", label: "File", icon: Upload },
+  ];
+  
   return (
-    <div
-      ref={setNodeRef}
-      className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors"
-    >
-      <div className="text-center">
-        <Plus className="w-6 h-6 mx-auto mb-2" />
-        <p className="text-sm">Drop fields here to create a new row</p>
+    <div className="relative">
+      <div
+        ref={setNodeRef}
+        className="flex items-center justify-center min-h-[80px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer"
+        onClick={() => setShowFieldOptions(!showFieldOptions)}
+      >
+        <div className="text-center">
+          <Plus className="w-6 h-6 mx-auto mb-2" />
+          <p className="text-sm">Click to add field or drop fields here</p>
+        </div>
       </div>
+      
+      {showFieldOptions && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 p-2 grid grid-cols-2 gap-1">
+          {fieldTypes.map((fieldType) => {
+            const IconComponent = fieldType.icon;
+            return (
+              <button
+                key={fieldType.type}
+                className="flex items-center gap-2 p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddField?.(fieldType.type);
+                  setShowFieldOptions(false);
+                }}
+              >
+                <IconComponent className="w-4 h-4 text-gray-500" />
+                {fieldType.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -3322,7 +3364,7 @@ export default function FormEditor() {
                               )}
 
                               {/* Empty row for new fields */}
-                              <NewRowDropZone />
+                              <NewRowDropZone onAddField={handleAddField} />
                             </div>
                           ) : (
                             // Traditional Layout Modes
