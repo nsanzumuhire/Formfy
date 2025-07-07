@@ -516,6 +516,7 @@ export default function FormEditor() {
     submitButtonColor: "#3b82f6",
     cancelButtonColor: "#6b7280",
     showCancelButton: false,
+    fullWidthButtons: false,
   });
 
   // UI state for comboboxes
@@ -1168,6 +1169,7 @@ export default function FormEditor() {
         submitButtonColor: settings.submitButtonColor || "#3b82f6",
         cancelButtonColor: settings.cancelButtonColor || "#6b7280",
         showCancelButton: settings.showCancelButton || false,
+        fullWidthButtons: settings.fullWidthButtons || false,
       });
     }
 
@@ -2395,6 +2397,25 @@ export default function FormEditor() {
                             </Label>
                           </div>
 
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="full-width-buttons"
+                              checked={formConfig.fullWidthButtons}
+                              onCheckedChange={(checked) => {
+                                setFormConfig({
+                                  ...formConfig,
+                                  fullWidthButtons: !!checked,
+                                });
+                              }}
+                            />
+                            <Label
+                              htmlFor="full-width-buttons"
+                              className="text-xs cursor-pointer"
+                            >
+                              Full Width Buttons
+                            </Label>
+                          </div>
+
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <Label className="text-xs">Submit Text</Label>
@@ -3055,17 +3076,19 @@ export default function FormEditor() {
                             {formFields.length > 0 && (
                               <div
                                 className={`pt-6 ${
-                                  formConfig.buttonLayout === "left"
-                                    ? "flex justify-start"
-                                    : formConfig.buttonLayout === "center"
-                                      ? "flex justify-center"
-                                      : formConfig.buttonLayout === "right"
-                                        ? "flex justify-end"
-                                        : formConfig.buttonLayout === "justify"
-                                          ? "flex justify-between"
-                                          : formConfig.buttonLayout === "split"
+                                  formConfig.fullWidthButtons
+                                    ? "flex flex-col space-y-3"
+                                    : formConfig.buttonLayout === "left"
+                                      ? "flex justify-start"
+                                      : formConfig.buttonLayout === "center"
+                                        ? "flex justify-center"
+                                        : formConfig.buttonLayout === "right"
+                                          ? "flex justify-end"
+                                          : formConfig.buttonLayout === "justify"
                                             ? "flex justify-between"
-                                            : "flex justify-center"
+                                            : formConfig.buttonLayout === "split"
+                                              ? "flex justify-between"
+                                              : "flex justify-center"
                                 }`}
                               >
                                 {formConfig.buttonLayout === "split" &&
@@ -3079,7 +3102,7 @@ export default function FormEditor() {
                                           formConfig.cancelButtonColor,
                                         color: formConfig.cancelButtonColor,
                                       }}
-                                      className="px-6"
+                                      className={`px-6 ${formConfig.fullWidthButtons ? "w-full" : ""}`}
                                     >
                                       {formConfig.cancelButtonText}
                                     </Button>
@@ -3087,11 +3110,13 @@ export default function FormEditor() {
 
                                 <div
                                   className={`${
-                                    formConfig.buttonLayout === "split"
-                                      ? ""
-                                      : formConfig.showCancelButton
-                                        ? "flex gap-3"
-                                        : ""
+                                    formConfig.fullWidthButtons
+                                      ? "w-full"
+                                      : formConfig.buttonLayout === "split"
+                                        ? ""
+                                        : formConfig.showCancelButton
+                                          ? "flex gap-3"
+                                          : ""
                                   }`}
                                 >
                                   {formConfig.showCancelButton &&
@@ -3105,7 +3130,7 @@ export default function FormEditor() {
                                             formConfig.cancelButtonColor,
                                           color: formConfig.cancelButtonColor,
                                         }}
-                                        className="px-6"
+                                        className={`px-6 ${formConfig.fullWidthButtons ? "w-full" : ""}`}
                                       >
                                         {formConfig.cancelButtonText}
                                       </Button>
@@ -3119,7 +3144,7 @@ export default function FormEditor() {
                                       borderColor: formConfig.submitButtonColor,
                                       color: "#ffffff",
                                     }}
-                                    className="px-6"
+                                    className={`px-6 ${formConfig.fullWidthButtons ? "w-full" : ""}`}
                                   >
                                     {formConfig.submitButtonText}
                                   </Button>
@@ -3488,17 +3513,19 @@ export default function FormEditor() {
                           {formFields.length > 0 && (
                             <div
                               className={`pt-6 ${
-                                formConfig.buttonLayout === "left"
-                                  ? "flex justify-start"
-                                  : formConfig.buttonLayout === "center"
-                                    ? "flex justify-center"
-                                    : formConfig.buttonLayout === "right"
-                                      ? "flex justify-end"
-                                      : formConfig.buttonLayout === "justify"
-                                        ? "flex justify-between"
-                                        : formConfig.buttonLayout === "split"
+                                formConfig.fullWidthButtons
+                                  ? "flex flex-col space-y-3"
+                                  : formConfig.buttonLayout === "left"
+                                    ? "flex justify-start"
+                                    : formConfig.buttonLayout === "center"
+                                      ? "flex justify-center"
+                                      : formConfig.buttonLayout === "right"
+                                        ? "flex justify-end"
+                                        : formConfig.buttonLayout === "justify"
                                           ? "flex justify-between"
-                                          : "flex justify-center"
+                                          : formConfig.buttonLayout === "split"
+                                            ? "flex justify-between"
+                                            : "flex justify-center"
                               }`}
                             >
                               {formConfig.buttonLayout === "split" &&
@@ -3511,7 +3538,7 @@ export default function FormEditor() {
                                       borderColor: formConfig.cancelButtonColor,
                                       color: formConfig.cancelButtonColor,
                                     }}
-                                    className="px-6 pointer-events-none"
+                                    className={`px-6 pointer-events-none ${formConfig.fullWidthButtons ? "w-full" : ""}`}
                                   >
                                     {formConfig.cancelButtonText}
                                   </Button>
@@ -3519,11 +3546,13 @@ export default function FormEditor() {
 
                               <div
                                 className={`${
-                                  formConfig.buttonLayout === "split"
-                                    ? ""
-                                    : formConfig.showCancelButton
-                                      ? "flex gap-3"
-                                      : ""
+                                  formConfig.fullWidthButtons
+                                    ? "w-full"
+                                    : formConfig.buttonLayout === "split"
+                                      ? ""
+                                      : formConfig.showCancelButton
+                                        ? "flex gap-3"
+                                        : ""
                                 }`}
                               >
                                 {formConfig.showCancelButton &&
@@ -3537,7 +3566,7 @@ export default function FormEditor() {
                                           formConfig.cancelButtonColor,
                                         color: formConfig.cancelButtonColor,
                                       }}
-                                      className="px-6 pointer-events-none"
+                                      className={`px-6 pointer-events-none ${formConfig.fullWidthButtons ? "w-full" : ""}`}
                                     >
                                       {formConfig.cancelButtonText}
                                     </Button>
@@ -3551,7 +3580,7 @@ export default function FormEditor() {
                                     borderColor: formConfig.submitButtonColor,
                                     color: "#ffffff",
                                   }}
-                                  className="px-6 pointer-events-none"
+                                  className={`px-6 pointer-events-none ${formConfig.fullWidthButtons ? "w-full" : ""}`}
                                 >
                                   {formConfig.submitButtonText}
                                 </Button>
