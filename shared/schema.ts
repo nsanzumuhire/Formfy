@@ -122,6 +122,7 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
 
 export const insertFormSchema = createInsertSchema(forms).omit({
   id: true,
+  checksum: true,
   createdAt: true,
   updatedAt: true,
 });
