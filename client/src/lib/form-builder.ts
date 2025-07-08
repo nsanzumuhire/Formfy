@@ -65,6 +65,9 @@ export interface FormFieldData {
     field: string; // The field name to compare against
     offset?: number; // Optional days offset
   };
+  // Checkbox specific properties
+  checkboxLabel?: string; // Label text that appears next to checkbox
+  showTopLabel?: boolean; // Whether to show the top field label
 }
 
 export interface FormSchema {

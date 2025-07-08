@@ -292,7 +292,7 @@ function SortableField({
       }}
     >
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${field.type === "checkbox" && field.showTopLabel === false ? "sr-only" : ""}`}>
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -377,27 +377,14 @@ function SortableField({
       ) : field.type === "file" ? (
         <Input type="file" disabled className="bg-gray-50 dark:bg-gray-900" />
       ) : field.type === "checkbox" ? (
-        <div
-          className={
-            field.layout === "horizontal"
-              ? "flex flex-wrap gap-4"
-              : "space-y-2"
-          }
-        >
-          {(field.options || [
-            { label: "Option 1", value: "option1" },
-            { label: "Option 2", value: "option2" }
-          ]).map((option: any, index: number) => (
-            <div key={index} className="flex items-center space-x-2">
-              <Checkbox 
-                className="pointer-events-none opacity-100"
-                checked={false}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {option.label}
-              </span>
-            </div>
-          ))}
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            className="pointer-events-none opacity-100"
+            checked={false}
+          />
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {field.checkboxLabel || "Check this option"}
+          </span>
         </div>
       ) : field.type === "radio" ? (
         <RadioGroup
@@ -4066,6 +4053,63 @@ export default function FormEditor() {
                             </div>
                           )}
                         </div>
+
+                        {/* Checkbox Properties */}
+                        {selectedField.type === "checkbox" && (
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                              Checkbox Settings
+                            </h4>
+
+                            <div>
+                              <Label className="text-xs font-medium">
+                                Checkbox Label
+                              </Label>
+                              <Input
+                                value={selectedField.checkboxLabel || ""}
+                                onChange={(e) => {
+                                  setFormFields((fields) =>
+                                    fields.map((f) =>
+                                      f.id === selectedFieldId
+                                        ? {
+                                            ...f,
+                                            checkboxLabel: e.target.value,
+                                          }
+                                        : f,
+                                    ),
+                                  );
+                                }}
+                                className="mt-1 h-8 text-xs"
+                                placeholder="Check this option"
+                              />
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="showTopLabel"
+                                checked={selectedField.showTopLabel !== false}
+                                onCheckedChange={(checked) => {
+                                  setFormFields((fields) =>
+                                    fields.map((f) =>
+                                      f.id === selectedFieldId
+                                        ? {
+                                            ...f,
+                                            showTopLabel: checked,
+                                          }
+                                        : f,
+                                    ),
+                                  );
+                                }}
+                              />
+                              <Label
+                                htmlFor="showTopLabel"
+                                className="text-xs cursor-pointer"
+                              >
+                                Show top label
+                              </Label>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Options Management - Only for select and radio */}
                         {isSelectInput && (
