@@ -89,7 +89,7 @@ export function SortableFormField({
             }
           >
             {(field.options || []).map((option: any, index: number) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={index} className="flex items-center space-x-2">
                 <Checkbox 
                   disabled 
                   className="pointer-events-none"
@@ -115,7 +115,7 @@ export function SortableFormField({
               { label: "Option 1", value: "option1" },
               { label: "Option 2", value: "option2" }
             ]).map((option: any, index: number) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={index} className="flex items-center space-x-2">
                 <RadioGroupItem 
                   value={option.value} 
                   id={`radio-${field.id}-${index}`}

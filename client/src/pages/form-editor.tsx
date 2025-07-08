@@ -377,11 +377,24 @@ function SortableField({
       ) : field.type === "file" ? (
         <Input type="file" disabled className="bg-gray-50 dark:bg-gray-900" />
       ) : field.type === "checkbox" ? (
-        <div className="flex items-center gap-2">
-          <input type="checkbox" disabled className="rounded" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {field.placeholder}
-          </span>
+        <div
+          className={
+            field.layout === "horizontal"
+              ? "flex flex-wrap gap-4"
+              : "space-y-2"
+          }
+        >
+          {(field.options || []).map((option: any, index: number) => (
+            <div key={index} className="flex items-center space-x-2">
+              <Checkbox 
+                disabled 
+                className="pointer-events-none"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {option.label}
+              </span>
+            </div>
+          ))}
         </div>
       ) : field.type === "radio" ? (
         <RadioGroup
@@ -396,12 +409,11 @@ function SortableField({
               { label: "Option 2", value: "option2" },
             ]
           ).map((option: any, index: number) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center space-x-2">
               <RadioGroupItem
                 value={option.value}
                 id={`edit-radio-${field.id}-${index}`}
                 disabled
-                className="bg-gray-50 dark:bg-gray-900"
               />
               <Label
                 htmlFor={`edit-radio-${field.id}-${index}`}
@@ -2695,7 +2707,7 @@ export default function FormEditor() {
                                                   ) => (
                                                     <div
                                                       key={index}
-                                                      className="flex items-center gap-2"
+                                                      className="flex items-center space-x-2"
                                                     >
                                                       <RadioGroupItem
                                                         value={option.value}
@@ -2703,6 +2715,7 @@ export default function FormEditor() {
                                                       />
                                                       <Label
                                                         htmlFor={`preview-radio-${field.id}-${index}`}
+                                                        className="text-sm cursor-pointer"
                                                       >
                                                         {option.label}
                                                       </Label>
@@ -2725,7 +2738,7 @@ export default function FormEditor() {
                                                   ) => (
                                                     <div
                                                       key={index}
-                                                      className="flex items-center gap-2"
+                                                      className="flex items-center space-x-2"
                                                     >
                                                       <Checkbox
                                                         id={`preview-checkbox-${field.id}-${index}`}
