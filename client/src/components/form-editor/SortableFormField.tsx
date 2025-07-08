@@ -81,11 +81,24 @@ export function SortableFormField({
         );
       case "checkbox":
         return (
-          <div className="flex items-center gap-2">
-            <Checkbox disabled />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {field.placeholder}
-            </span>
+          <div
+            className={
+              field.layout === "horizontal"
+                ? "flex flex-wrap gap-4 checkbox-field"
+                : "space-y-2 checkbox-field"
+            }
+          >
+            {(field.options || []).map((option: any, index: number) => (
+              <div key={index} className="flex items-center gap-2">
+                <Checkbox 
+                  disabled 
+                  className="pointer-events-none bg-background border-border"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {option.label}
+                </span>
+              </div>
+            ))}
           </div>
         );
       case "radio":
