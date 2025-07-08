@@ -2714,8 +2714,8 @@ export default function FormEditor() {
                                               <div
                                                 className={
                                                   field.layout === "horizontal"
-                                                    ? "flex flex-wrap gap-4 checkbox-field"
-                                                    : "space-y-2 checkbox-field"
+                                                    ? "flex flex-wrap gap-4"
+                                                    : "space-y-2"
                                                 }
                                               >
                                                 {(field.options || []).map(
@@ -2729,7 +2729,6 @@ export default function FormEditor() {
                                                     >
                                                       <Checkbox
                                                         id={`preview-checkbox-${field.id}-${index}`}
-                                                        className="bg-background border-border"
                                                       />
                                                       <Label
                                                         htmlFor={`preview-checkbox-${field.id}-${index}`}

@@ -98,28 +98,6 @@
   .drag-item:active {
     cursor: grabbing;
   }
-
-  /* Fix checkbox visibility and styling */
-  button[role="checkbox"] {
-    background-color: hsl(var(--background)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
-  
-  button[role="checkbox"][data-disabled] {
-    opacity: 0.8 !important;
-    background-color: hsl(var(--background)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
-  
-  .dark button[role="checkbox"] {
-    background-color: hsl(var(--background)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
-  
-  .dark button[role="checkbox"][data-disabled] {
-    background-color: hsl(var(--background)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
   
   .drop-zone {
     min-height: 200px;
