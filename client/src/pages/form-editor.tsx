@@ -384,11 +384,14 @@ function SortableField({
               : "space-y-2"
           }
         >
-          {(field.options || []).map((option: any, index: number) => (
+          {(field.options || [
+            { label: "Option 1", value: "option1" },
+            { label: "Option 2", value: "option2" }
+          ]).map((option: any, index: number) => (
             <div key={index} className="flex items-center space-x-2">
               <Checkbox 
-                disabled 
-                className="pointer-events-none"
+                className="pointer-events-none opacity-100"
+                checked={false}
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 {option.label}
