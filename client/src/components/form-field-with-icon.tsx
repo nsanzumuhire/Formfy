@@ -41,7 +41,7 @@ export function FormFieldWithIcon({
       borderRadius: `${formConfig.borderRadius || 6}px`,
       borderWidth: `${formConfig.borderStyle?.width || 1}px`,
       borderStyle: formConfig.borderStyle?.style || 'solid',
-      borderColor: formConfig.borderStyle?.color || formConfig.theme?.inputBorderColor || '#d1d5db',
+      borderColor: formConfig.borderStyle?.color || formConfig.theme?.inputBorderColor || 'hsl(var(--border))',
     };
   };
 
@@ -70,7 +70,7 @@ export function FormFieldWithIcon({
       <div className={cn(
         "flex items-center px-3",
         field.icon.position === 'left' ? 'border-r' : 'border-l',
-        "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400"
+        "border-border text-muted-foreground"
       )}>
         <IconComponent size={field.icon.size} />
       </div>
@@ -280,7 +280,7 @@ export function FormFieldWithIcon({
 
   return (
     <div className={cn("relative", className)}>
-      <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden bg-white dark:bg-gray-800">
+      <div className="flex items-center border border-border rounded-md overflow-hidden bg-background">
         {renderIcon('left')}
         {renderInputField()}
         {renderIcon('right')}
