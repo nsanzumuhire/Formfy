@@ -616,14 +616,14 @@ export default function FormEditor() {
       primaryForeground: "#ffffff",
       secondaryBackground: "#f3f4f6",
       secondaryForeground: "#374151",
-      inputBorderColor: "#d1d5db",
+      inputBorderColor: "#e5e3e0",
     },
     inputHeight: 40,
     borderRadius: 6,
     borderStyle: {
       width: 1,
       style: "solid" as "solid" | "dashed" | "dotted",
-      color: "#d1d5db",
+      color: "#e5e3e0",
     },
   });
 
@@ -772,14 +772,14 @@ export default function FormEditor() {
           primaryForeground: "#ffffff",
           secondaryBackground: "#f3f4f6",
           secondaryForeground: "#374151",
-          inputBorderColor: "#d1d5db",
+          inputBorderColor: "#e5e3e0",
           ...schema.settings.theme,
         },
         // Ensure border style exists with defaults
         borderStyle: {
           width: 1,
           style: "solid" as "solid" | "dashed" | "dotted",
-          color: "#d1d5db",
+          color: "#e5e3e0",
           ...schema.settings.borderStyle,
         },
         // Default values for new properties
