@@ -262,12 +262,14 @@ function SortableField({
   onSelect,
   onUpdate,
   onDelete,
+  isPreviewMode = false,
 }: {
   field: any;
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (updates: any) => void;
   onDelete?: () => void;
+  isPreviewMode?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: field.id });
@@ -282,13 +284,17 @@ function SortableField({
       ref={setNodeRef}
       style={style}
       className={`p-4 border rounded-lg transition-all ${
-        isSelected
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+        isPreviewMode 
+          ? "border-transparent bg-transparent"
+          : isSelected
+            ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
+            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
       }`}
       onClick={(e) => {
-        e.stopPropagation();
-        onSelect();
+        if (!isPreviewMode) {
+          e.stopPropagation();
+          onSelect();
+        }
       }}
     >
       <div className="flex items-center justify-between mb-2">
@@ -296,29 +302,31 @@ function SortableField({
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
         </label>
-        <div className="flex items-center gap-1">
-          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-            <Edit className="w-3 h-3 text-gray-400" />
-          </button>
-          <button
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded hover:text-red-600"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onDelete) {
-                onDelete();
-              }
-            }}
-          >
-            <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-600" />
-          </button>
-          <button
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab"
-            {...attributes}
-            {...listeners}
-          >
-            <Grip className="w-3 h-3 text-gray-400" />
-          </button>
-        </div>
+        {!isPreviewMode && (
+          <div className="flex items-center gap-1">
+            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+              <Edit className="w-3 h-3 text-gray-400" />
+            </button>
+            <button
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded hover:text-red-600"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onDelete) {
+                  onDelete();
+                }
+              }}
+            >
+              <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-600" />
+            </button>
+            <button
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-grab"
+              {...attributes}
+              {...listeners}
+            >
+              <Grip className="w-3 h-3 text-gray-400" />
+            </button>
+          </div>
+        )}
       </div>
 
       {field.type === "text" ||
