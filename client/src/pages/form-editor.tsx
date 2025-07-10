@@ -45,6 +45,7 @@ import {
   Grip,
   Save,
   Eye,
+  EyeOff,
   Layout,
   Maximize,
   ArrowLeftRight,
@@ -363,6 +364,56 @@ function SortableField({
             }}
           />
           {field.icon && field.icon.position === "right" && (
+            <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+              {(() => {
+                const IconComponent = (LucideIcons as any)[field.icon.name];
+                return IconComponent ? (
+                  <IconComponent size={field.icon.size} />
+                ) : null;
+              })()}
+            </div>
+          )}
+        </div>
+      ) : field.type === "password" ? (
+        <div className="relative flex items-center">
+          {field.icon && field.icon.position === "left" && (
+            <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+              {(() => {
+                const IconComponent = (LucideIcons as any)[field.icon.name];
+                return IconComponent ? (
+                  <IconComponent size={field.icon.size} />
+                ) : null;
+              })()}
+            </div>
+          )}
+          <Input
+            type="password"
+            placeholder={field.placeholder}
+            disabled
+            className={`bg-gray-50 dark:bg-gray-900 ${field.icon?.position === "left" ? "pl-10" : ""} ${field.showPasswordToggle ? "pr-10" : field.icon?.position === "right" ? "pr-10" : ""}`}
+            style={{
+              paddingLeft:
+                field.icon?.position === "left"
+                  ? `${30 + (field.icon.size || 16)}px`
+                  : undefined,
+              paddingRight:
+                field.showPasswordToggle 
+                  ? "40px"
+                  : field.icon?.position === "right"
+                    ? `${30 + (field.icon.size || 16)}px`
+                    : undefined,
+            }}
+          />
+          {field.showPasswordToggle && (
+            <button
+              type="button"
+              className="absolute right-3 z-10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              disabled
+            >
+              <EyeOff className="w-4 h-4" />
+            </button>
+          )}
+          {field.icon && field.icon.position === "right" && !field.showPasswordToggle && (
             <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
               {(() => {
                 const IconComponent = (LucideIcons as any)[field.icon.name];
@@ -2616,7 +2667,6 @@ export default function FormEditor() {
                                             {/* Render form field based on type */}
                                             {field.type === "text" ||
                                             field.type === "email" ||
-                                            field.type === "password" ||
                                             field.type === "number" ||
                                             field.type === "tel" ||
                                             field.type === "url" ? (
@@ -2665,6 +2715,81 @@ export default function FormEditor() {
                                                 {field.icon &&
                                                   field.icon.position ===
                                                     "right" && (
+                                                    <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                      {(() => {
+                                                        const IconComponent = (
+                                                          LucideIcons as any
+                                                        )[field.icon.name];
+                                                        return IconComponent ? (
+                                                          <IconComponent
+                                                            size={
+                                                              field.icon.size
+                                                            }
+                                                          />
+                                                        ) : null;
+                                                      })()}
+                                                    </div>
+                                                  )}
+                                              </div>
+                                            ) : field.type === "password" ? (
+                                              <div className="relative flex items-center">
+                                                {field.icon &&
+                                                  field.icon.position ===
+                                                    "left" && (
+                                                    <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                      {(() => {
+                                                        const IconComponent = (
+                                                          LucideIcons as any
+                                                        )[field.icon.name];
+                                                        return IconComponent ? (
+                                                          <IconComponent
+                                                            size={
+                                                              field.icon.size
+                                                            }
+                                                          />
+                                                        ) : null;
+                                                      })()}
+                                                    </div>
+                                                  )}
+                                                <Input
+                                                  type="password"
+                                                  placeholder={
+                                                    field.placeholder
+                                                  }
+                                                  disabled={field.disabled}
+                                                  readOnly={field.readonly}
+                                                  className={`w-full ${field.icon?.position === "left" ? "pl-10" : ""} ${field.showPasswordToggle ? "pr-10" : field.icon?.position === "right" ? "pr-10" : ""}`}
+                                                  style={{
+                                                    width: "100%",
+                                                    paddingLeft:
+                                                      field.icon?.position ===
+                                                      "left"
+                                                        ? `${30 + (field.icon.size || 16)}px`
+                                                        : undefined,
+                                                    paddingRight:
+                                                      field.showPasswordToggle 
+                                                        ? "40px"
+                                                        : field.icon?.position ===
+                                                          "right"
+                                                          ? `${30 + (field.icon.size || 16)}px`
+                                                          : undefined,
+                                                  }}
+                                                />
+                                                {field.showPasswordToggle && (
+                                                  <button
+                                                    type="button"
+                                                    className="absolute right-3 z-10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                                    onClick={(e) => {
+                                                      e.preventDefault();
+                                                      // Toggle password visibility (functional in real form)
+                                                    }}
+                                                  >
+                                                    <EyeOff className="w-4 h-4" />
+                                                  </button>
+                                                )}
+                                                {field.icon &&
+                                                  field.icon.position ===
+                                                    "right" && !field.showPasswordToggle && (
                                                     <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
                                                       {(() => {
                                                         const IconComponent = (
@@ -2910,6 +3035,85 @@ export default function FormEditor() {
                                             {field.icon &&
                                               field.icon.position ===
                                                 "right" && (
+                                                <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
+                                                  {(() => {
+                                                    const IconComponent = (
+                                                      LucideIcons as any
+                                                    )[field.icon.name];
+                                                    return IconComponent ? (
+                                                      <IconComponent
+                                                        size={field.icon.size}
+                                                      />
+                                                    ) : null;
+                                                  })()}
+                                                </div>
+                                              )}
+                                          </div>
+                                        ) : field.type === "password" ? (
+                                          <div className="relative flex items-center">
+                                            {field.icon &&
+                                              field.icon.position ===
+                                                "left" && (
+                                                <div className="absolute left-3 z-10 text-gray-500 dark:text-gray-400">
+                                                  {(() => {
+                                                    const IconComponent = (
+                                                      LucideIcons as any
+                                                    )[field.icon.name];
+                                                    return IconComponent ? (
+                                                      <IconComponent
+                                                        size={field.icon.size}
+                                                      />
+                                                    ) : null;
+                                                  })()}
+                                                </div>
+                                              )}
+                                            <Input
+                                              type="password"
+                                              placeholder={field.placeholder}
+                                              disabled={field.disabled}
+                                              readOnly={field.readonly}
+                                              autoFocus={field.autofocus}
+                                              autoComplete={field.autocomplete}
+                                              className={`${field.prefix ? "pl-8" : ""} ${field.suffix ? "pr-8" : ""} ${field.icon?.position === "left" ? "pl-10" : ""} ${field.showPasswordToggle ? "pr-10" : field.icon?.position === "right" ? "pr-10" : ""} ${field.class || ""}`}
+                                              style={{
+                                                width:
+                                                  typeof field.width ===
+                                                  "number"
+                                                    ? `${field.width}%`
+                                                    : field.width || "100%",
+                                                paddingLeft:
+                                                  field.icon?.position ===
+                                                  "left"
+                                                    ? `${30 + (field.icon.size || 16)}px`
+                                                    : undefined,
+                                                paddingRight:
+                                                  field.showPasswordToggle 
+                                                    ? "40px"
+                                                    : field.icon?.position ===
+                                                      "right"
+                                                      ? `${30 + (field.icon.size || 16)}px`
+                                                      : undefined,
+                                                ...(field.layout ===
+                                                  "inline" && {
+                                                  minWidth: "120px",
+                                                }),
+                                              }}
+                                            />
+                                            {field.showPasswordToggle && (
+                                              <button
+                                                type="button"
+                                                className="absolute right-3 z-10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  // Toggle password visibility (functional in real form)
+                                                }}
+                                              >
+                                                <EyeOff className="w-4 h-4" />
+                                              </button>
+                                            )}
+                                            {field.icon &&
+                                              field.icon.position ===
+                                                "right" && !field.showPasswordToggle && (
                                                 <div className="absolute right-3 z-10 text-gray-500 dark:text-gray-400">
                                                   {(() => {
                                                     const IconComponent = (
@@ -3851,6 +4055,31 @@ export default function FormEditor() {
                                   className="text-xs cursor-pointer"
                                 >
                                   Auto Focus
+                                </Label>
+                              </div>
+                            )}
+
+                            {/* Show Password Toggle - Only for password inputs */}
+                            {fieldType === "password" && (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="showPasswordToggle"
+                                  checked={selectedField.showPasswordToggle || false}
+                                  onCheckedChange={(checked) => {
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === selectedFieldId
+                                          ? { ...f, showPasswordToggle: !!checked }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                />
+                                <Label
+                                  htmlFor="showPasswordToggle"
+                                  className="text-xs cursor-pointer"
+                                >
+                                  Show/Hide Toggle
                                 </Label>
                               </div>
                             )}

@@ -68,6 +68,8 @@ export interface FormFieldData {
   // Checkbox specific properties
   checkboxLabel?: string; // Label text that appears next to checkbox
   showTopLabel?: boolean; // Whether to show the top field label
+  // Password specific properties
+  showPasswordToggle?: boolean; // Whether to show password visibility toggle
 }
 
 export interface FormSchema {
@@ -270,6 +272,7 @@ function getDefaultLabel(type: FieldType): string {
     text: 'Text Field',
     textarea: 'Textarea',
     email: 'Email Address',
+    password: 'Password',
     number: 'Number',
     tel: 'Phone Number',
     url: 'Website URL',
@@ -289,6 +292,7 @@ export function generateDefaultFieldName(type: FieldType, existingFields: FormFi
     text: 'textField',
     textarea: 'textArea',
     email: 'emailField',
+    password: 'passwordField',
     number: 'numberField',
     tel: 'phoneField',
     url: 'urlField',
@@ -360,6 +364,7 @@ function getDefaultPlaceholder(type: FieldType): string {
     text: 'Enter text here...',
     textarea: 'Enter your message...',
     email: 'Enter your email...',
+    password: 'Enter your password...',
     number: 'Enter a number...',
     tel: 'Enter phone number...',
     url: 'Enter website URL...',
