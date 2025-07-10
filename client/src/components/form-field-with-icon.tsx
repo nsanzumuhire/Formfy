@@ -131,14 +131,62 @@ export function FormFieldWithIcon({
         );
       
       case 'file':
+        const acceptTypes = field.fileTypes?.length 
+          ? field.fileTypes.map(type => `.${type.toLowerCase()}`).join(',')
+          : undefined;
+          
         return (
-          <Input
-            type="file"
-            onChange={(e) => onChange?.(e.target.files?.[0])}
-            className={baseInputClass}
-            disabled={disabled || field.disabled}
-            required={field.required}
-          />
+          <div className="space-y-1">
+            <Input
+              type="file"
+              accept={acceptTypes}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // Validate file size
+                  const fileSizeMB = file.size / (1024 * 1024);
+                  
+                  if (field.maxFileSize && fileSizeMB > field.maxFileSize) {
+                    alert(`File size (${fileSizeMB.toFixed(2)}MB) exceeds maximum allowed size of ${field.maxFileSize}MB`);
+                    e.target.value = '';
+                    return;
+                  }
+                  
+                  if (field.minFileSize && fileSizeMB < field.minFileSize) {
+                    alert(`File size (${fileSizeMB.toFixed(2)}MB) is below minimum required size of ${field.minFileSize}MB`);
+                    e.target.value = '';
+                    return;
+                  }
+                  
+                  // Validate file type
+                  if (field.fileTypes?.length) {
+                    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+                    if (!fileExtension || !field.fileTypes.map(t => t.toLowerCase()).includes(fileExtension)) {
+                      alert(`File type "${fileExtension}" is not allowed. Allowed types: ${field.fileTypes.join(', ')}`);
+                      e.target.value = '';
+                      return;
+                    }
+                  }
+                }
+                onChange?.(file);
+              }}
+              className={baseInputClass}
+              disabled={disabled || field.disabled}
+              required={field.required}
+            />
+            {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                {field.fileTypes?.length && (
+                  <div>Allowed types: {field.fileTypes.join(', ')}</div>
+                )}
+                {(field.minFileSize || field.maxFileSize) && (
+                  <div>
+                    Size: {field.minFileSize ? `${field.minFileSize}MB min` : ''}{field.minFileSize && field.maxFileSize ? ', ' : ''}{field.maxFileSize ? `${field.maxFileSize}MB max` : ''}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         );
       
       case 'date':

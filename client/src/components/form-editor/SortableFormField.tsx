@@ -73,11 +73,28 @@ export function SortableFormField({
         );
       case "file":
         return (
-          <Input
-            type="file"
-            disabled
-            className="bg-gray-50 dark:bg-gray-900"
-          />
+          <div className="space-y-1">
+            <Input
+              type="file"
+              accept={field.fileTypes?.length 
+                ? field.fileTypes.map(type => `.${type.toLowerCase()}`).join(',')
+                : undefined}
+              disabled
+              className="bg-gray-50 dark:bg-gray-900"
+            />
+            {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                {field.fileTypes?.length && (
+                  <div>Allowed types: {field.fileTypes.join(', ')}</div>
+                )}
+                {(field.minFileSize || field.maxFileSize) && (
+                  <div>
+                    Size: {field.minFileSize ? `${field.minFileSize}MB min` : ''}{field.minFileSize && field.maxFileSize ? ', ' : ''}{field.maxFileSize ? `${field.maxFileSize}MB max` : ''}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         );
       case "checkbox":
         return (

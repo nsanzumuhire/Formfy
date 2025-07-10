@@ -434,7 +434,28 @@ function SortableField({
       ) : field.type === "date" ? (
         <Input type="date" disabled className="bg-gray-50 dark:bg-gray-900" />
       ) : field.type === "file" ? (
-        <Input type="file" disabled className="bg-gray-50 dark:bg-gray-900" />
+        <div className="space-y-1">
+          <Input 
+            type="file" 
+            disabled 
+            accept={field.fileTypes?.length 
+              ? field.fileTypes.map(type => `.${type.toLowerCase()}`).join(',')
+              : undefined}
+            className="bg-gray-50 dark:bg-gray-900" 
+          />
+          {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
+            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+              {field.fileTypes?.length && (
+                <div>Allowed types: {field.fileTypes.join(', ')}</div>
+              )}
+              {(field.minFileSize || field.maxFileSize) && (
+                <div>
+                  Size: {field.minFileSize ? `${field.minFileSize}MB min` : ''}{field.minFileSize && field.maxFileSize ? ', ' : ''}{field.maxFileSize ? `${field.maxFileSize}MB max` : ''}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       ) : field.type === "checkbox" ? (
         <div className="flex items-center space-x-2">
           <Checkbox 
@@ -2893,11 +2914,28 @@ export default function FormEditor() {
                                                 style={{ width: "100%" }}
                                               />
                                             ) : field.type === "file" ? (
-                                              <Input
-                                                type="file"
-                                                className="w-full"
-                                                style={{ width: "100%" }}
-                                              />
+                                              <div className="space-y-1">
+                                                <Input
+                                                  type="file"
+                                                  accept={field.fileTypes?.length 
+                                                    ? field.fileTypes.map(type => `.${type.toLowerCase()}`).join(',')
+                                                    : undefined}
+                                                  className="w-full"
+                                                  style={{ width: "100%" }}
+                                                />
+                                                {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
+                                                  <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                                                    {field.fileTypes?.length && (
+                                                      <div>Allowed types: {field.fileTypes.join(', ')}</div>
+                                                    )}
+                                                    {(field.minFileSize || field.maxFileSize) && (
+                                                      <div>
+                                                        Size: {field.minFileSize ? `${field.minFileSize}MB min` : ''}{field.minFileSize && field.maxFileSize ? ', ' : ''}{field.maxFileSize ? `${field.maxFileSize}MB max` : ''}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                )}
+                                              </div>
                                             ) : null}
                                           </div>
                                         </div>
@@ -3152,14 +3190,31 @@ export default function FormEditor() {
                                             }}
                                           />
                                         ) : field.type === "file" ? (
-                                          <Input
-                                            type="file"
-                                            disabled={field.disabled}
-                                            className={field.class || ""}
-                                            style={{
-                                              width: field.width || "100%",
-                                            }}
-                                          />
+                                          <div className="space-y-1">
+                                            <Input
+                                              type="file"
+                                              accept={field.fileTypes?.length 
+                                                ? field.fileTypes.map(type => `.${type.toLowerCase()}`).join(',')
+                                                : undefined}
+                                              disabled={field.disabled}
+                                              className={field.class || ""}
+                                              style={{
+                                                width: field.width || "100%",
+                                              }}
+                                            />
+                                            {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
+                                              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                                                {field.fileTypes?.length && (
+                                                  <div>Allowed types: {field.fileTypes.join(', ')}</div>
+                                                )}
+                                                {(field.minFileSize || field.maxFileSize) && (
+                                                  <div>
+                                                    Size: {field.minFileSize ? `${field.minFileSize}MB min` : ''}{field.minFileSize && field.maxFileSize ? ', ' : ''}{field.maxFileSize ? `${field.maxFileSize}MB max` : ''}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
                                         ) : field.type === "checkbox" ? (
                                           <div className="flex items-center space-x-2">
                                             <Checkbox
@@ -4328,6 +4383,106 @@ export default function FormEditor() {
                               >
                                 Show top label
                               </Label>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* File Upload Properties */}
+                        {selectedField.type === "file" && (
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b pb-2">
+                              File Upload Settings
+                            </h4>
+
+                            <div>
+                              <Label className="text-xs font-medium">
+                                Allowed File Types
+                              </Label>
+                              <div className="mt-1 space-y-2">
+                                <Input
+                                  value={(selectedField.fileTypes || []).join(', ')}
+                                  onChange={(e) => {
+                                    const types = e.target.value
+                                      .split(',')
+                                      .map(type => type.trim())
+                                      .filter(type => type.length > 0);
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              fileTypes: types.length > 0 ? types : undefined,
+                                            }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                  className="h-8 text-xs"
+                                  placeholder="pdf, jpg, png, doc"
+                                />
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Separate file extensions with commas (e.g., pdf, jpg, png)
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs font-medium">
+                                  Min Size (MB)
+                                </Label>
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  value={selectedField.minFileSize || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : undefined;
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              minFileSize: value,
+                                            }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                  className="mt-1 h-8 text-xs"
+                                  placeholder="0.1"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs font-medium">
+                                  Max Size (MB)
+                                </Label>
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  value={selectedField.maxFileSize || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : undefined;
+                                    setFormFields((fields) =>
+                                      fields.map((f) =>
+                                        f.id === selectedFieldId
+                                          ? {
+                                              ...f,
+                                              maxFileSize: value,
+                                            }
+                                          : f,
+                                      ),
+                                    );
+                                  }}
+                                  className="mt-1 h-8 text-xs"
+                                  placeholder="10"
+                                />
+                              </div>
                             </div>
                           </div>
                         )}

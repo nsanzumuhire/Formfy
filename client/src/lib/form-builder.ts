@@ -70,6 +70,10 @@ export interface FormFieldData {
   showTopLabel?: boolean; // Whether to show the top field label
   // Password specific properties
   showPasswordToggle?: boolean; // Whether to show password visibility toggle
+  // File upload specific properties
+  fileTypes?: string[]; // Allowed file types (e.g., ['pdf', 'jpg', 'png'])
+  maxFileSize?: number; // Maximum file size in MB
+  minFileSize?: number; // Minimum file size in MB
 }
 
 export interface FormSchema {
