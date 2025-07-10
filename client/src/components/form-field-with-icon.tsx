@@ -28,7 +28,7 @@ export function FormFieldWithIcon({
   className, 
   disabled, 
   readonly,
-  formConfig
+  formConfig = {}
 }: FormFieldWithIconProps) {
   const IconComponent = field.icon ? (LucideIcons as any)[field.icon.name] : null;
   
