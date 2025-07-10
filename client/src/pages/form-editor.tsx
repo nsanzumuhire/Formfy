@@ -2520,7 +2520,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Primary Background</Label>
                               <Input
                                 type="color"
-                                value={formConfig.theme.primaryBackground}
+                                value={formConfig.theme?.primaryBackground || "#3b82f6"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2538,7 +2538,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Primary Foreground</Label>
                               <Input
                                 type="color"
-                                value={formConfig.theme.primaryForeground}
+                                value={formConfig.theme?.primaryForeground || "#ffffff"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2558,7 +2558,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Secondary Background</Label>
                               <Input
                                 type="color"
-                                value={formConfig.theme.secondaryBackground}
+                                value={formConfig.theme?.secondaryBackground || "#f3f4f6"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2576,7 +2576,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Secondary Foreground</Label>
                               <Input
                                 type="color"
-                                value={formConfig.theme.secondaryForeground}
+                                value={formConfig.theme?.secondaryForeground || "#374151"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2595,7 +2595,7 @@ export default function FormEditor() {
                             <Label className="text-xs">Input Border Color</Label>
                             <Input
                               type="color"
-                              value={formConfig.theme.inputBorderColor}
+                              value={formConfig.theme?.inputBorderColor || "#d1d5db"}
                               onChange={(e) => {
                                 setFormConfig({
                                   ...formConfig,
