@@ -256,6 +256,12 @@ export function createFormField(type: FieldType, existingFields: FormFieldData[]
     ];
   }
 
+  // Add default checkbox label
+  if (type === 'checkbox') {
+    baseField.checkboxLabel = 'Check this option';
+    baseField.showTopLabel = false;
+  }
+
   return baseField;
 }
 

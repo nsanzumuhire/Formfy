@@ -1121,7 +1121,7 @@ export default function FormEditor() {
     setShowFormsList(false); // Collapse forms sidebar when creating
     // Reset form config to defaults
     setFormConfig({
-      layout: "single",
+      layout: "auto",
       gridColumns: 2,
       spacing: "8px",
       customSpacing: 8,
@@ -1160,7 +1160,7 @@ export default function FormEditor() {
 
       setFormFields(fields);
       setFormConfig({
-        layout: settings.layout || "single",
+        layout: settings.layout || "auto",
         gridColumns: settings.gridColumns || 2,
         spacing: settings.spacing || "8px",
         customSpacing: settings.customSpacing || 8,
@@ -2714,34 +2714,16 @@ export default function FormEditor() {
                                                 )}
                                               </RadioGroup>
                                             ) : field.type === "checkbox" ? (
-                                              <div
-                                                className={
-                                                  field.layout === "horizontal"
-                                                    ? "flex flex-wrap gap-4"
-                                                    : "space-y-2"
-                                                }
-                                              >
-                                                {(field.options || []).map(
-                                                  (
-                                                    option: any,
-                                                    index: number,
-                                                  ) => (
-                                                    <div
-                                                      key={index}
-                                                      className="flex items-center space-x-2"
-                                                    >
-                                                      <Checkbox
-                                                        id={`preview-checkbox-${field.id}-${index}`}
-                                                      />
-                                                      <Label
-                                                        htmlFor={`preview-checkbox-${field.id}-${index}`}
-                                                        className="text-sm cursor-pointer"
-                                                      >
-                                                        {option.label}
-                                                      </Label>
-                                                    </div>
-                                                  ),
-                                                )}
+                                              <div className="flex items-center space-x-2">
+                                                <Checkbox
+                                                  id={`preview-checkbox-${field.id}`}
+                                                />
+                                                <Label
+                                                  htmlFor={`preview-checkbox-${field.id}`}
+                                                  className="text-sm cursor-pointer"
+                                                >
+                                                  {field.checkboxLabel || field.placeholder || "Check this option"}
+                                                </Label>
                                               </div>
                                             ) : field.type === "select" ? (
                                               <Select>
@@ -2976,7 +2958,7 @@ export default function FormEditor() {
                                               htmlFor={`checkbox-${field.id}`}
                                               className="text-sm font-normal cursor-pointer"
                                             >
-                                              {field.placeholder ||
+                                              {field.checkboxLabel || field.placeholder ||
                                                 "Check this option"}
                                             </Label>
                                           </div>
