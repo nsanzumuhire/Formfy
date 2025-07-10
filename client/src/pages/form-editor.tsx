@@ -432,7 +432,7 @@ function SortableField({
           rows={3}
         />
       ) : field.type === "date" ? (
-        <Input type="date" disabled className="bg-gray-50 dark:bg-gray-900" />
+        <Input type="date" disabled className="bg-gray-50 dark:bg-gray-900 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
       ) : field.type === "file" ? (
         <div className="space-y-1">
           <Input 
@@ -2910,7 +2910,7 @@ export default function FormEditor() {
                                             ) : field.type === "date" ? (
                                               <Input
                                                 type="date"
-                                                className="w-full"
+                                                className="w-full [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                                                 style={{ width: "100%" }}
                                               />
                                             ) : field.type === "file" ? (
@@ -3184,7 +3184,7 @@ export default function FormEditor() {
                                           <Input
                                             type="date"
                                             disabled={field.disabled}
-                                            className={field.class || ""}
+                                            className={`${field.class || ""} [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                                             style={{
                                               width: field.width || "100%",
                                             }}

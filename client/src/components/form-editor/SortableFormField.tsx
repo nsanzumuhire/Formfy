@@ -68,7 +68,7 @@ export function SortableFormField({
           <Input
             type="date"
             disabled
-            className="bg-gray-50 dark:bg-gray-900"
+            className="bg-gray-50 dark:bg-gray-900 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer"
           />
         );
       case "file":

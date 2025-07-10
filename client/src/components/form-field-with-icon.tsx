@@ -195,7 +195,7 @@ export function FormFieldWithIcon({
             type="date"
             value={value || ''}
             onChange={(e) => onChange?.(e.target.value)}
-            className={baseInputClass}
+            className={cn(baseInputClass, "[&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer")}
             disabled={disabled || field.disabled}
             readOnly={readonly || field.readonly}
             required={field.required}
