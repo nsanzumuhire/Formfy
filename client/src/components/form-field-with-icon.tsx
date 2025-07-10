@@ -147,7 +147,6 @@ export function FormFieldWithIcon({
               checked={!!value}
               onCheckedChange={onChange}
               disabled={disabled || field.disabled}
-              style={getDynamicStyle()}
             />
             <Label htmlFor={field.id} className="text-sm">
               {field.label}

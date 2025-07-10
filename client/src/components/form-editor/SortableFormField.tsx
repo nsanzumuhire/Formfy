@@ -103,12 +103,6 @@ export function SortableFormField({
             <Checkbox 
               className="pointer-events-none opacity-100"
               checked={false}
-              style={{
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: 'hsl(var(--input))',
-                borderRadius: '4px',
-              }}
             />
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {field.checkboxLabel || "Check this option"}
