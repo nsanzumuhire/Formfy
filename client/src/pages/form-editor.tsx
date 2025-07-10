@@ -2595,7 +2595,7 @@ export default function FormEditor() {
                             <Label className="text-xs">Input Border Color</Label>
                             <Input
                               type="color"
-                              value={formConfig.theme?.inputBorderColor || "#d1d5db"}
+                              value={formConfig.theme?.inputBorderColor || "#e2e8f0"}
                               onChange={(e) => {
                                 setFormConfig({
                                   ...formConfig,
@@ -2701,7 +2701,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Border Color</Label>
                               <Input
                                 type="color"
-                                value={formConfig.borderStyle?.color || "#d1d5db"}
+                                value={formConfig.borderStyle?.color || "#e2e8f0"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
