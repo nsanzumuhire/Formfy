@@ -18,6 +18,7 @@ interface FormFieldWithIconProps {
   className?: string;
   disabled?: boolean;
   readonly?: boolean;
+  formConfig?: any; // Appearance configuration
 }
 
 export function FormFieldWithIcon({ 
@@ -26,9 +27,41 @@ export function FormFieldWithIcon({
   onChange, 
   className, 
   disabled, 
-  readonly 
+  readonly,
+  formConfig
 }: FormFieldWithIconProps) {
   const IconComponent = field.icon ? (LucideIcons as any)[field.icon.name] : null;
+  
+  // Generate dynamic styles based on form configuration
+  const getDynamicStyle = () => {
+    if (!formConfig) return {};
+    
+    return {
+      height: `${formConfig.inputHeight || 40}px`,
+      borderRadius: `${formConfig.borderRadius || 6}px`,
+      borderWidth: `${formConfig.borderStyle?.width || 1}px`,
+      borderStyle: formConfig.borderStyle?.style || 'solid',
+      borderColor: formConfig.borderStyle?.color || formConfig.theme?.inputBorderColor || '#d1d5db',
+    };
+  };
+
+  const getButtonStyle = (type: 'submit' | 'cancel') => {
+    if (!formConfig) return {};
+    
+    if (type === 'submit') {
+      return {
+        backgroundColor: formConfig.theme?.primaryBackground || formConfig.submitButtonColor || '#3b82f6',
+        color: formConfig.theme?.primaryForeground || '#ffffff',
+        borderRadius: `${formConfig.borderRadius || 6}px`,
+      };
+    } else {
+      return {
+        backgroundColor: formConfig.theme?.secondaryBackground || formConfig.cancelButtonColor || '#f3f4f6',
+        color: formConfig.theme?.secondaryForeground || '#374151',
+        borderRadius: `${formConfig.borderRadius || 6}px`,
+      };
+    }
+  };
   
   const renderIcon = (position: 'left' | 'right') => {
     if (!field.icon || field.icon.position !== position || !IconComponent) return null;
@@ -66,6 +99,7 @@ export function FormFieldWithIcon({
             value={value || ''}
             onChange={(e) => onChange?.(e.target.value)}
             className={baseInputClass}
+            style={getDynamicStyle()}
             disabled={disabled || field.disabled}
             readOnly={readonly || field.readonly}
             required={field.required}
@@ -82,14 +116,17 @@ export function FormFieldWithIcon({
             disabled={disabled || field.disabled}
             readOnly={readonly || field.readonly}
             required={field.required}
-            style={{ height: field.height }}
+            style={{ 
+              height: field.height,
+              ...getDynamicStyle()
+            }}
           />
         );
       
       case 'select':
         return (
           <Select value={value} onValueChange={onChange} disabled={disabled || field.disabled}>
-            <SelectTrigger className={baseInputClass}>
+            <SelectTrigger className={baseInputClass} style={getDynamicStyle()}>
               <SelectValue placeholder={field.placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -172,6 +209,7 @@ export function FormFieldWithIcon({
                 onChange?.(file);
               }}
               className={baseInputClass}
+              style={getDynamicStyle()}
               disabled={disabled || field.disabled}
               required={field.required}
             />
@@ -198,6 +236,7 @@ export function FormFieldWithIcon({
             placeholder={field.placeholder || "Select date"}
             disabled={disabled || field.disabled}
             className={baseInputClass}
+            style={getDynamicStyle()}
             min={field.minDate}
             max={field.maxDate}
           />
@@ -210,6 +249,7 @@ export function FormFieldWithIcon({
             value={value || ''}
             onChange={(e) => onChange?.(e.target.value)}
             className={baseInputClass}
+            style={getDynamicStyle()}
             disabled={disabled || field.disabled}
             readOnly={readonly || field.readonly}
             required={field.required}
