@@ -2170,6 +2170,7 @@ export default function FormEditor() {
                             <CommandItem
                               value="auto"
                               onSelect={() => {
+                                const previousLayout = formConfig.layout;
                                 setFormConfig({
                                   ...formConfig,
                                   layout: "auto",
@@ -2180,10 +2181,9 @@ export default function FormEditor() {
                                   fields.map((field) => ({
                                     ...field,
                                     rowId: field.rowId || generateRowId(),
-                                    width:
-                                      typeof field.width === "string"
-                                        ? 100
-                                        : field.width || 100,
+                                    width: previousLayout === "auto" ? 
+                                      (typeof field.width === "string" ? 100 : field.width || 100) : 
+                                      100,
                                   })),
                                 );
 
@@ -2204,10 +2204,22 @@ export default function FormEditor() {
                             <CommandItem
                               value="grid"
                               onSelect={() => {
+                                const previousLayout = formConfig.layout;
                                 setFormConfig({
                                   ...formConfig,
                                   layout: "grid",
                                 });
+                                
+                                // Reset field properties when switching from auto mode
+                                if (previousLayout === "auto") {
+                                  setFormFields((fields) =>
+                                    fields.map((field) => ({
+                                      ...field,
+                                      rowId: undefined,
+                                      width: 100,
+                                    })),
+                                  );
+                                }
                                 setLayoutOpen(false);
                               }}
                             >
@@ -2225,10 +2237,22 @@ export default function FormEditor() {
                             <CommandItem
                               value="single-column"
                               onSelect={() => {
+                                const previousLayout = formConfig.layout;
                                 setFormConfig({
                                   ...formConfig,
                                   layout: "single-column",
                                 });
+                                
+                                // Reset field properties when switching from auto mode
+                                if (previousLayout === "auto") {
+                                  setFormFields((fields) =>
+                                    fields.map((field) => ({
+                                      ...field,
+                                      rowId: undefined,
+                                      width: 100,
+                                    })),
+                                  );
+                                }
                                 setLayoutOpen(false);
                               }}
                             >
