@@ -2940,8 +2940,16 @@ export default function FormEditor() {
                                             ) : field.type === "select" ? (
                                               <Select>
                                                 <SelectTrigger
-                                                  className="w-full"
-                                                  style={{ width: "100%" }}
+                                                  className={field.class || ""}
+                                                  style={{
+                                                    width:
+                                                      typeof field.width === "number"
+                                                        ? `${field.width}%`
+                                                        : field.width || "100%",
+                                                    ...(field.layout === "inline" && {
+                                                      minWidth: "120px",
+                                                    }),
+                                                  }}
                                                 >
                                                   <SelectValue
                                                     placeholder={
@@ -2986,8 +2994,17 @@ export default function FormEditor() {
                                                   accept={field.fileTypes?.length 
                                                     ? field.fileTypes.map(type => `.${type.toLowerCase()}`).join(',')
                                                     : undefined}
-                                                  className="w-full"
-                                                  style={{ width: "100%" }}
+                                                  disabled={field.disabled}
+                                                  className={field.class || ""}
+                                                  style={{
+                                                    width:
+                                                      typeof field.width === "number"
+                                                        ? `${field.width}%`
+                                                        : field.width || "100%",
+                                                    ...(field.layout === "inline" && {
+                                                      minWidth: "120px",
+                                                    }),
+                                                  }}
                                                 />
                                                 {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
                                                   <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
