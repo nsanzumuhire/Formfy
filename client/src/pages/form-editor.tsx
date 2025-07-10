@@ -1956,11 +1956,12 @@ export default function FormEditor() {
         {isCreatingForm ? (
           /* Form Builder Interface */
           <div className="h-full flex">
-            {/* Toolbox Sidebar */}
-            <div
-              className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col relative z-10"
-              onSubmit={(e) => e.preventDefault()}
-            >
+            {/* Toolbox Sidebar - Hidden in preview mode */}
+            {!isPreviewMode && (
+              <div
+                className="w-12 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col relative z-10"
+                onSubmit={(e) => e.preventDefault()}
+              >
               {/* Tools Header */}
               <div className="p-3 border-b border-gray-200 dark:border-gray-800">
                 <button
@@ -2134,13 +2135,15 @@ export default function FormEditor() {
                   <LinkIcon className="w-4 h-4 text-gray-600 dark:text-gray-400 mx-auto" />
                 </button>
               </div>
-            </div>
+              </div>
+            )}
 
             {/* Canvas Area */}
             <div className="flex-1 flex flex-col">
-              {/* Enhanced Top Toolbar */}
-              <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-between px-4">
-                <div className="flex items-center gap-4">
+              {/* Enhanced Top Toolbar - Hidden in preview mode */}
+              {!isPreviewMode && (
+                <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-between px-4">
+                  <div className="flex items-center gap-4">
                   {/* Layout Type Combobox */}
                   <div className="flex items-center gap-2">
                     <Popover open={layoutOpen} onOpenChange={setLayoutOpen}>
@@ -2606,7 +2609,28 @@ export default function FormEditor() {
                     Save
                   </Button>
                 </div>
-              </div>
+                </div>
+              )}
+
+              {/* Always visible buttons in preview mode */}
+              {isPreviewMode && (
+                <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-end px-4">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsPreviewMode(!isPreviewMode)}
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      {isPreviewMode ? "Edit" : "Preview"}
+                    </Button>
+                    <Button size="sm" onClick={handleSaveForm}>
+                      <Save className="w-4 h-4 mr-1" />
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* Canvas */}
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
@@ -3472,11 +3496,15 @@ export default function FormEditor() {
                                       key={
                                         rowFields[0]?.rowId || `row-${rowIndex}`
                                       }
-                                      className="group relative flex gap-2 min-h-[60px] p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                                      className={`group relative flex gap-2 min-h-[60px] ${
+                                        isPreviewMode 
+                                          ? "border-none p-0" 
+                                          : "p-2 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                                      }`}
                                       style={{ gap: getSpacingValue() }}
                                     >
                                       {/* Row Controls */}
-                                      {rowId && (
+                                      {!isPreviewMode && rowId && (
                                         <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
                                           <button
                                             onClick={() => {
@@ -3631,10 +3659,10 @@ export default function FormEditor() {
                                           }}
                                         >
                                           {/* Resize Handle */}
-                                          {(rowFields.length > 1 &&
+                                          {!isPreviewMode && ((rowFields.length > 1 &&
                                             rowFields.indexOf(field) <
                                               rowFields.length - 1) ||
-                                          rowFields.length === 1 ? (
+                                          rowFields.length === 1) ? (
                                             <div
                                               className="absolute right-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-10"
                                               onMouseDown={(e) =>
@@ -3721,13 +3749,13 @@ export default function FormEditor() {
                                                 setShowPropertiesPanel(false);
                                               }
                                             }}
-                                            isPreviewMode={false}
+                                            isPreviewMode={isPreviewMode}
                                           />
                                         </div>
                                       ))}
 
                                       {/* Drop Zone for adding fields to this row */}
-                                      {rowFields[0]?.rowId && (
+                                      {!isPreviewMode && rowFields[0]?.rowId && (
                                         <RowDropZone
                                           rowId={rowFields[0].rowId}
                                           onAddField={handleAddField}
@@ -3739,7 +3767,7 @@ export default function FormEditor() {
                               )}
 
                               {/* Empty row for new fields */}
-                              <NewRowDropZone onAddField={handleAddField} />
+                              {!isPreviewMode && <NewRowDropZone onAddField={handleAddField} />}
                             </div>
                           ) : (
                             // Traditional Layout Modes
@@ -3782,7 +3810,7 @@ export default function FormEditor() {
                                       setShowPropertiesPanel(false);
                                     }
                                   }}
-                                  isPreviewMode={false}
+                                  isPreviewMode={isPreviewMode}
                                 />
                               ))}
                             </div>
@@ -3875,7 +3903,7 @@ export default function FormEditor() {
             </div>
 
             {/* Properties Panel - Collapsed by default, shows when field is selected */}
-            {showPropertiesPanel && selectedFieldId && (
+            {!isPreviewMode && showPropertiesPanel && selectedFieldId && (
               <div className="w-64 border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">
