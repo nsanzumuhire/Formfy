@@ -297,7 +297,7 @@ function SortableField({
         }
       }}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className={`flex items-center mb-2 ${field.type === "checkbox" && field.showTopLabel === false ? "justify-end" : "justify-between"}`}>
         <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${field.type === "checkbox" && field.showTopLabel === false ? "sr-only" : ""}`}>
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
