@@ -1733,7 +1733,13 @@ export default function FormEditor() {
                   >
                     <Download className="w-3 h-3" />
                   </Button>
-                  <Button size="sm" className="h-8 w-8 p-0" onClick={handleNewFormClick}>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-8 w-8 p-0" 
+                    onClick={handleNewFormClick}
+                    title="Create new form"
+                  >
                     <Plus className="w-3 h-3" />
                   </Button>
                 </>
