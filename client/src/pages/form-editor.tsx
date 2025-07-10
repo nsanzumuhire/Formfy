@@ -2658,7 +2658,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Border Width (px)</Label>
                               <Input
                                 type="number"
-                                value={formConfig.borderStyle.width}
+                                value={formConfig.borderStyle?.width || 1}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2676,7 +2676,7 @@ export default function FormEditor() {
                             <div>
                               <Label className="text-xs">Border Style</Label>
                               <Select
-                                value={formConfig.borderStyle.style}
+                                value={formConfig.borderStyle?.style || "solid"}
                                 onValueChange={(value: any) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2701,7 +2701,7 @@ export default function FormEditor() {
                               <Label className="text-xs">Border Color</Label>
                               <Input
                                 type="color"
-                                value={formConfig.borderStyle.color}
+                                value={formConfig.borderStyle?.color || "#d1d5db"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
