@@ -41,7 +41,7 @@ export function FormFieldWithIcon({
       borderRadius: `${formConfig.borderRadius || 6}px`,
       borderWidth: `${formConfig.borderStyle?.width || 1}px`,
       borderStyle: formConfig.borderStyle?.style || 'solid',
-      borderColor: formConfig.borderStyle?.color || formConfig.theme?.inputBorderColor || '#e2e8f0',
+      borderColor: formConfig.borderStyle?.color || formConfig.theme?.inputBorderColor || '#d1d5db',
     };
   };
 
