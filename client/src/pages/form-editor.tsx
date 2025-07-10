@@ -433,7 +433,13 @@ function SortableField({
           rows={3}
         />
       ) : field.type === "date" ? (
-        <Input type="date" disabled className="bg-gray-50 dark:bg-gray-900 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
+        <SimpleDatePicker
+          placeholder={field.placeholder || "Select date"}
+          disabled
+          className="bg-gray-50 dark:bg-gray-900"
+          min={field.minDate}
+          max={field.maxDate}
+        />
       ) : field.type === "file" ? (
         <div className="space-y-1">
           <Input 
@@ -581,6 +587,9 @@ export default function FormEditor() {
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [editingFormId, setEditingFormId] = useState<string | null>(null);
+  
+  // Form values state for preview mode
+  const [formValues, setFormValues] = useState<Record<string, any>>({});
 
   // UI state
   const [showFormsList, setShowFormsList] = useState(true);
@@ -2914,6 +2923,13 @@ export default function FormEditor() {
                                                 className="w-full"
                                                 min={field.minDate}
                                                 max={field.maxDate}
+                                                value={formValues[field.name || field.id] || ""}
+                                                onChange={(value) => {
+                                                  setFormValues(prev => ({
+                                                    ...prev,
+                                                    [field.name || field.id]: value
+                                                  }));
+                                                }}
                                               />
                                             ) : field.type === "file" ? (
                                               <div className="space-y-1">
@@ -3189,6 +3205,13 @@ export default function FormEditor() {
                                             className={`${field.class || ""}`}
                                             min={field.minDate}
                                             max={field.maxDate}
+                                            value={formValues[field.name || field.id] || ""}
+                                            onChange={(value) => {
+                                              setFormValues(prev => ({
+                                                ...prev,
+                                                [field.name || field.id]: value
+                                              }));
+                                            }}
                                           />
                                         ) : field.type === "file" ? (
                                           <div className="space-y-1">
