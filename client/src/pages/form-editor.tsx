@@ -3288,7 +3288,13 @@ export default function FormEditor() {
                                               disabled={field.disabled}
                                               className={field.class || ""}
                                               style={{
-                                                width: field.width || "100%",
+                                                width:
+                                                  typeof field.width === "number"
+                                                    ? `${field.width}%`
+                                                    : field.width || "100%",
+                                                ...(field.layout === "inline" && {
+                                                  minWidth: "120px",
+                                                }),
                                               }}
                                             />
                                             {(field.fileTypes?.length || field.maxFileSize || field.minFileSize) && (
@@ -3363,9 +3369,11 @@ export default function FormEditor() {
                                             <SelectTrigger
                                               className={field.class || ""}
                                               style={{
-                                                width: field.width || "100%",
-                                                ...(field.layout ===
-                                                  "inline" && {
+                                                width:
+                                                  typeof field.width === "number"
+                                                    ? `${field.width}%`
+                                                    : field.width || "100%",
+                                                ...(field.layout === "inline" && {
                                                   minWidth: "120px",
                                                 }),
                                               }}

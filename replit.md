@@ -126,11 +126,15 @@ Changelog:
   - Automatic checksum generation for all form create/update operations to prevent unauthorized modifications
   - Added /api/forms/:id/validate endpoint for form integrity verification
   - Database migration completed to add checksum field to existing forms with backward compatibility
-- July 10, 2025. Fixed date input native calendar icon positioning
+- July 10, 2025. Fixed date input native calendar icon positioning and layout width issues
   - Added CSS styling to position date input calendar icon on the right side properly
   - Applied webkit-calendar-picker-indicator styling with ml-auto to push icon right
   - Updated all date input locations: form editor preview modes, edit mode, SortableFormField, FormFieldWithIcon
   - Calendar icon now appears on the right side instead of after the date format placeholder
+  - Fixed select and file component width handling during layout transitions
+  - Updated width styling to properly use field.width property with percentage conversion
+  - Added consistent inline layout support with minimum width constraints for both components
+  - All field types now properly reset widths when switching between Auto, Grid, and Single layout modes
 - July 2, 2025. Added password form field type and enhanced date field validation
   - Added password input field type to form builder toolbox with Lock icon
   - Updated all form field rendering components to support password field type
