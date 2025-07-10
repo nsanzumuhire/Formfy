@@ -2596,7 +2596,7 @@ export default function FormEditor() {
                             <div className="flex gap-1">
                               <Input
                                 type="color"
-                                value={formConfig.theme?.inputBorderColor || "#eae8e5"}
+                                value={formConfig.theme?.inputBorderColor || "#dedcd7"}
                                 onChange={(e) => {
                                   setFormConfig({
                                     ...formConfig,
@@ -2614,7 +2614,7 @@ export default function FormEditor() {
                               />
                               <Input
                                 type="text"
-                                value={formConfig.theme?.inputBorderColor || "#eae8e5"}
+                                value={formConfig.theme?.inputBorderColor || "#dedcd7"}
                                 onChange={(e) => {
                                   const value = e.target.value;
                                   // Allow both hex (#) and without hex format
@@ -2632,7 +2632,7 @@ export default function FormEditor() {
                                   });
                                 }}
                                 className="h-8 text-xs flex-1"
-                                placeholder="#eae8e5"
+                                placeholder="#dedcd7"
                               />
                             </div>
                           </div>
@@ -2726,7 +2726,7 @@ export default function FormEditor() {
                               <div className="flex gap-1">
                                 <Input
                                   type="color"
-                                  value={formConfig.borderStyle?.color || "#eae8e5"}
+                                  value={formConfig.borderStyle?.color || "#dedcd7"}
                                   onChange={(e) => {
                                     setFormConfig({
                                       ...formConfig,
@@ -2744,7 +2744,7 @@ export default function FormEditor() {
                                 />
                                 <Input
                                   type="text"
-                                  value={formConfig.borderStyle?.color || "#eae8e5"}
+                                  value={formConfig.borderStyle?.color || "#dedcd7"}
                                   onChange={(e) => {
                                     const value = e.target.value;
                                     // Allow both hex (#) and without hex format
@@ -2762,7 +2762,7 @@ export default function FormEditor() {
                                     });
                                   }}
                                   className="h-8 text-xs flex-1"
-                                  placeholder="#eae8e5"
+                                  placeholder="#dedcd7"
                                 />
                               </div>
                             </div>

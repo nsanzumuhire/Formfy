@@ -13,8 +13,8 @@
   --popover-foreground: hsl(20, 14.3%, 4.1%);
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 92%);
-  --input: hsl(20, 5.9%, 92%);
+  --border: hsl(20, 5.9%, 88%);
+  --input: hsl(20, 5.9%, 88%);
   --primary: hsl(142, 76%, 36%);
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(60, 4.8%, 95.9%);
@@ -49,8 +49,8 @@
   --popover-foreground: hsl(0, 0%, 95%);
   --card: hsl(20, 14.3%, 4.1%);
   --card-foreground: hsl(0, 0%, 95%);
-  --border: hsl(0, 0%, 20%);
-  --input: hsl(0, 0%, 20%);
+  --border: hsl(0, 0%, 30%);
+  --input: hsl(0, 0%, 30%);
   --primary: hsl(142, 76%, 36%);
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(0, 0%, 15%);
