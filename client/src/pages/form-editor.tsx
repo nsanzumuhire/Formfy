@@ -2593,24 +2593,48 @@ export default function FormEditor() {
 
                           <div>
                             <Label className="text-xs">Input Border Color</Label>
-                            <Input
-                              type="color"
-                              value={formConfig.theme?.inputBorderColor || "#e7e5e4"}
-                              onChange={(e) => {
-                                setFormConfig({
-                                  ...formConfig,
-                                  theme: {
-                                    ...formConfig.theme,
-                                    inputBorderColor: e.target.value,
-                                  },
-                                  borderStyle: {
-                                    ...formConfig.borderStyle,
-                                    color: e.target.value,
-                                  },
-                                });
-                              }}
-                              className="h-8 w-full"
-                            />
+                            <div className="flex gap-1">
+                              <Input
+                                type="color"
+                                value={formConfig.theme?.inputBorderColor || "#eae8e5"}
+                                onChange={(e) => {
+                                  setFormConfig({
+                                    ...formConfig,
+                                    theme: {
+                                      ...formConfig.theme,
+                                      inputBorderColor: e.target.value,
+                                    },
+                                    borderStyle: {
+                                      ...formConfig.borderStyle,
+                                      color: e.target.value,
+                                    },
+                                  });
+                                }}
+                                className="h-8 w-12 p-0"
+                              />
+                              <Input
+                                type="text"
+                                value={formConfig.theme?.inputBorderColor || "#eae8e5"}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  // Allow both hex (#) and without hex format
+                                  const hexValue = value.startsWith('#') ? value : `#${value}`;
+                                  setFormConfig({
+                                    ...formConfig,
+                                    theme: {
+                                      ...formConfig.theme,
+                                      inputBorderColor: hexValue,
+                                    },
+                                    borderStyle: {
+                                      ...formConfig.borderStyle,
+                                      color: hexValue,
+                                    },
+                                  });
+                                }}
+                                className="h-8 text-xs flex-1"
+                                placeholder="#eae8e5"
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -2699,24 +2723,48 @@ export default function FormEditor() {
                             </div>
                             <div>
                               <Label className="text-xs">Border Color</Label>
-                              <Input
-                                type="color"
-                                value={formConfig.borderStyle?.color || "#d1d5db"}
-                                onChange={(e) => {
-                                  setFormConfig({
-                                    ...formConfig,
-                                    borderStyle: {
-                                      ...formConfig.borderStyle,
-                                      color: e.target.value,
-                                    },
-                                    theme: {
-                                      ...formConfig.theme,
-                                      inputBorderColor: e.target.value,
-                                    },
-                                  });
-                                }}
-                                className="h-8 w-full"
-                              />
+                              <div className="flex gap-1">
+                                <Input
+                                  type="color"
+                                  value={formConfig.borderStyle?.color || "#eae8e5"}
+                                  onChange={(e) => {
+                                    setFormConfig({
+                                      ...formConfig,
+                                      borderStyle: {
+                                        ...formConfig.borderStyle,
+                                        color: e.target.value,
+                                      },
+                                      theme: {
+                                        ...formConfig.theme,
+                                        inputBorderColor: e.target.value,
+                                      },
+                                    });
+                                  }}
+                                  className="h-8 w-12 p-0"
+                                />
+                                <Input
+                                  type="text"
+                                  value={formConfig.borderStyle?.color || "#eae8e5"}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Allow both hex (#) and without hex format
+                                    const hexValue = value.startsWith('#') ? value : `#${value}`;
+                                    setFormConfig({
+                                      ...formConfig,
+                                      borderStyle: {
+                                        ...formConfig.borderStyle,
+                                        color: hexValue,
+                                      },
+                                      theme: {
+                                        ...formConfig.theme,
+                                        inputBorderColor: hexValue,
+                                      },
+                                    });
+                                  }}
+                                  className="h-8 text-xs flex-1"
+                                  placeholder="#eae8e5"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
