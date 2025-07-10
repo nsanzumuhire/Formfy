@@ -1711,39 +1711,38 @@ export default function FormEditor() {
         <div className="w-64 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100">
                 Forms
               </h2>
-              <div className="flex items-center gap-2">
-                {forms && forms.length > 0 && (
-                  <>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-7 px-2" 
-                      onClick={handleDownloadAllFormsZip}
-                      title="Download all forms as ZIP"
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
-                    <Button size="sm" className="h-7" onClick={handleNewFormClick}>
-                      <Plus className="w-3 h-3 mr-1" />
-                      New
-                    </Button>
-                  </>
-                )}
-              </div>
             </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="search"
-                placeholder="Search forms..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Search forms..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-8 text-sm bg-white dark:bg-gray-800"
+                />
+              </div>
+              {forms && forms.length > 0 && (
+                <>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-8 w-8 p-0" 
+                    onClick={handleDownloadAllFormsZip}
+                    title="Download all forms as ZIP"
+                  >
+                    <Download className="w-3 h-3" />
+                  </Button>
+                  <Button size="sm" className="h-8 w-8 p-0" onClick={handleNewFormClick}>
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
