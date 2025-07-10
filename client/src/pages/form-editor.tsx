@@ -2942,10 +2942,7 @@ export default function FormEditor() {
                                                 <SelectTrigger
                                                   className={field.class || ""}
                                                   style={{
-                                                    width:
-                                                      typeof field.width === "number"
-                                                        ? `${field.width}%`
-                                                        : field.width || "100%",
+                                                    width: "100%",
                                                     ...(field.layout === "inline" && {
                                                       minWidth: "120px",
                                                     }),
@@ -2997,10 +2994,7 @@ export default function FormEditor() {
                                                   disabled={field.disabled}
                                                   className={field.class || ""}
                                                   style={{
-                                                    width:
-                                                      typeof field.width === "number"
-                                                        ? `${field.width}%`
-                                                        : field.width || "100%",
+                                                    width: "100%",
                                                     ...(field.layout === "inline" && {
                                                       minWidth: "120px",
                                                     }),
