@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SimpleDatePicker } from "@/components/ui/date-picker";
 import { FormFieldData } from "@/lib/form-builder";
 
 interface SortableFormFieldProps {
@@ -65,10 +66,10 @@ export function SortableFormField({
         );
       case "date":
         return (
-          <Input
-            type="date"
+          <SimpleDatePicker
+            placeholder={field.placeholder || "Select date"}
             disabled
-            className="bg-gray-50 dark:bg-gray-900 [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            className="bg-gray-50 dark:bg-gray-900"
           />
         );
       case "file":

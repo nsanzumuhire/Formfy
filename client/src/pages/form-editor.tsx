@@ -110,6 +110,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SimpleDatePicker } from "@/components/ui/date-picker";
 import { useProject } from "@/hooks/useProject";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -2908,10 +2909,11 @@ export default function FormEditor() {
                                                 </SelectContent>
                                               </Select>
                                             ) : field.type === "date" ? (
-                                              <Input
-                                                type="date"
-                                                className="w-full [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                                                style={{ width: "100%" }}
+                                              <SimpleDatePicker
+                                                placeholder={field.placeholder || "Select date"}
+                                                className="w-full"
+                                                min={field.minDate}
+                                                max={field.maxDate}
                                               />
                                             ) : field.type === "file" ? (
                                               <div className="space-y-1">
@@ -3181,13 +3183,12 @@ export default function FormEditor() {
                                             rows={3}
                                           />
                                         ) : field.type === "date" ? (
-                                          <Input
-                                            type="date"
+                                          <SimpleDatePicker
+                                            placeholder={field.placeholder || "Select date"}
                                             disabled={field.disabled}
-                                            className={`${field.class || ""} [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
-                                            style={{
-                                              width: field.width || "100%",
-                                            }}
+                                            className={`${field.class || ""}`}
+                                            min={field.minDate}
+                                            max={field.maxDate}
                                           />
                                         ) : field.type === "file" ? (
                                           <div className="space-y-1">
@@ -4992,21 +4993,21 @@ export default function FormEditor() {
                           <Label className="text-xs font-medium">
                             Min Date
                           </Label>
-                          <Input
-                            type="date"
+                          <SimpleDatePicker
                             value={
                               formFields.find((f) => f.id === selectedFieldId)
                                 ?.minDate || ""
                             }
-                            onChange={(e) => {
+                            onChange={(value) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
                                   f.id === selectedFieldId
-                                    ? { ...f, minDate: e.target.value }
+                                    ? { ...f, minDate: value }
                                     : f,
                                 ),
                               );
                             }}
+                            placeholder="Select min date"
                             className="mt-1 h-8 text-xs"
                           />
                         </div>
@@ -5014,21 +5015,21 @@ export default function FormEditor() {
                           <Label className="text-xs font-medium">
                             Max Date
                           </Label>
-                          <Input
-                            type="date"
+                          <SimpleDatePicker
                             value={
                               formFields.find((f) => f.id === selectedFieldId)
                                 ?.maxDate || ""
                             }
-                            onChange={(e) => {
+                            onChange={(value) => {
                               setFormFields((fields) =>
                                 fields.map((f) =>
                                   f.id === selectedFieldId
-                                    ? { ...f, maxDate: e.target.value }
+                                    ? { ...f, maxDate: value }
                                     : f,
                                 ),
                               );
                             }}
+                            placeholder="Select max date"
                             className="mt-1 h-8 text-xs"
                           />
                         </div>

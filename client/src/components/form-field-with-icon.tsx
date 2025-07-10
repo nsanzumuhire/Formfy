@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { SimpleDatePicker } from '@/components/ui/date-picker';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
 import { FormFieldData } from '@/lib/form-builder';
@@ -191,14 +192,14 @@ export function FormFieldWithIcon({
       
       case 'date':
         return (
-          <Input
-            type="date"
+          <SimpleDatePicker
             value={value || ''}
-            onChange={(e) => onChange?.(e.target.value)}
-            className={cn(baseInputClass, "[&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer")}
+            onChange={onChange}
+            placeholder={field.placeholder || "Select date"}
             disabled={disabled || field.disabled}
-            readOnly={readonly || field.readonly}
-            required={field.required}
+            className={baseInputClass}
+            min={field.minDate}
+            max={field.maxDate}
           />
         );
       
