@@ -3438,6 +3438,7 @@ export default function FormEditor() {
                                                 setShowPropertiesPanel(false);
                                               }
                                             }}
+                                            isPreviewMode={false}
                                           />
                                         </div>
                                       ))}
@@ -3498,6 +3499,7 @@ export default function FormEditor() {
                                       setShowPropertiesPanel(false);
                                     }
                                   }}
+                                  isPreviewMode={false}
                                 />
                               ))}
                             </div>
