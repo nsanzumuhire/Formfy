@@ -1711,11 +1711,6 @@ export default function FormEditor() {
         <div className="w-64 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <div className="mb-3">
-              <h2 className="font-semibold text-gray-900 dark:text-gray-100">
-                Forms
-              </h2>
-            </div>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
