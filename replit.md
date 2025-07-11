@@ -134,6 +134,9 @@ Changelog:
   - Ensured perfect consistency between edit mode and preview mode border styling
   - Fixed FormFieldWithIcon component to respect horizontal layout for radio groups in preview mode
   - Radio groups now render identically in both edit and preview modes with proper horizontal layout support
+  - Fixed critical preview mode issue where orphaned JSX conditional code was displaying as debug text
+  - Removed duplicate field rendering logic in preview mode, now uses only FormFieldWithIcon component
+  - Preview mode now displays clean form fields without any debug information
 - July 10, 2025. Fixed date input native calendar icon positioning and layout width issues
   - Added CSS styling to position date input calendar icon on the right side properly
   - Applied webkit-calendar-picker-indicator styling with ml-auto to push icon right
