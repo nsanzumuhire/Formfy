@@ -251,7 +251,7 @@ export function createFormField(type: FieldType, existingFields: FormFieldData[]
     placeholder: getDefaultPlaceholder(type),
     order: 0,
     width: "100%", // Default to full width
-    layout: 'vertical', // Default layout for radio/checkbox
+    layout: type === 'radio' ? 'horizontal' : 'vertical', // Default radio to horizontal, others to vertical
   };
 
   // Add default options for select and radio fields

@@ -126,6 +126,12 @@ Changelog:
   - Automatic checksum generation for all form create/update operations to prevent unauthorized modifications
   - Added /api/forms/:id/validate endpoint for form integrity verification
   - Database migration completed to add checksum field to existing forms with backward compatibility
+- July 11, 2025. Set radio group buttons to default to horizontal layout and fixed border color consistency
+  - Updated createFormField function to default radio fields to horizontal layout instead of vertical
+  - Radio groups now provide better UX with horizontal arrangement by default for typical use cases
+  - Fixed remaining hard-coded border colors (#d1d5db) in form editor configuration
+  - Updated all border color references to use consistent lighter color (#e5e3e0) for better visual harmony
+  - Ensured perfect consistency between edit mode and preview mode border styling
 - July 10, 2025. Fixed date input native calendar icon positioning and layout width issues
   - Added CSS styling to position date input calendar icon on the right side properly
   - Applied webkit-calendar-picker-indicator styling with ml-auto to push icon right
