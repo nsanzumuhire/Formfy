@@ -132,6 +132,8 @@ Changelog:
   - Fixed remaining hard-coded border colors (#d1d5db) in form editor configuration
   - Updated all border color references to use consistent lighter color (#e5e3e0) for better visual harmony
   - Ensured perfect consistency between edit mode and preview mode border styling
+  - Fixed FormFieldWithIcon component to respect horizontal layout for radio groups in preview mode
+  - Radio groups now render identically in both edit and preview modes with proper horizontal layout support
 - July 10, 2025. Fixed date input native calendar icon positioning and layout width issues
   - Added CSS styling to position date input calendar icon on the right side properly
   - Applied webkit-calendar-picker-indicator styling with ml-auto to push icon right

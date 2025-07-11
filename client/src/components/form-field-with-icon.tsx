@@ -156,7 +156,12 @@ export function FormFieldWithIcon({
       
       case 'radio':
         return (
-          <RadioGroup value={value} onValueChange={onChange} disabled={disabled || field.disabled}>
+          <RadioGroup 
+            value={value} 
+            onValueChange={onChange} 
+            disabled={disabled || field.disabled}
+            className={field.layout === 'horizontal' ? 'flex flex-wrap gap-4' : 'space-y-2'}
+          >
             {field.options?.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <RadioGroupItem value={option.value} id={`${field.id}-${index}`} />
